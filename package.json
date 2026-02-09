@@ -1,28 +1,34 @@
 {
-	"name": "budejovicky-majales",
-	"version": "1.0.0",
-	"private": true,
-	"description": "Budějovický Majáles - Festival website and marketing system",
-	"workspaces": [
-		"frontend",
-		"backend"
-	],
-	"scripts": {
-		"dev:frontend": "yarn workspace frontend dev",
-		"dev:backend": "yarn workspace backend develop",
-		"dev": "concurrently \"yarn dev:frontend\" \"yarn dev:backend\"",
-		"build:frontend": "yarn workspace frontend build",
-		"build:backend": "yarn workspace backend build",
-		"build": "yarn build:frontend && yarn build:backend",
-		"start:frontend": "yarn workspace frontend start",
-		"start:backend": "yarn workspace backend start",
-		"lint:frontend": "yarn workspace frontend lint"
-	},
-	"devDependencies": {
-		"concurrently": "^9.2.1"
-	},
-	"engines": {
-		"node": ">=20.0.0",
-		"yarn": ">=1.22.0"
-	}
+  "name": "budejovicky-majales",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Budějovický Majáles - Festival website and marketing system",
+  "workspaces": {
+    "packages": [
+      "frontend",
+      "backend"
+    ],
+    "nohoist": [
+      "frontend/eslint-config-next",
+      "frontend/eslint-config-next/**"
+    ]
+  },
+  "scripts": {
+    "dev:frontend": "yarn workspace frontend dev",
+    "dev:backend": "yarn workspace backend develop",
+    "dev": "concurrently \"yarn dev:frontend\" \"yarn dev:backend\"",
+    "build:frontend": "yarn workspace frontend build",
+    "build:backend": "yarn workspace backend build",
+    "build": "yarn build:frontend && yarn build:backend",
+    "start:frontend": "yarn workspace frontend start",
+    "start:backend": "yarn workspace backend start",
+    "lint:frontend": "yarn workspace frontend lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "yarn": ">=1.22.0"
+  }
 }

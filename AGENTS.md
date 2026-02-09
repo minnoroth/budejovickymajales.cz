@@ -12,9 +12,16 @@
 - DISCLAIMER: U všech verzí si nejprve zkontroluj kompatibilitu s Strapi a poté použij nejvyšší možnou stabilní verzi
 - Budeme chtít používat Next.js jako hlavní fullstackový framework
   - To znamená sloučeninu Typescriptu a Reactu, zároveň celý projekt budeme zakládat na MUI
+  - Framer Motion pro animace a přechody
 - Jako package manager chci používat yarn
 - Pro CMS budeme chtít používat Strapi, jako Open-source řešení
 - Databázi budeme časem chtít mít v Postgres a používat REST jako primární komunikaci
+
+## Design Approach
+
+- **Mobile-first**: 80% uživatelů přistupuje z mobilu — vždy navrhujeme a implementujeme nejdřív mobilní zobrazení, pak rozšiřujeme na tablet/desktop
+- Veškeré MUI `sx` breakpointy píšeme mobile-first (xs → sm → md → lg)
+- Testujeme primárně na šířce 375px (iPhone), poté 768px (tablet), poté 1280px+ (desktop)
 
 ## Cíl č.1
 

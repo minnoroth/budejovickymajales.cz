@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
 import ThemeRegistry from "@/components/ThemeRegistry";
+import TranslationProvider from "@/providers/TranslationProvider";
+import cs from "@/translations/cs.json";
 
 export const metadata: Metadata = {
-	title: "Budějovický Majáles",
-	description: "Official website for Budějovický Majáles festival",
+  title: cs["meta.title"],
+  description: cs["meta.description"],
 };
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en">
-			<body>
-				<ThemeRegistry>{children}</ThemeRegistry>
-			</body>
-		</html>
-	);
+  return (
+    <html lang="cs">
+      <body>
+        <ThemeRegistry>
+          <TranslationProvider>{children}</TranslationProvider>
+        </ThemeRegistry>
+      </body>
+    </html>
+  );
 }

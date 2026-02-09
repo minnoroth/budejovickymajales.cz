@@ -1,0 +1,20 @@
+{
+  "kind": "singleType",
+  "collectionName": "festival_settings",
+  "info": {
+    "singularName": "festival-setting",
+    "pluralName": "festival-settings",
+    "displayName": "Festival Setting"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "festivalDate": {
+      "type": "datetime"
+    },
+    "festivalEndDate": {
+      "type": "datetime"
+    }
+  }
+}

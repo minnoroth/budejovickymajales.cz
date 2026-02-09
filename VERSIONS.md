@@ -14,10 +14,10 @@ This document tracks the versions of key technologies used in the project.
 
 | Technology | Version | Notes |
 |------------|---------|-------|
-| Next.js | 15.5.6 | Latest stable with App Router |
-| React | 19.1.0 | Latest stable |
-| React DOM | 19.1.0 | Latest stable |
-| MUI (Material-UI) | 7.3.4 | Latest stable |
+| Next.js | 16.1.6 | App Router, Turbopack default |
+| React | 19.2.4 | Latest stable |
+| React DOM | 19.2.4 | Latest stable |
+| MUI (Material-UI) | 7.3.7 | Latest stable |
 | Emotion | 11.14.x | Required for MUI styling |
 | Tailwind CSS | 4.x | Utility-first CSS |
 
@@ -25,7 +25,9 @@ This document tracks the versions of key technologies used in the project.
 
 | Technology | Version | Notes |
 |------------|---------|-------|
-| Strapi | 5.28.0 | Latest stable CMS |
+| Strapi | 5.35.0 | Latest stable CMS |
+| sharp | 0.33.5 | Image processing (matched to Strapi upload) |
+| better-sqlite3 | 12.6.2 | Development database driver |
 | SQLite | - | Development database |
 | PostgreSQL | - | Planned for production |
 
@@ -34,9 +36,9 @@ This document tracks the versions of key technologies used in the project.
 | Technology | Version | Notes |
 |------------|---------|-------|
 | ESLint | 9.x | Code linting |
+| eslint-config-next | 16.1.6 | Next.js ESLint rules |
 | Concurrently | 9.x | Run multiple commands |
 
 ## Last Updated
 
-October 21, 2025
-
+February 7, 2026
