@@ -1,5 +1,20 @@
 import { createTheme } from "@mui/material/styles";
 
+declare module "@mui/material/styles" {
+  interface Palette {
+    gradient: {
+      gold: string;
+      heroOverlay: string;
+    };
+  }
+  interface PaletteOptions {
+    gradient?: {
+      gold: string;
+      heroOverlay: string;
+    };
+  }
+}
+
 const theme = createTheme({
   palette: {
     mode: "dark",
@@ -23,22 +38,23 @@ const theme = createTheme({
       primary: "#F5F0EB",
       secondary: "#B8AFA6",
     },
+    gradient: {
+      gold: "linear-gradient(135deg, #E8A849 0%, #F2C97E 100%)",
+      heroOverlay:
+        "linear-gradient(to bottom, rgba(10,15,13,0.5) 0%, rgba(10,15,13,0.92) 100%)",
+    },
   },
   typography: {
     fontFamily: [
+      "var(--font-space-grotesk)",
       "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
       "sans-serif",
     ].join(","),
     h1: {
       fontSize: "2.5rem",
-      fontWeight: 800,
+      fontWeight: 900,
       lineHeight: 1.1,
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.03em",
       "@media (min-width:600px)": {
         fontSize: "3.5rem",
       },

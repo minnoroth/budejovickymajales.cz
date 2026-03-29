@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "king_candidates",
+  "info": {
+    "singularName": "king-candidate",
+    "pluralName": "king-candidates",
+    "displayName": "King Candidate"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "school": {
+      "type": "string",
+      "required": true
+    },
+    "schoolTheme": {
+      "type": "string"
+    },
+    "votes": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "year": {
+      "type": "integer",
+      "required": true
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

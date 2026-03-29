@@ -151,7 +151,13 @@ export default function HeroSection({
             )}
 
             <motion.div variants={fadeUp}>
-              <Button variant="contained" size="large" sx={{ mt: 1 }}>
+              <Button
+                variant="contained"
+                size="large"
+                component="a"
+                href="/program"
+                sx={{ mt: 1 }}
+              >
                 {t("hero.ctaProgram")}
               </Button>
             </motion.div>

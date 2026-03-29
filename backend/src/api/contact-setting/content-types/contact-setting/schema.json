@@ -1,0 +1,29 @@
+{
+  "kind": "singleType",
+  "collectionName": "contact_setting",
+  "info": {
+    "singularName": "contact-setting",
+    "pluralName": "contact-settings",
+    "displayName": "Contact Setting"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "instagramUrl": {
+      "type": "string"
+    },
+    "facebookUrl": {
+      "type": "string"
+    },
+    "youtubeUrl": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "program_events",
+  "info": {
+    "singularName": "program-event",
+    "pluralName": "program-events",
+    "displayName": "Program Event"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "date": {
+      "type": "datetime",
+      "required": true
+    },
+    "endDate": {
+      "type": "datetime"
+    },
+    "stage": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}
