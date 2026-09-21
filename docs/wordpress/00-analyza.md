@@ -95,6 +95,15 @@ Obojí jde dopsat vlastním kódem (15 h + 12 h), ale je to křehké — sahá t
 pluginu a po každé jeho aktualizaci se to musí otestovat. **Doporučuji obojí nedělat**, dokud
 se nepotvrdí, že to někdo reálně používá. Viz první dvě otázky v [01-otazky-na-schuzku.md](01-otazky-na-schuzku.md).
 
+### Ročník řešíme taxonomií, ne dvojicí dat
+
+Analýza vyprodukovala na stejný požadavek dva různé návrhy a v [02-moduly-detail.md](02-moduly-detail.md)
+jsou oba: modul Program navrhuje dvě nastavení s datem začátku a konce, modul Homepage taxonomii
+`rocnik` s poli u termínu. **Platí taxonomie.** Jeden termín na ročník znamená archiv zdarma,
+žádnou datovou aritmetiku a srozumitelné chování pro toho, kdo web převezme:
+starý obsah nezmizí, jen se přestane zobrazovat ve výpisech. Datum začátku a konce festivalu
+jsou pole u toho termínu, takže se nastavují na jednom místě jako dnes v BM Adminu.
+
 ---
 
 ## Rozsah po modulech
@@ -129,7 +138,9 @@ To je vedle práce na plný úvazek hodně. Jsou tři cesty a je potřeba vybrat
 
 1. **Zúžit MVP.** Vyškrtnout zrušení rezervace návštěvníkem (−15 h), poznámky u rezervací (−12 h),
    carousely na homepage, dvourozměrnou časovou osu lineupu a fotogalerii starších ročníků.
-   Dostaneme se ke zhruba **150 h ≈ 8 h týdně**, což reálné je.
+   Orientačně to vychází na **~150 h ≈ 8 h týdně**, což reálné je.
+   Tohle číslo je zatím odhad od oka, ne spočítaný rozpad — moduly mají odhad jako celek,
+   ne zvlášť za MVP. Přesný rozpad udělám po schůzce, až bude jasné, co ze seznamu vypadne.
 2. **Přibrat pomoc.** Migrace dat a přepis 15 statických stránek jsou práce, kterou zvládne
    i netechnický člověk z týmu. Je to zhruba 25–30 h, které nemusím dělat já.
 3. **Posunout ostrý start na po ročníku 2027.** Ročník 2027 by ještě odjel na starém webu.
