@@ -16,7 +16,12 @@ Kritérium proto není „udržovatelné vývojářem", ale **převzatelné ciz�
 
 Rozpracovaný Next.js + Strapi se zahazuje. Datový model z něj se přenáší, kód ne.
 
-**Rozsah: 193–312 hodin. Provoz: ~1 750 Kč ročně.**
+**Doporučený rozsah: ~45–50 hodin vývoje. Provoz: ~1 750 Kč ročně.**
+
+Práce je pro-bono, takže rozsah řídí jediné kritérium: co nejméně hodin a co nejdřív hotovo.
+Úplný seznam přání zadavatele vychází na 193–312 h (viz [02-moduly-detail.md](02-moduly-detail.md)),
+ale to není cena za přechod na WordPress — to je cena za nový web se všemi novými funkcemi.
+Doporučený rozsah níže dává funkční web a zbytek se doobjednává po položkách.
 
 ---
 
@@ -106,7 +111,10 @@ jsou pole u toho termínu, takže se nastavují na jednom místě jako dnes v BM
 
 ---
 
-## Rozsah po modulech
+## Rozsah po modulech — plný seznam přání
+
+Tahle tabulka je **úplný seznam přání zadavatele**, ne doporučený rozsah. Slouží k odjednávání
+po položkách. Co z toho doporučuju udělat teď, je v kapitole [Doporučený rozsah](#doporučený-rozsah).
 
 | Modul | Hodin | Klíčové rozhodnutí |
 |---|---|---|
@@ -124,29 +132,66 @@ je v [02-moduly-detail.md](02-moduly-detail.md).
 
 ---
 
-## Buď rozsah, nebo termín
+## Doporučený rozsah
 
-Tohle je nejdůležitější odstavec celého dokumentu.
+Číslo 193–312 h je součet sedmi nezávislých odhadů a má dvě známé slabiny. **Migrace je započtená
+dvakrát** — moduly Program (13 h) a Provoz (14+6 h) popisují tentýž importní pipeline, reálně je to
+~25 h místo 45 h. A **odhady nikdo nevaliduje**: každý modul odhadoval jiný agent s instrukcí
+„počítej, že se WordPress učíš za pochodu". Ber to jako horní hranici, ne jako rozpočet.
 
-Festival 2027 se koná koncem května. Program se začíná zadávat v březnu, takže web musí být
-hotový a tým zaškolený **do konce ledna 2027**. Od dneška je to zhruba 18 týdnů.
+Je tu ale zásadnější problém. Ten rozsah obsahuje **161 hodin vlastního kódu**, což je v přímém
+rozporu se smyslem celého projektu. Kdyby se to napsalo, příští sestava zdědí custom WordPress —
+jen o málo lepší past než dnešní custom Nette. Pravidlo „žádné úpravy nad rámec nutného"
+z kapitoly o předání platí i pro tenhle dokument.
 
-- 193 h / 18 týdnů = **11 hodin týdně**
-- 312 h / 18 týdnů = **17 hodin týdně**
+### Jedno rozhodnutí, které srazí polovinu: nemigrovat minulost
 
-To je vedle práce na plný úvazek hodně. Jsou tři cesty a je potřeba vybrat jednu:
+Ročník 2026 proběhl. Program 2027 se bude zadávat od nuly. Migrace 102 loňských akcí je čistě
+archivní práce s nulovou provozní hodnotou.
 
-1. **Zúžit MVP.** Vyškrtnout zrušení rezervace návštěvníkem (−15 h), poznámky u rezervací (−12 h),
-   carousely na homepage, dvourozměrnou časovou osu lineupu a fotogalerii starších ročníků.
-   Orientačně to vychází na **~150 h ≈ 8 h týdně**, což reálné je.
-   Tohle číslo je zatím odhad od oka, ne spočítaný rozpad — moduly mají odhad jako celek,
-   ne zvlášť za MVP. Přesný rozpad udělám po schůzce, až bude jasné, co ze seznamu vypadne.
-2. **Přibrat pomoc.** Migrace dat a přepis 15 statických stránek jsou práce, kterou zvládne
-   i netechnický člověk z týmu. Je to zhruba 25–30 h, které nemusím dělat já.
-3. **Posunout ostrý start na po ročníku 2027.** Ročník 2027 by ještě odjel na starém webu.
-   Nejbezpečnější varianta, ale znamená to udržovat AngularJS o rok déle.
+Řešení: starý web zamrazit na `2026.budejovickymajales.cz` jako archiv — přesně jak už to dělají
+s `2019.budejovickymajales.cz`. Do nového webu se přenesou jen věci, které se opakují každý rok:
+**místa, žánry s kategoriemi a partneři**.
 
-Moje doporučení: **kombinace 1 a 2.** Zúžit MVP a předat migraci obsahu týmu.
+| Co tím odpadne | Hodin |
+|---|---|
+| Importní skripty a transformace dat | ~25 |
+| Skrývání minulých ročníků (v novém webu žádné nejsou) | ~12 |
+| Migrace historie, fotek a králů | ~10 |
+| Zrušení rezervace návštěvníkem + poznámky u rezervací | 27 |
+| Vlastní časová osa lineupu (první verze = nativní denní výpis) | ~10 |
+| Carousely, segmenty bodů, fotogalerie | ~15 |
+
+### Co zbyde
+
+| Práce | Hodin |
+|---|---|
+| Instalace a konfigurace pluginů | 8 |
+| Vzhled: paleta, typografie, hlavička, patička v Customizeru | 8 |
+| Mřížka programu v jejich kartičkovém vzhledu (shortcode) | 14 |
+| Stránka Králové | 5 |
+| Homepage | 6 |
+| Plnění obsahu (místa, žánry, partneři, texty stránek) — přes MCP, viz níže | 8 |
+| Přesměrování starých URL a ostrý přechod | 4 |
+| Testování a opravy na mobilu | 12 |
+| **Celkem** | **~65 h, reálně 45–50 h** |
+
+Rozptyl je v tom, kolik obsahu se povede nahrát agentem místo ručně.
+
+Do konce ledna 2027 je to zhruba **3 hodiny týdně**. To se vedle práce na úvazek zvládnout dá.
+
+### Co se tím obětuje
+
+Lineup v první verzi bude nativní výpis po dnech, ne vlastní časová osa. Rezervace bez zrušení
+návštěvníkem a bez poznámek. Žádné carousely. Body králů jako jedno číslo, ne rozpad po segmentech.
+Program 2026 a historie zůstanou na archivní subdoméně.
+
+Nic z toho není kritické a všechno se dá přidat později. Jestli se to nikdy nepřidá, bude to proto,
+že to nikdo nepotřeboval.
+
+**Jak to odjednat na schůzce:** nechoď tam s číslem 193–312. Choď s větou „za zhruba 50 hodin
+dostanete funkční web; každé další přání ze seznamu má cenovku v hodinách a vyberete si, které
+si koupíte". Rozpad po položkách je v [02-moduly-detail.md](02-moduly-detail.md).
 
 ---
 
@@ -161,23 +206,69 @@ Moje doporučení: **kombinace 1 a 2.** Zúžit MVP a předat migraci obsahu tý
 
 Žádná jednorázová investice. Eshop na Shoptetu má vlastní tarif a v téhle kalkulaci není.
 
-Práce je dobrovolnická. Kdyby se platila, 193–312 hodin v běžné sazbě odpovídá zhruba
-200–450 tisícům Kč. To patří do žádostí o dotace a do jednání s partnery — je to skutečný věcný dar.
+Práce je pro-bono. Kdyby se platila, doporučený rozsah 45–50 hodin odpovídá v běžné sazbě zhruba
+50–100 tisícům Kč, plný seznam přání 200–450 tisícům. To patří do žádostí o dotace a do jednání
+s partnery — je to skutečný věcný dar a má smysl ho takhle vyčíslit.
 
 ---
 
 ## Migrace dat
 
-Máme přístup do databáze (`d66215_bm19pr` na `wm56.wedos.net`) i na FTP, takže migrace není
-stahování z webu, ale **SQL dump → transformace → import**.
+**V doporučeném rozsahu se minulost nemigruje.** Starý web zamrzne na `2026.budejovickymajales.cz`
+jako archiv a do nového se přenesou jen věci, které se opakují každý rok: **49 míst, žánry
+s kategoriemi a partneři**. To je práce na pár hodin přes MCP nebo REST API, ne na importní skript.
 
-Jedno omezení: Wedos na sdíleném hostingu nedává SSH, takže WP-CLI nejde spustit na serveru.
-Celý web se proto postaví **lokálně** (DDEV nebo Local), naimportuje se obsah a nahraje se hotová
-instalace s databází. Není to problém, jen je potřeba to vědět dopředu.
+Máme sice přístup do databáze (`d66215_bm19pr` na `wm56.wedos.net`) i na FTP, takže plná migrace
+přes SQL dump by šla — ale u loňského programu se nevyplatí. Archivní subdoménu už používají
+pro ročník 2019, takže je to zavedený postup, ne improvizace.
+
+Jedno omezení, pokud by se plná migrace přece dělala: Wedos na sdíleném hostingu nedává SSH,
+takže WP-CLI nejde spustit na serveru. Web by se musel postavit **lokálně** (DDEV nebo Local)
+a nahrát celý včetně databáze.
 
 Součástí migrace je **13 pravidel přesměrování 301** ze starých anglických adres
 (`/aboutUs`, `/faqs`, `/partners`, `/program/689`) na nové české. Na staré adresy vedou odkazy
 z plakátů, Instagramu i z webů partnerů.
+
+---
+
+## WordPress se dá ovládat přímo z Claude Code
+
+Od WordPressu 6.9 je v jádře **Abilities API** — registr toho, co web umí. Nad ním běží
+**MCP Adapter**, oficiální balíček WordPressu, který ten registr vystaví jako MCP server.
+Ověřeno na živém webu dikyzemuzem.cz, který tyhle endpointy má:
+
+```
+/wp-json/mcp/mcp-adapter-default-server
+/wp-json/mcp/mcp-oauth-server
+/wp-json/wp-abilities/v1/abilities/{name}/run
+```
+
+Jádro samo registruje jen tři schopnosti a všechny jsou jen pro čtení. Zápis přidává plugin
+**Agent Abilities for MCP** (zdarma, bez placené verze) se 179 schopnostmi: příspěvky, stránky
+a vlastní typy obsahu včetně zakládání a úprav, taxonomie, média, menu — a k tomu 13 nástrojů pro
+The Events Calendar, 3 pro Event Tickets a 7 pro ACF, tedy přesně pro pluginy, které jsme vybrali.
+Připojení přes OAuth nebo aplikační heslo vyhrazeného uživatele.
+
+**Proč to sedí zrovna sem:** Wedos nedává SSH, takže WP-CLI nejde spustit na serveru.
+MCP přes HTTPS tenhle problém obchází.
+
+**Co to ušetří:** plnění obsahu. Místa, žánry, partneři a texty stránek se nahrají agentem
+místo ručního klikání nebo psaní importních skriptů — odhadem 25 h práce na 8 h.
+
+**Co neušetří:** shortcode s mřížkou programu, CSS, nastavení vzhledu, rozhodnutí o designu
+a testování na mobilu. To zůstává ruční prací.
+
+### Dvě výhrady
+
+**Ověřit hands-on.** Číslo 179 schopností je z popisu pluginu, ne z vlastního testu. Oficiální
+MCP Adapter je záměrně jen pro čtení. Hodina zkoušení na lokální instalaci to potvrdí nebo vyvrátí,
+než na tom postavíme plán.
+
+**MCP nesmí být součást předání.** Je to nástroj pro stavbu, ne náhrada použitelné administrace.
+Příští sestava nemusí mít Claude ani vědět, co MCP je — web musí jít spravovat klikáním.
+Po spuštění nechat plugin v režimu „jen pro čtení", nebo ho vypnout a zapínat ad hoc.
+Plugin má přepínač read-only, allowlisty po rolích a audit log, takže se to dá držet pod kontrolou.
 
 ---
 
