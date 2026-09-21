@@ -316,7 +316,8 @@ Potřebuju:
 | Účty zůstanou na osobním Gmailu | ztráta přístupu k webu i e-mailu | převod na spolek jako první krok |
 | Předání nové sestavě po roce či dvou | web zamrzne | předávací protokol, screencasty, standardní platforma |
 | Rezervace se nepřenesou 1:1 | nefunkční rezervace před festivalem | otestovat na loňských datech do března |
-| Rozsah 193–312 h vedle práce na úvazek | nestihne se do ledna | zúžit MVP, předat migraci obsahu týmu |
+| Rozsah se rozšíří zpět k plnému seznamu přání | nestihne se do ledna, pro-bono práce se protáhne | každé přání navíc odjednat zvlášť s cenovkou v hodinách |
+| Vlastní kód nad doporučený rozsah | příští sestava zdědí custom WordPress | strop: co nejde naklikat, se nedělá, dokud o to někdo nepožádá podruhé |
 | Vlastní kód nad Event Tickets | rozbije se při aktualizaci pluginu | nedělat ho, dokud se nepotvrdí, že to někdo používá |
 | Licence majálesového fontu | právní riziko | dohledat fakturu, nebo nahradit OFL fontem |
 | Přibývání pluginů | křehkost | strop dvanáct pluginů, nový schvaluje administrátor |
