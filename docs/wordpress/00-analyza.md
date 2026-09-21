@@ -5,6 +5,7 @@ Stav k 21. 9. 2026. Podklad pro schůzku s organizačním týmem Budějovického
 - [01-otazky-na-schuzku.md](01-otazky-na-schuzku.md) — co je potřeba rozhodnout, seřazeno podle dopadu
 - [02-moduly-detail.md](02-moduly-detail.md) — detailní návrh všech sedmi modulů
 - [03-overena-fakta.md](03-overena-fakta.md) — 25 ověřených tvrzení o pluginech, s odkazy na zdroje
+- [04-mcp-test.md](04-mcp-test.md) — **otestováno na živé instalaci**: co MCP napojení opravdu umí
 
 ---
 
@@ -245,10 +246,14 @@ Ověřeno na živém webu dikyzemuzem.cz, který tyhle endpointy má:
 ```
 
 Jádro samo registruje jen tři schopnosti a všechny jsou jen pro čtení. Zápis přidává plugin
-**Agent Abilities for MCP** (zdarma, bez placené verze) se 179 schopnostmi: příspěvky, stránky
-a vlastní typy obsahu včetně zakládání a úprav, taxonomie, média, menu — a k tomu 13 nástrojů pro
-The Events Calendar, 3 pro Event Tickets a 7 pro ACF, tedy přesně pro pluginy, které jsme vybrali.
-Připojení přes OAuth nebo aplikační heslo vyhrazeného uživatele.
+**Agent Abilities for MCP** (zdarma, bez placené verze). **Otestováno na živé instalaci**
+(viz [04-mcp-test.md](04-mcp-test.md)): pro náš stack vystaví **108 nástrojů**, ne 179 —
+to je číslo pro plnou instalaci včetně WooCommerce, které mít nebudeme. Z toho 16 nástrojů
+pro The Events Calendar včetně zakládání akcí a míst, 7 pro vlastní pole a zbytek na příspěvky,
+stránky, taxonomie a média. Připojení přes OAuth nebo aplikační heslo vyhrazeného uživatele.
+
+Zápis jsem ověřil end-to-end: přes MCP vzniklo místo „Piaristické náměstí" a akce navázaná
+na něj, potvrzeno v databázi i na webu, s korektní diakritikou.
 
 **Proč to sedí zrovna sem:** Wedos nedává SSH, takže WP-CLI nejde spustit na serveru.
 MCP přes HTTPS tenhle problém obchází.
@@ -259,11 +264,18 @@ místo ručního klikání nebo psaní importních skriptů — odhadem 25 h pr�
 **Co neušetří:** shortcode s mřížkou programu, CSS, nastavení vzhledu, rozhodnutí o designu
 a testování na mobilu. To zůstává ruční prací.
 
-### Dvě výhrady
+### Tři překážky, na které se narazí i na ostrém webu
 
-**Ověřit hands-on.** Číslo 179 schopností je z popisu pluginu, ne z vlastního testu. Oficiální
-MCP Adapter je záměrně jen pro čtení. Hodina zkoušení na lokální instalaci to potvrdí nebo vyvrátí,
-než na tom postavíme plán.
+Zjištěno při testu, podrobně v [04-mcp-test.md](04-mcp-test.md):
+
+1. **Aplikační hesla vyžadují HTTPS** — WordPress je přes plain HTTP vypíná. Na Wedosu s SSL
+   to problém není, lokálně se to musí obejít.
+2. **Apache nepouští hlavičku `Authorization`** — bez jednoho řádku v `.htaccess` přijde
+   `rest_not_logged_in`, i když je heslo správně. Na sdíleném Wedosu s tím počítat.
+3. **Ve výchozím stavu je vypnuté všechno** — čerstvě aktivovaný plugin vystaví nula nástrojů.
+   Kdo to nečeká, stráví hodinu hledáním, proč to „nefunguje".
+
+### A jedna zásadní výhrada
 
 **MCP nesmí být součást předání.** Je to nástroj pro stavbu, ne náhrada použitelné administrace.
 Příští sestava nemusí mít Claude ani vědět, co MCP je — web musí jít spravovat klikáním.
