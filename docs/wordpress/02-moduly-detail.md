@@ -1,5 +1,9 @@
 # Moduly — detailní návrh
 
+> **Pozor: některá čísla v tomhle dokumentu jsou překonaná.** Je to snímek analýzy z 21. 9. 2026,
+> ne živý stav. Stavba kostry část údajů opravila — zejména počet žánrů (47, ne 159) a seznam
+> duplicit. Aktuální stav je v [05-kostra.md](05-kostra.md), závěry v [00-analyza.md](00-analyza.md).
+
 Vygenerováno z vícagentní analýzy (7 modulů, 25 ověřených tvrzení o pluginech).
 Přehled a rozhodnutí jsou v [00-analyza.md](00-analyza.md), otázky v [01-otazky-na-schuzku.md](01-otazky-na-schuzku.md).
 

@@ -1,0 +1,305 @@
+[
+    {
+        "key": "post_type_kral",
+        "title": "Králové",
+        "menu_order": 0,
+        "active": true,
+        "post_type": "kral",
+        "advanced_configuration": true,
+        "import_source": "",
+        "import_date": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "labels": {
+            "name": "Králové",
+            "singular_name": "Král",
+            "menu_name": "Králové",
+            "all_items": "Všichni králové",
+            "add_new": "Přidat krále",
+            "add_new_item": "Přidat krále",
+            "edit_item": "Upravit krále",
+            "new_item": "Nový král",
+            "view_item": "Zobrazit krále",
+            "view_items": "Zobrazit krále",
+            "search_items": "Hledat krále",
+            "not_found": "Žádný král nenalezen",
+            "not_found_in_trash": "V koši není žádný král",
+            "parent_item_colon": "",
+            "archives": "Archiv králů",
+            "attributes": "Pořadí krále",
+            "featured_image": "Fotka kandidáta",
+            "set_featured_image": "Nastavit fotku kandidáta",
+            "remove_featured_image": "Odebrat fotku kandidáta",
+            "use_featured_image": "Použít jako fotku kandidáta",
+            "insert_into_item": "Vložit do krále",
+            "uploaded_to_this_item": "Nahráno k tomuto králi",
+            "filter_items_list": "Filtrovat seznam králů",
+            "filter_by_date": "Filtrovat podle data",
+            "items_list_navigation": "Navigace v seznamu králů",
+            "items_list": "Seznam králů",
+            "item_published": "Král publikován.",
+            "item_published_privately": "Král publikován soukromě.",
+            "item_reverted_to_draft": "Král vrácen do konceptů.",
+            "item_scheduled": "Král naplánován.",
+            "item_updated": "Král aktualizován.",
+            "item_link": "Odkaz na krále",
+            "item_link_description": "Odkaz na krále."
+        },
+        "description": "Kandidáti na krále Majálesu – jméno, škola, téma a nasbírané body.",
+        "public": true,
+        "hierarchical": false,
+        "exclude_from_search": false,
+        "publicly_queryable": true,
+        "show_ui": true,
+        "show_in_menu": true,
+        "admin_menu_parent": "",
+        "show_in_admin_bar": true,
+        "show_in_nav_menus": true,
+        "show_in_rest": true,
+        "rest_base": "",
+        "rest_namespace": "wp/v2",
+        "rest_controller_class": "WP_REST_Posts_Controller",
+        "menu_position": 26,
+        "menu_icon": "dashicons-awards",
+        "rename_capabilities": false,
+        "singular_capability_name": "post",
+        "plural_capability_name": "posts",
+        "supports": [
+            "title",
+            "thumbnail",
+            "page-attributes"
+        ],
+        "taxonomies": [],
+        "has_archive": false,
+        "has_archive_slug": "",
+        "rewrite": {
+            "permalink_rewrite": "post_type_key",
+            "slug": "",
+            "feeds": false,
+            "pages": true,
+            "with_front": true
+        },
+        "query_var": "post_type_key",
+        "query_var_name": "",
+        "can_export": true,
+        "delete_with_user": false,
+        "register_meta_box_cb": "",
+        "enter_title_here": "Jméno kandidáta"
+    },
+    {
+        "key": "taxonomy_rocnik",
+        "title": "Ročníky",
+        "menu_order": 0,
+        "active": true,
+        "taxonomy": "rocnik",
+        "object_type": [
+            "post",
+            "tribe_events",
+            "kral"
+        ],
+        "advanced_configuration": true,
+        "import_source": "",
+        "import_date": "",
+        "labels": {
+            "name": "Ročníky",
+            "singular_name": "Ročník",
+            "menu_name": "Ročníky",
+            "search_items": "Hledat ročníky",
+            "popular_items": "Nejpoužívanější ročníky",
+            "all_items": "Všechny ročníky",
+            "parent_item": "",
+            "parent_item_colon": "",
+            "name_field_description": "Rok ročníku, například 2027.",
+            "slug_field_description": "Část URL adresy, například 2027.",
+            "parent_field_description": "",
+            "desc_field_description": "Nepovinný popis ročníku.",
+            "edit_item": "Upravit ročník",
+            "view_item": "Zobrazit ročník",
+            "update_item": "Uložit ročník",
+            "add_new_item": "Přidat ročník",
+            "new_item_name": "Název nového ročníku",
+            "separate_items_with_commas": "Ročníky oddělte čárkou",
+            "add_or_remove_items": "Přidat nebo odebrat ročníky",
+            "choose_from_most_used": "Vybrat z nejpoužívanějších ročníků",
+            "not_found": "Žádné ročníky nenalezeny",
+            "no_terms": "Žádné ročníky",
+            "filter_by_item": "Filtrovat podle ročníku",
+            "items_list_navigation": "Navigace v seznamu ročníků",
+            "items_list": "Seznam ročníků",
+            "most_used": "Nejpoužívanější",
+            "back_to_items": "← Zpět na ročníky",
+            "item_link": "Odkaz na ročník",
+            "item_link_description": "Odkaz na ročník."
+        },
+        "description": "Ročník festivalu. Přiřazuje se k článkům, akcím programu i králům.",
+        "capabilities": {
+            "manage_terms": "manage_categories",
+            "edit_terms": "manage_categories",
+            "delete_terms": "manage_categories",
+            "assign_terms": "edit_posts"
+        },
+        "public": true,
+        "publicly_queryable": true,
+        "hierarchical": true,
+        "show_ui": true,
+        "show_in_menu": true,
+        "show_in_nav_menus": true,
+        "show_in_rest": true,
+        "rest_base": "",
+        "rest_namespace": "wp/v2",
+        "rest_controller_class": "WP_REST_Terms_Controller",
+        "show_tagcloud": false,
+        "show_in_quick_edit": true,
+        "show_admin_column": true,
+        "rewrite": {
+            "permalink_rewrite": "taxonomy_key",
+            "slug": "",
+            "with_front": true,
+            "rewrite_hierarchical": false
+        },
+        "query_var": "taxonomy_key",
+        "query_var_name": "",
+        "default_term": {
+            "default_term_enabled": false,
+            "default_term_name": "",
+            "default_term_slug": "",
+            "default_term_description": ""
+        },
+        "sort": null,
+        "meta_box": "default",
+        "meta_box_cb": "",
+        "meta_box_sanitize_cb": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_tribe_events",
+        "title": "Akce – nastavení webu",
+        "fields": [],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "tribe_events"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Doplňková nastavení akce pro web Majálesu.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_tribe_events_cat",
+        "title": "Kategorie programu – barva",
+        "fields": [],
+        "location": [
+            [
+                {
+                    "param": "taxonomy",
+                    "operator": "==",
+                    "value": "tribe_events_cat"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Barevné rozlišení kategorií programu.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_kral",
+        "title": "Král – detail kandidáta",
+        "fields": [],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "kral"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Údaje o kandidátovi na krále a jeho bodování.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_tribe_venue",
+        "title": "Místo – bezbariérovost",
+        "fields": [],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "tribe_venue"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Bezbariérovost se vede u místa, ne u jednotlivých akcí.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_rocnik",
+        "title": "Ročník – termín festivalu",
+        "fields": [],
+        "location": [
+            [
+                {
+                    "param": "taxonomy",
+                    "operator": "==",
+                    "value": "rocnik"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Termín festivalu pro daný ročník.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    }
+]

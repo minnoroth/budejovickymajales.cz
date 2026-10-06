@@ -13,8 +13,10 @@ Odškrtávej přímo tady — je to zápis ze schůzky.
 
 ### Program, lineup, žánry, místa
 
-- [ ] Barva u žánru: v datech je 159 žánrů, z toho 99 jen pod Hudbou. Vybarvit je ručně nikdo nikdy nezvládne a v lineupu by vznikl zmatek. Navrhuji vyplňovat barvu u 9 kategorií a žánry ji dědí; technicky bude barva nastavitelná i u žánru pro výjimky. Souhlasí s tím dramaturgie?
-- [ ] Souhlasíte se sloučením duplicitních žánrů při migraci (punk/rock 98+100, disco 116+117, Workshop ve čtyřech kategoriích, Přednáška 78+88, Rozhovor 71+135, Soutěž 45+146, Představení 86+90)? A co se šesti událostmi bez kategorie — zařadit je do nové kategorie „Ostatní", nebo je nechat nezařazené?
+- [x] ~~Barva u žánru~~ — **vyřešeno při stavbě kostry.** Žánrů je 47 (ne 159), po sloučení 42 termínů. Barva je vyplněná u 9 kategorií, žánry ji dědí. Technicky jde nastavit i u žánru pro výjimky.
+- [ ] **Rozpad složených hudebních žánrů.** `punk/rock` a podobné jsou rozpadlé na základní žánry, takže hudební akce ponese víc žánrů místo jednoho. Potvrdí to dramaturgie? Spolu s tím sloučení `nu metal → rock`, `post punk → punk`, `bedroom rap → Rap`, `electronica → elektronika`.
+- [ ] **Šest akcí nemá žánr ani kategorii** (Moon Cat Tattoo 2×, SKATECONTEST, speed friending, Dance Battle, BudeCirkus). Kam patří?
+- [x] ~~Duplicitní žánry~~ — **ověřeno v datech.** Skutečná duplicita je jen `disco` (dvě ID pod stejnou kategorií). `Přednáška` i `Soutěž` se vyskytují jen jednou, `Rozhovor` a `Představení` v datech nejsou vůbec. Původní seznam byl chybný.
 - [ ] Zadání mluví o 6 kategoriích, v datech ročníku 2026 jich je 9 (navíc Vnitřní scéna, Volba krále, Online). Které z nich jsou ještě živé a které jsou pozůstatek covidových ročníků a mohou se smazat?
 - [ ] Bezbariérovost: navrhuji vyplňovat u místa (49 položek, vyplní se jednou a platí napořád) místo u každého vystoupení (102× každý rok). Přijatelné? U výjimek půjde na události nastavit ručně.
 - [ ] Pole „Země původu" se dnes nikde na webu nezobrazuje — na kartičce ani v lineupu. Používá se někde jinde (tiskoviny, sociální sítě), nebo ho můžeme zrušit?

@@ -6,6 +6,7 @@ Stav k 21. 9. 2026. Podklad pro schůzku s organizačním týmem Budějovického
 - [02-moduly-detail.md](02-moduly-detail.md) — detailní návrh všech sedmi modulů
 - [03-overena-fakta.md](03-overena-fakta.md) — 25 ověřených tvrzení o pluginech, s odkazy na zdroje
 - [04-mcp-test.md](04-mcp-test.md) — **otestováno na živé instalaci**: co MCP napojení opravdu umí
+- [05-kostra.md](05-kostra.md) — **postaveno**: co už na lokále stojí a co čeká na rozhodnutí
 
 ---
 
@@ -35,7 +36,7 @@ a požadavky od content managera. Po jejich zapracování odhad vyskočil na 193
 |---|---|
 | Rezervační systém — aktivně používaný, s kapacitou, okny, povinnou rezervací a poznámkami | +24–44 h |
 | Editovatelný vzhled — zadavatel chce sám měnit barvy, písma a obsah všech stránek | +42–62 h |
-| Dvouúrovňová taxonomie žánrů s barvami, 159 žánrů v datech | součást +42–64 h |
+| Dvouúrovňová taxonomie žánrů s barvami | součást +42–64 h |
 | Přestavba navigace a 4 nové stránky | součást modulu vzhled |
 | Převod účtů, role, migrace přes 6 typů obsahu | +26–42 h |
 
@@ -56,7 +57,7 @@ Administrace pokrývá Aktuality, Krále, Kartičky, Interprety (Vystoupení / �
 Rezervace a Nastavení (Počasí, Konání festivalu). Nepokrývá partnery, osvěžovny, FAQ ani statické
 stránky — ty jsou v šablonách.
 
-**Data, která se přenášejí:** 102 akcí ročníku 2026, 49 míst, 159 žánrů v 9 kategoriích,
+**Data, která se přenášejí:** 102 akcí ročníku 2026, 28 reálně použitých míst, 47 žánrů v 9 kategoriích,
 20 kandidátů na krále, 46 log partnerů v 8 sekcích, 24 položek menu osvěžoven, 12 FAQ,
 21 ročníků historie (2004–2024), 47 fotek, 15 statických stránek.
 
