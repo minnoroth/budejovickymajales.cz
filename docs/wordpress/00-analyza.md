@@ -292,10 +292,41 @@ Zadání chce dvě role a WordPress je umí bez jediné řádky kódu, přes plu
 - **Admin 2** — vlastní role „Dramaturgie". Pouze program, králové a rezervace.
   Nedostane se ke stránkám, vzhledu, pluginům ani uživatelům.
 
-**Účty jsou dnes největší riziko celého projektu.** Hosting, doména, databáze i FTP visí na
-osobním Gmailu `webmajales@gmail.com` jedné osoby. MX záznamy navíc míří na Google Workspace,
-takže i e-mail má stejný jednobodový selhávací uzel. Převod na spolek (IČO, bankovní účet,
-telefon statutára kvůli ověřovacím SMS) je **krok číslo jedna, ne poslední**.
+### Rozhodnutí 6. 10. 2026: hosting se nepřevádí
+
+Původní doporučení bylo převést účet Wedos na IČO spolku. **Od toho se ustupuje** — hosting
+zůstává tam, kde je. Místo toho se **WordPress registruje na `web@budejovickymajales.cz`**,
+tedy na spolkovou doménovou schránku, ke které je přístup.
+
+**Co to řeší.** Administrátorské účty WordPressu, resety hesel i systémová upozornění chodí
+do spolkové schránky, ne na osobní Gmail. To pokrývá většinu každodenního rizika: nový člověk
+se do webu dostane, aniž by musel shánět konkrétní osobu.
+
+**Co zůstává otevřené.** Hosting, doména, databáze a FTP pořád visí na `webmajales@gmail.com`.
+Když ten účet zmizí nebo k němu nebude přístup, nepůjde zaplatit fakturu, prodloužit doménu,
+obnovit zálohu ani založit subdoménu. Nejcitlivější z toho je **doména** — když propadne,
+je jedno, kdo má administrátora WordPressu.
+
+Ještě o patro výš: `web@budejovickymajales.cz` běží na Google Workspace (MX míří na Google),
+takže i ta schránka je jen tak trvalá jako Workspace účet, který ji hostuje. Stojí za to zjistit,
+kdo je jeho superadmin.
+
+### Levnější náhrada za převod
+
+Když se účet nepřevádí, stejný výsledek se dá z větší části koupit čtyřmi kroky, které nestojí nic:
+
+1. **Zapsat do předávacího protokolu**, kdo drží účet Wedos, kdy doména vyprší a kdo platí fakturu.
+2. **Přístup k Wedosu nesmí znát jediný člověk** — heslo do sdíleného správce hesel spolku.
+3. **Záloha mimo Wedos** (Duplicator Lite → úložiště spolku). Když se přístup ztratí, web se dá
+   postavit jinde. Tohle je ta nejdůležitější položka ze čtyř.
+4. **Připomínka na prodloužení domény** v kalendáři spolku, ne jen e-mail jedné osobě.
+
+### Co je tím pádem potřeba od správce hostingu
+
+Pro stavbu je potřeba **subdoména a databáze** (např. `novy.budejovickymajales.cz`). FTP účet si
+podle poznámek může každý vývojář dostat vlastní, ale subdoménu a databázi zakládá správce
+ve Wedos panelu. **To je jediná věc, kterou je od držitele účtu reálně potřeba** — ne převod,
+jen jedno založení.
 
 ---
 
