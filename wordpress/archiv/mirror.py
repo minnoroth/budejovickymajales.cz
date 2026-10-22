@@ -22,7 +22,10 @@ HOSTS = {"budejovickymajales.cz", "www.budejovickymajales.cz"}
 START = "https://budejovickymajales.cz/"
 OUT = sys.argv[1] if len(sys.argv) > 1 else "./mirror"
 DELAY = 0.25          # be gentle with their server
-SKIP = re.compile(r"^/(admin|wp-admin)(/|$)", re.I)
+SKIP = re.compile(
+    r"^/(admin|wp-admin)(/|$)"
+    r"|^/uploads/files/Presskit\.zip$",   # 416 MB tiskových materiálů, do archivu nepatří
+    re.I)
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "\
      "(KHTML, like Gecko) Chrome/140.0 Safari/537.36"
 

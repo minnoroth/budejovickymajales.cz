@@ -44,3 +44,12 @@ Soubory s parametrem v URL (`gt-walsheim-bold.woff2?v=72e2a9…`) se musí ulož
 **holou cestou** bez parametru — statický server parametr ignoruje a hledá
 `gt-walsheim-bold.woff2`. První verze skriptu tohle neuměla a uložila fonty jako
 adresáře s binárkou přejmenovanou na `index.html`.
+
+## Co se záměrně nestahuje
+
+`uploads/files/Presskit.zip` (416 MB) — tiskové materiály k ročníku, který skončil.
+Tvořily tři čtvrtiny archivu a upload přes FTP by se kvůli nim protáhl.
+Skript je přeskakuje, archiv má bez nich **144 MB**.
+
+Důsledek: odkaz na presskit na stránce `kontakty` povede do prázdna.
+Soubor je k dispozici na původním webu, dokud běží.
