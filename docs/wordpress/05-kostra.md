@@ -40,6 +40,34 @@ mohl překlepnout a založit duplicitní termín. Takhle je to zaškrtávací se
 | `tribe_events` | `v_carouselu` (ano/ne) | nezávisle na nativním „Featured Event" z TEC |
 | `tribe_events` | `bezbarierovost_vyjimka` | zdědit / ano / ne, výchozí zdědit |
 
+## Doplněno 22. 10. 2026 — lokalizace a ověření role
+
+Před předáním týmu doplněno:
+
+- **Administrace je česky** (`cs_CZ`), časové pásmo Europe/Prague, formát data `j. n. Y`
+  a času `G:i`. Předtím běžela anglicky v UTC s americkými formáty, což by pro studentský
+  tým byla zbytečná překážka.
+- **Stránka Aktuality** založena a nastavena jako výpis příspěvků. Předtím neměly aktuality
+  kde být vidět (`page_for_posts` bylo 0).
+- Smazán ukázkový příspěvek „Hello world!" a testovací data z dřívějších zkoušek.
+
+### Role Dramaturgie — ověřena skutečným přihlášením
+
+Dřívější ověření bylo jen přes oprávnění. Po přihlášení pod rolí platí:
+
+| Vidí v menu | Nevidí |
+|---|---|
+| Nástěnka, Příspěvky, Média, Komentáře | Stránky |
+| **Akce**, **Místa konání**, **Rubriky Akce** | Vzhled, Pluginy, Uživatelé, Nastavení |
+| **Králové**, Profil, Nástroje | **Vstupenky** (globální menu) |
+
+**Rezervace role spravuje přes konkrétní akci, ne přes globální menu.** Jakmile má akce
+rezervaci, objeví se ve výpisu akcí odkaz **Účastníci** a ten funguje. Globální menu
+Vstupenky je zamčené na `manage_options`, protože obsahuje nastavení pluginu —
+to je správně a nemění se.
+
+Žádný vlastní kód tedy nebyl potřeba.
+
 ## Co čeká na rozhodnutí
 
 **Role Dramaturgie dosáhne i na běžné Příspěvky.** Nejde to obejít — Event Tickets a typ Králové
@@ -48,6 +76,7 @@ realita je „to plus aktuality".
 
 **Export účastníků do CSV té roli nefunguje.** Event Tickets ho podmiňuje právem `publish_pages`,
 které dramaturgie záměrně nemá. Buď jí práva na stránky dáte, nebo export dělá Admin 1.
+Samotný seznam přihlášených ale dramaturgie vidí a spravuje — jen bez exportu.
 
 **Rodičovské položky v menu nejsou proklikávací.** Program, Partneři, Praktické info a O festivalu
 jsou tlačítka bez odkazu — důsledek požadavku „rozbalovací". Samotné URL fungují.
