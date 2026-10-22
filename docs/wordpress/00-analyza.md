@@ -7,6 +7,8 @@ Stav k 21. 9. 2026. Podklad pro schůzku s organizačním týmem Budějovického
 - [03-overena-fakta.md](03-overena-fakta.md) — 25 ověřených tvrzení o pluginech, s odkazy na zdroje
 - [04-mcp-test.md](04-mcp-test.md) — **otestováno na živé instalaci**: co MCP napojení opravdu umí
 - [05-kostra.md](05-kostra.md) — **postaveno**: co už na lokále stojí a co čeká na rozhodnutí
+- [06-navod-pro-tym.md](06-navod-pro-tym.md) — návod pro majálesový tým, jak plnit obsah
+- [07-nasazeni.md](07-nasazeni.md) — **nasazeno**: postup na Wedos a pasti, na které se narazilo
 
 ---
 
