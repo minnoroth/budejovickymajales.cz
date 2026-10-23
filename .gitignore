@@ -55,3 +55,9 @@ backend/.strapi-updater.json
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Fonty s nejasnou licencí sem nepatří (repo je veřejné)
+*.otf
+*.ttf
+*.woff
+*.woff2
