@@ -10,7 +10,7 @@ pas = (
     '{"top":"64px","bottom":"64px","left":"24px","right":"24px"}}},"layout":{"type":"constrained"}} -->\n'
     '<div class="wp-block-group alignfull bm-pas-hlavni" style="padding:64px 24px">'
     '<!-- wp:group {"layout":{"type":"constrained","contentSize":"1160px"}} -->\n'
-    '<div class="wp-block-group">'
+    '<div class="wp-block-group bm-obsah">'
     '<!-- wp:paragraph {"className":"bm-nadlinka"} -->\n<p class="bm-nadlinka">30. 5. – 5. 6. 2027</p>\n<!-- /wp:paragraph -->\n'
     '<!-- wp:heading {"level":1} -->\n<h1 class="wp-block-heading">Program</h1>\n<!-- /wp:heading -->\n'
     '<!-- wp:paragraph -->\n<p>Sedm dní, desítky míst po celých Budějovicích. Vstup na všechno zdarma.</p>\n<!-- /wp:paragraph -->\n'

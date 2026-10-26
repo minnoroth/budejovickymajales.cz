@@ -20,6 +20,15 @@
 }
 
 /* ── Barevné pásy sekcí ───────────────────────────────────────── */
+/* Pás jde přes celé okno, obsah uvnitř drží čitelnou šířku. Šířku nese
+   tahle skupina, ne jednotlivé bloky — jinak každý blok počítá vlastní
+   vystředění a nadpis skončí na jiné svislici než odstavec pod ním. */
+.wp-block-group.bm-obsah {
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .bm-pas-hlavni  { background: var(--global-palette1); color: var(--global-palette9); }
 .bm-pas-koral   { background: var(--global-palette10); color: var(--global-palette3); }
 .bm-pas-levand  { background: var(--bm-levandulova); color: var(--global-palette3); }
@@ -31,12 +40,14 @@
 
 /* Odsazení nadpisu od textu uvnitř pásu. */
 .bm-pas-hlavni h1, .bm-pas-koral h2, .bm-pas-levand h2 { margin-bottom: 16px; }
-/* WordPress centruje obsah „constrained“ skupiny pomocí !important,
-   takže zúžený odstavec se musí ukotvit vlevo stejnou zbraní. */
-.bm-pas-hlavni p, .bm-pas-koral p, .bm-pas-levand p {
+/* Odstavce se zužují kvůli délce řádku. WordPress je centruje přes
+   !important, takže se k levé svislici musí ukotvit stejnou zbraní. */
+/* Kadence obaluje obsah skupiny ještě jedním divem, proto dvě varianty. */
+.bm-obsah > p,
+.bm-obsah > .wp-block-group__inner-container > p {
   max-width: 660px;
   margin-left: 0 !important;
-  margin-right: 0 !important;
+  margin-right: auto !important;
 }
 
 /* Datum nad nadpisem v hero sekci. */

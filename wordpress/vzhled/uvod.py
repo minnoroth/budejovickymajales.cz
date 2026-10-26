@@ -4,7 +4,7 @@ from pripojeni import rest
 def sekce(cls, inner, pad="72px"):
     """Pás přes celou šířku okna, obsah uvnitř zarovnaný na čitelnou šířku."""
     vnitrek = (f'<!-- wp:group {{"layout":{{"type":"constrained","contentSize":"1160px"}}}} -->\n'
-               f'<div class="wp-block-group">{inner}</div>\n<!-- /wp:group -->\n')
+               f'<div class="wp-block-group bm-obsah">{inner}</div>\n<!-- /wp:group -->\n')
     return (f'<!-- wp:group {{"align":"full","className":"{cls}","style":{{"spacing":{{"padding":'
             f'{{"top":"{pad}","bottom":"{pad}","left":"24px","right":"24px"}}}}}},'
             f'"layout":{{"type":"constrained"}}}} -->\n'
