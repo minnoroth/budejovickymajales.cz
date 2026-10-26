@@ -4,6 +4,11 @@
 
 Ceny a verze platí k datu analýzy. Před nákupem čehokoli ověř znovu.
 
+> **Oprava po nasazení:** globální paleta Kadence 1.5.2 má **patnáct slotů**, ne devět —
+> sloty 11–14 drží systémové stavy (úspěch, informace, chyba, upozornění) a slot 15 je volný
+> akcent. Kde se v textu mluví o devíti slotech, platí patnáct. Rozpis je
+> v [08-vzhled.md](08-vzhled.md).
+
 ---
 
 ## Program, lineup, žánry, místa

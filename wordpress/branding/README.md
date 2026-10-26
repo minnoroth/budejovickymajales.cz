@@ -7,8 +7,14 @@ takže tohle je referenční styl, ne finální vizuál.
 
 | Soubor | Použití |
 |---|---|
-| `logo-bile.png` | na barevné a tmavé pozadí |
-| `logo-cerne.png` | na světlé pozadí |
+| `logo-bile.png` | zdroj — na barevné a tmavé pozadí |
+| `logo-cerne.png` | zdroj — na světlé pozadí |
+| `majales-znak-bile.png` | oříznutá varianta nahraná do webu (hlavička, patička) |
+| `majales-znak-cerne.png` | oříznutá varianta pro světlá pozadí |
+
+Zdrojové soubory mají kolem znaku široký průhledný rám, kvůli kterému se znak v hlavičce
+scvrkne na polovinu výšky řádku. Oříznuté varianty vyrábí
+[`../vzhled/oriznout-logo.py`](../vzhled/oriznout-logo.py).
 
 Obě verze jsou **jednobarevné** — ověřeno, bílá má jedinou barvu, černá dvanáct kvůli vyhlazení
 hran. To je pro web výhoda: logo se položí na libovolné pozadí ročníku a nikdy se s ním nepere.
@@ -58,17 +64,18 @@ grafiky spolku.
 3. Pokud ani jedno nevyjde, **napsat Ilyovi Bazhanovovi přímo**. U indie autorů bývá reálné,
    že studentskému festivalu webovou licenci dají zdarma nebo za symbolickou částku.
 
-### Náhradní řešení
+### Náhradní řešení — nasazené
 
-Když se licence nedohledá, sáhnout po OFL fontu z Google Fonts s lokálním hostováním.
-Vyřeší to i současný problém webu, kde se Space Mono tahá z Google CDN, což je GDPR problém.
+Staging jede na **Archivu** z Google Fonts (OFL), hostovaném lokálně. Vyřešilo to i současný
+problém webu, kde se Space Mono tahá z Google CDN, což je GDPR problém. Až se licence Archivu
+od Ilyi Bazhanova dohledá, vymění se font v Customizeru → Typografie.
 
 ## Jak se to promítne do webu
 
 Princip „jedna barva na sekci" **sedí na datový model, který už v kostře je** — kategorie programu
 mají pole `barva`. Co grafička dělala ručně pro Instagram, umí web generovat z dat.
 
-Vzhled se proto staví přes **globální paletu Kadence v Customizeru**: barvy budou v devíti slotech,
-CSS na ně odkazuje proměnnými `var(--global-palette1..9)` a nikdy napřímo hex hodnotou.
-Rebranding na ročník 2027 je pak vyplnění devíti polí, ne přepisování stylů — a zvládne ho
-příští sestava bez vývojáře.
+Vzhled se proto staví přes **globální paletu Kadence v Customizeru**: barvy sedí v patnácti
+slotech, CSS na ně odkazuje proměnnými `var(--global-palette1..15)` a nikdy napřímo hex hodnotou.
+Rebranding na ročník 2027 je pak vyplnění patnácti polí, ne přepisování stylů — a zvládne ho
+příští sestava bez vývojáře. Rozpis slotů je v [docs/wordpress/08-vzhled.md](../../docs/wordpress/08-vzhled.md).
