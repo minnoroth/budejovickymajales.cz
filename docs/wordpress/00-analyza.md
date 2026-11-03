@@ -32,7 +32,7 @@ Doporučený rozsah níže dává funkční web a zbytek se doobjednává po pol
 ## Co se od minulé verze analýzy změnilo
 
 Původní odhad 49–66 hodin **neplatí**. Vznikl dřív, než byly k dispozici screenshoty BM Adminu
-a požadavky od content managera. Po jejich zapracování odhad vyskočil na 193–312 h. Důvody:
+a požadavky od marketingového ředitele. Po jejich zapracování odhad vyskočil na 193–312 h. Důvody:
 
 | Co jsem podcenil | Dopad |
 |---|---|
