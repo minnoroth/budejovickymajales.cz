@@ -38,6 +38,7 @@
 	var NA_STRANKU_TEC = 50;
 	var NA_STRANKU_WP = 100;
 	var MAX_STRANEK = 40;
+	var SOUBEZNYCH_SOND = 3;
 
 	/* ─────────────────────────────────────────────────────────────────────
 	   Drobnosti
@@ -241,13 +242,24 @@
 			return b.name.localeCompare(a.name, 'cs', { numeric: true });
 		});
 
-		for (var i = 0; i < terminy.length; i++) {
-			if (!terminy[i].datum_od || !terminy[i].datum_do) {
-				continue;
-			}
-			var prvni = await strankaAkci(zaklad, terminy[i].datum_od, terminy[i].datum_do, 1);
-			if ((prvni && +prvni.total) > 0) {
-				return { rocnik: terminy[i], prvni: prvni };
+		var kandidati = terminy.filter(function (termin) {
+			return termin.datum_od && termin.datum_do;
+		});
+
+		/* Sondy jdou po trojicích naráz. Každý dotaz stojí na sdíleném
+		   hostingu přes vteřinu, takže ptát se ročník po ročníku je na
+		   studené cache znát — a sonda na nejnovější ročník, do kterého
+		   teprve někdo začal zadávat program, se zeptá vždycky zbytečně.
+		   Stránka 1 vítěze se rovnou použije, nestahuje se dvakrát. */
+		for (var i = 0; i < kandidati.length; i += SOUBEZNYCH_SOND) {
+			var davka = kandidati.slice(i, i + SOUBEZNYCH_SOND);
+			var odpovedi = await Promise.all(davka.map(function (termin) {
+				return strankaAkci(zaklad, termin.datum_od, termin.datum_do, 1);
+			}));
+			for (var j = 0; j < davka.length; j++) {
+				if ((odpovedi[j] && +odpovedi[j].total) > 0) {
+					return { rocnik: davka[j], prvni: odpovedi[j] };
+				}
 			}
 		}
 
@@ -343,24 +355,34 @@
 		var vybrany = await vyberRocnik(koren);
 		var rocnik = vybrany.rocnik;
 
-		var doplnky = await Promise.all([
+		/* Jakmile je ročník známý, zbytek jde naráz. Při studené cache je na
+		   Wedosu každý dotaz drahý a čekat na ně za sebou je na první
+		   návštěvě znát — než se program vykreslí, kouká návštěvník na
+		   záchranný blok. Počet stránek s akcemi říká total_pages v těle
+		   odpovědi; stránka za koncem vrací 404, takže se na ni nedá narazit
+		   naslepo. */
+		var dalsiStranky = [];
+		if (vybrany.prvni) {
+			var stranek = Math.min(+vybrany.prvni.total_pages || 1, MAX_STRANEK);
+			for (var stranka = 2; stranka <= stranek; stranka++) {
+				dalsiStranky.push(strankaAkci(koren, rocnik.datum_od, rocnik.datum_do, stranka));
+			}
+		}
+
+		var vse = await Promise.all([
 			nepovinne(function () {
 				return strankyWp(koren, 'wp/v2/tribe_events_cat', 'id,name,slug,parent,acf');
 			}, 'Barvy kategorií'),
 			nepovinne(function () {
 				return strankyWp(koren, 'wp/v2/tribe_venue', 'id,slug,link,title,acf');
-			}, 'Bezbariérovost míst')
+			}, 'Bezbariérovost míst'),
+			Promise.all(dalsiStranky)
 		]);
 
-		var syrove = [];
-		if (vybrany.prvni) {
-			syrove = (vybrany.prvni.events || []).slice();
-			var stranek = Math.min(+vybrany.prvni.total_pages || 1, MAX_STRANEK);
-			for (var stranka = 2; stranka <= stranek; stranka++) {
-				var dalsi = await strankaAkci(koren, rocnik.datum_od, rocnik.datum_do, stranka);
-				syrove = syrove.concat((dalsi && dalsi.events) || []);
-			}
-		}
+		var syrove = vybrany.prvni ? (vybrany.prvni.events || []).slice() : [];
+		vse[2].forEach(function (odpoved) {
+			syrove = syrove.concat((odpoved && odpoved.events) || []);
+		});
 
 		/* Hranici 6:00 musí dodržet klient — TEC si konec rozsahu přepsal na
 		   23:59:59, takže v odpovědi je i to, co se děje den po festivalu.
@@ -375,8 +397,8 @@
 		return {
 			rocnik: rocnik,
 			akce: akce,
-			kategorie: doplnky[0].map(upravKategorii),
-			mista: doplnky[1].map(upravMisto)
+			kategorie: vse[0].map(upravKategorii),
+			mista: vse[1].map(upravMisto)
 		};
 	}
 
