@@ -161,19 +161,8 @@
 }
 
 /* ── Kalendář akcí (The Events Calendar) ─────────────────────── */
-/* Kadence napojuje na paletu jen základní barvy pluginu, odstíny
-   pro přejetí myší zůstávají modré z výchozího vzhledu. */
-:root, .tribe-common, .tribe-events {
-  --tec-color-accent-primary-hover: var(--global-palette2);
-  --tec-color-accent-primary-active: var(--global-palette2);
-  --tec-color-link-accent-hover: var(--global-palette2);
-  --tec-color-accent-primary-background: var(--global-palette7);
-  --tec-color-background-primary-multiday-hover: var(--global-palette7);
-  --tec-color-accent-primary-week-event: var(--global-palette7);
-  --tec-color-accent-primary-week-event-hover: var(--global-palette7);
-}
-.tribe-common .tribe-common-c-btn,
-.tribe-events .tribe-events-c-search__button { border-radius: 999px; font-weight: 800; }
+/* Vzhled kalendáře bydlí v samostatném bm-akce.css, který se
+   vkládá hned za tenhle soubor. Nic ke kalendáři nepiš sem. */
 
 /* ── Úvodní stránka ───────────────────────────────────────────── */
 /* Úvod začíná barevným pásem hned pod hlavičkou, proto se ruší
