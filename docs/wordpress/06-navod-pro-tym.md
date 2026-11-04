@@ -170,8 +170,13 @@ Když stejná kapela hraje dvakrát, jsou to **dvě akce**.
 Najdi box **The Events Calendar**, část **TIME & DATE**.
 
 5. Klikni do prvního políčka u **Start/End:**. Vyskočí **kalendář** — vyber v něm den.
-   **Datum raději klikej, nepiš.** Systém zatím čeká americký formát (nejdřív měsíc,
-   potom den), takže „30. 5." napsané ručně pochopí špatně.
+   Kalendář je česky a začíná pondělím, takže se v něm dá klikat bez přemýšlení.
+   **Datum ale klikej, nepiš.** V políčku zůstane americký zápis: `11/4/2026` znamená
+   **4. listopadu**, ne 11. dubna. Ručně napsané „30. 5." systém pochopí špatně.
+
+   > Festival je skoro rok daleko, takže se kalendář otevře na aktuálním měsíci a musíš
+   > se proklikat dopředu. Šipka vpravo nahoře posouvá po měsících, rozbalovátka
+   > **měsíc** a **rok** skočí rovnou.
 6. Vedle data je políčko s časem. Klikni do něj a vyber čas ze seznamu.
 7. Stejně vyplň **čas konce** a **datum konce**. U akce, která trvá jeden večer,
    je datum konce stejné jako datum začátku.
@@ -202,8 +207,9 @@ Vpravo (na menším displeji dole) je box **Kategorie akcí (Event Categories)**
 
 11. Najdi v seznamu **žánr** akce a zaškrtni ho. Žánry jsou odsazené pod svou kategorií —
     třeba *punk* je odsazený pod *Hudba*.
-12. **Zaškrtni i tu kategorii nad ním** (tedy *Hudba*). Z kategorie se bere barva, kterou
-    akce dostane v programu. Bez ní by akce mohla vypadat bezbarvě.
+12. **Kategorii nad ním (tedy *Hudba*) zaškrtávat nemusíš** — doplní se sama při uložení.
+    Z kategorie se bere barva, kterou akce dostane v programu, a zapomenout ji bývala
+    nejčastější chyba. Proto to teď hlídá web za tebe.
 13. Když akce sedí pod víc žánrů, zaškrtni jich víc. Nic se nerozbije.
 
 Podrobnosti o tom, co je kategorie a co žánr, jsou v [sekci 4](#4-žánry-a-kategorie).
