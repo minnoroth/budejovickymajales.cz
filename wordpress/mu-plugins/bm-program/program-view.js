@@ -137,6 +137,14 @@
     t.innerHTML = s == null ? '' : String(s);
     return t.value;
   }
+  /* Výřez popisu chodí z The Events Calendar podle nastavení buď jako
+     holý text, nebo jako HTML. Značky se zahodí tady, ať se na stránce
+     neobjeví „<p>" — a protože se výsledek stejně ještě escapuje, nemůže
+     se tudy nic propašovat. */
+  function naText(s) {
+    return odstranEntity(String(s == null ? '' : s).replace(/<[^>]*>/g, ' '))
+      .replace(/\s+/g, ' ').trim();
+  }
   function bezDiakritiky(s) {
     return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   }
@@ -182,7 +190,7 @@
           rezervace: (e.ticketed || []).length > 0,
           top: !!e.featured,
           obraz: e.image && e.image.url ? e.image.url : '',
-          popis: odstranEntity(e.excerpt || ''),
+          popis: naText(e.excerpt),
           url: e.url || ''
         };
       })
@@ -491,6 +499,10 @@
     }
 
     el.skocTed.hidden = stavRocniku() !== 'behem';
+    /* Hláška o sdíleném odkazu je jednorázová. Kdyby zůstala viset,
+       přebila by po zbytek návštěvy upozornění na kolize — a to je ta
+       informace, kvůli které si člověk program skládá. */
+    prisloOdkazem = 0;
     zapisAdresu();
     dopocitejRozmery();
     vratFokus(stopa);
@@ -590,7 +602,9 @@
 
     var zprava = '';
     if (prisloOdkazem) {
-      zprava = '★ Ze sdíleného odkazu přibylo ' + prisloOdkazem + ' vystoupení k tvému výběru.';
+      zprava = '★ Ze sdíleného odkazu ' +
+        sklonuj(prisloOdkazem, 'přibylo', 'přibyla', 'přibylo') + ' ' +
+        prisloOdkazem + ' vystoupení k tvému výběru.';
     } else if (kol.size) {
       zprava = '⚠ Ve výběru máš ' + kol.size + ' ' + sklonuj(kol.size,
         'akci, která se časově překrývá',
@@ -598,8 +612,9 @@
         'akcí, které se časově překrývají') +
         ' s jinou — jsou označené štítkem KOLIZE.';
     } else if (stavRocniku() === 'pred') {
+      /* Datum už tečku nese („31. 5."), druhá by za ním byla navíc. */
       zprava = 'Festival ještě nezačal. Ukazujeme první den ročníku — ' +
-        DNY_INFO[0].nazev + ' ' + DNY_INFO[0].datum + '.';
+        DNY_INFO[0].nazev + ' ' + DNY_INFO[0].datum;
     } else if (stavRocniku() === 'po') {
       zprava = 'Ročník už skončil. Tohle je jeho program, ne nadcházející. ' +
         'Nový se objeví, až ho dramaturgie zveřejní.';
@@ -816,7 +831,10 @@
       (a.rezervace ? '<span class="bmp-stitek bmp-stitek--rez">Rezervace</span>' : '') +
       (a.top ? '<span class="bmp-stitek bmp-stitek--top">Top představení</span>' : '') +
       '</div>' +
-      (a.popis ? '<div class="bmp-detail__popis">' + esc(a.popis) + '</div>' : '') +
+      /* Výřez je useknutý v polovině věty, proto výpustka — ale jen
+         když si ji plugin nepřidal sám. */
+      (a.popis ? '<div class="bmp-detail__popis">' + esc(a.popis) +
+        (/[.!?…]$/.test(a.popis) ? '' : '…') + '</div>' : '') +
       (zaroven.length ? '<div class="bmp-detail__zaroven"><h3>Ve stejnou dobu jinde</h3><ul>' +
         zaroven.map(function (z) {
           return '<li><b>' + hhmm(z.zac) + '</b>' + esc(z.nazev) +

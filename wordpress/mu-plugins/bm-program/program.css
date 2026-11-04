@@ -181,6 +181,11 @@
   outline-offset: 2px;
 }
 
+/* Atribut hidden musí přebít display z komponent — jinak by tlačítko
+   „Skoč na teď" zůstalo vidět i mimo festival, protože .bmp-btn
+   nastavuje display: inline-flex a to prohlížeči stačí k překrytí. */
+:is(#primary, body) .bmp [hidden] { display: none !important; }
+
 /* Jen pro čtečky obrazovky. */
 :is(#primary, body) .bmp .bmp-skryte {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
