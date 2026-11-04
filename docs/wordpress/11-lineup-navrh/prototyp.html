@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Program a lineup — návrh | Budějovický Majáles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════════════
+   PROGRAM + LINEUP — prototyp návrhu
+
+   Jediné místo, kde se mění barvy, je blok :root hned pod tímhle komentářem.
+   Na ostrém webu se hodnoty berou z globální palety Kadence: zápis
+   var(--global-paletteN, #hex) znamená „vezmi slot z palety; když žádná
+   není (jako tady v prototypu), použij záložní hex“. Rebranding na nový
+   ročník je proto přepsání palety v Customizeru, ne zásah do tohohle CSS.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Paleta ročníku 2024 ─────────────────────────────────────────── */
+  --bm-hlavni:      var(--global-palette1,  #1EA198);  /* zelenomodrá   */
+  --bm-hlavni-tmav: var(--global-palette2,  #0C6F69);
+  --bm-cerna:       var(--global-palette3,  #121212);
+  --bm-seda:        var(--global-palette5,  #5E5E5E);
+  --bm-linka:       var(--global-palette6,  #D8D8D4);
+  --bm-svetla:      var(--global-palette7,  #F4F3EF);
+  --bm-bila:        var(--global-palette9,  #FFFFFF);
+  --bm-koral:       var(--global-palette10, #EE7270);
+  --bm-zluta:       var(--global-palette15, #F8E862);
+  /* Levandulová se do palety Kadence nevešla, bydlí jako proměnná.
+     Důvod je popsaný v docs/wordpress/08-vzhled.md. */
+  --bm-levandulova: #B6B4DA;
+
+  /* ── Tvarosloví ──────────────────────────────────────────────────── */
+  --bm-ramecek: 3px solid var(--bm-cerna);
+  --bm-radius: 18px;
+  --bm-radius-s: 10px;
+  --bm-stin: 5px 5px 0 var(--bm-cerna);   /* plakátový stín, bez rozostření */
+  --bm-stin-s: 3px 3px 0 var(--bm-cerna);
+
+  /* ── Barvy kategorií ─────────────────────────────────────────────── */
+  /* Na ostrém webu je zdrojem pole „Barva“ u kategorie akce (SCF color
+     picker). Když je prázdné, platí tahle tabulka. Když ani tady slug
+     není, použije se --bm-kat-vychozi. Žánry barvu dědí po kategorii. */
+  --bm-kat-hudba:          var(--bm-hlavni);
+  --bm-kat-divadlo:        var(--bm-koral);
+  --bm-kat-filmy:          var(--bm-levandulova);
+  --bm-kat-venkovni-scena: var(--bm-zluta);
+  --bm-kat-vnitrni-scena:  #8CD3CD;
+  --bm-kat-volba-krale:    #F6AFAD;
+  --bm-kat-vychozi:        #E3E2DC;
+
+  /* ── Rozměry časové osy ──────────────────────────────────────────── */
+  --osa-px-za-minutu: 1.4;
+  --osa-sirka-sloupce: 152px;
+  --osa-sirka-casu: 58px;
+  --osa-vyska-hlavicky: 62px;
+}
+
+[data-kat="hudba"]          { --kat: var(--bm-kat-hudba); }
+[data-kat="divadlo"]        { --kat: var(--bm-kat-divadlo); }
+[data-kat="filmy"]          { --kat: var(--bm-kat-filmy); }
+[data-kat="venkovni-scena"] { --kat: var(--bm-kat-venkovni-scena); }
+[data-kat="vnitrni-scena"]  { --kat: var(--bm-kat-vnitrni-scena); }
+[data-kat="volba-krale"]    { --kat: var(--bm-kat-volba-krale); }
+
+/* ════════════════════════════════════════════════════════════════════
+   Základ
+   ════════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: Archivo, "Helvetica Neue", Arial, system-ui, sans-serif;
+  color: var(--bm-cerna);
+  background: var(--bm-bila);
+  font-size: 16px;
+  line-height: 1.45;
+}
+h1, h2, h3, h4 { margin: 0; line-height: 1.12; font-weight: 800; }
+button { font: inherit; color: inherit; }
+a { color: var(--bm-hlavni-tmav); }
+
+:focus-visible {
+  outline: 3px solid var(--bm-cerna);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.bm-obsah { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+
+/* Jen pro čtečky obrazovky. */
+.bm-skryte {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ── Rámeček prototypu ─────────────────────────────────────────────── */
+.bm-poznamka {
+  background: var(--bm-cerna); color: var(--bm-bila);
+  font-size: 13px; padding: 9px 0; font-weight: 600;
+}
+.bm-poznamka b { color: var(--bm-zluta); }
+
+/* ── Hlavička stránky ──────────────────────────────────────────────── */
+.bm-hlava {
+  background: var(--bm-hlavni); color: var(--bm-bila);
+  border-bottom: var(--bm-ramecek);
+  padding: 34px 0 30px;
+}
+.bm-hlava__nadlinka {
+  font-size: 13px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; margin-bottom: 10px; opacity: .9;
+}
+.bm-hlava h1 { font-size: clamp(34px, 7vw, 60px); letter-spacing: -.02em; }
+.bm-hlava__popis { margin: 12px 0 0; max-width: 620px; font-size: 16px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   Ovládání — dny, zobrazení, filtry
+   ════════════════════════════════════════════════════════════════════ */
+.bm-ovladani {
+  position: sticky; top: 0; z-index: 60;
+  background: var(--bm-bila);
+  border-bottom: var(--bm-ramecek);
+}
+
+/* Dny: vodorovný pás, na mobilu se posouvá prstem. */
+.bm-dny {
+  display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.bm-dny::-webkit-scrollbar { display: none; }
+.bm-den {
+  flex: 0 0 auto; cursor: pointer;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius-s);
+  background: var(--bm-bila); padding: 7px 14px;
+  text-align: left; line-height: 1.15;
+}
+.bm-den__zkratka { display: block; font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: .04em; }
+.bm-den__datum   { display: block; font-size: 12px; font-weight: 600; color: var(--bm-seda); }
+.bm-den[aria-pressed="true"] {
+  background: var(--bm-zluta); box-shadow: var(--bm-stin-s); transform: translate(-1px, -1px);
+}
+.bm-den[aria-pressed="true"] .bm-den__datum { color: var(--bm-cerna); }
+.bm-den--dnes .bm-den__zkratka::after {
+  content: "•"; color: var(--bm-koral); margin-left: 5px; font-size: 20px; line-height: 0;
+}
+
+.bm-radek {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 0 20px 12px;
+}
+.bm-radek--filtry { border-top: 1px dashed var(--bm-linka); padding-top: 12px; }
+
+/* Přepínač zobrazení */
+.bm-prepinac { display: flex; border: var(--bm-ramecek); border-radius: 999px; overflow: hidden; }
+.bm-prepinac button {
+  cursor: pointer; border: 0; background: var(--bm-bila);
+  padding: 9px 18px; font-weight: 800; font-size: 14px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.bm-prepinac button + button { border-left: 3px solid var(--bm-cerna); }
+.bm-prepinac button[aria-pressed="true"] { background: var(--bm-cerna); color: var(--bm-bila); }
+
+.bm-btn {
+  cursor: pointer; border: var(--bm-ramecek); border-radius: 999px;
+  background: var(--bm-bila); padding: 9px 16px; font-weight: 700; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.bm-btn:hover { background: var(--bm-svetla); }
+.bm-btn[aria-pressed="true"], .bm-btn--zvyrazneny { background: var(--bm-zluta); }
+.bm-btn--moje[aria-pressed="true"] { box-shadow: var(--bm-stin-s); }
+.bm-pocet {
+  background: var(--bm-cerna); color: var(--bm-bila); border-radius: 999px;
+  font-size: 12px; font-weight: 800; padding: 1px 7px; min-width: 20px; text-align: center;
+}
+
+.bm-hledani {
+  width: 100%; max-width: 420px; display: block;
+  border: var(--bm-ramecek); border-radius: 999px;
+  padding: 9px 16px; font-size: 14px; font-weight: 600; font-family: inherit;
+  background: var(--bm-bila);
+}
+.bm-hledani::placeholder { color: var(--bm-seda); font-weight: 600; }
+
+/* Panel filtrů */
+.bm-filtry { padding: 0 20px 14px; border-top: 1px dashed var(--bm-linka); }
+.bm-filtry[hidden] { display: none; }
+.bm-filtry__skupina { padding-top: 12px; }
+.bm-filtry__nazev {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--bm-seda); margin-bottom: 8px;
+}
+.bm-chipy { display: flex; flex-wrap: wrap; gap: 7px; }
+.bm-chip {
+  cursor: pointer; border: 2px solid var(--bm-cerna); border-radius: 999px;
+  background: var(--bm-bila); padding: 5px 12px; font-size: 13px; font-weight: 700;
+}
+.bm-chip[aria-pressed="true"] { background: var(--bm-cerna); color: var(--bm-bila); }
+.bm-chip--kat[aria-pressed="true"] { background: var(--kat, var(--bm-kat-vychozi)); color: var(--bm-cerna); }
+.bm-chip__tecka {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--kat, var(--bm-kat-vychozi)); border: 1.5px solid var(--bm-cerna);
+  margin-right: 6px; vertical-align: -1px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Shrnutí dne
+   ════════════════════════════════════════════════════════════════════ */
+.bm-shrnuti {
+  padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 8px 18px;
+  align-items: baseline; font-size: 14px; font-weight: 600; color: var(--bm-seda);
+}
+.bm-shrnuti strong { color: var(--bm-cerna); font-size: 20px; font-weight: 800; }
+.bm-stav {
+  margin: 0 20px 16px; padding: 12px 16px;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius-s);
+  background: var(--bm-zluta); font-weight: 700; font-size: 14px;
+}
+.bm-prazdno {
+  margin: 36px 20px; padding: 28px; text-align: center;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius);
+  background: var(--bm-svetla);
+}
+.bm-prazdno h3 { font-size: 22px; margin-bottom: 8px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   Celodenní pás (výstavy, instalace)
+   ════════════════════════════════════════════════════════════════════ */
+.bm-celoden { margin: 0 20px 14px; }
+.bm-celoden__nazev {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--bm-seda); margin-bottom: 7px;
+}
+.bm-celoden__pasy { display: flex; flex-wrap: wrap; gap: 8px; }
+.bm-celoden__pas {
+  cursor: pointer; text-align: left;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius-s);
+  background: var(--kat, var(--bm-kat-vychozi));
+  padding: 8px 14px; font-weight: 800; font-size: 14px;
+}
+.bm-celoden__pas small { display: block; font-weight: 600; font-size: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   ZOBRAZENÍ „LINEUP“ — časová osa s paralelními scénami
+   ════════════════════════════════════════════════════════════════════ */
+/* Osa je vlastní posuvná plocha: vodorovně jedou scény, svisle čas.
+   Hlavička se scénami drží nahoře, sloupec s časy vlevo. Nejde to řešit
+   posouváním celé stránky — jakmile je na kontejneru overflow-x, prohlížeč
+   zapne i overflow-y a „sticky“ vůči stránce přestane platit. */
+.bm-osa {
+  margin: 0 20px 28px;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius);
+  overflow: auto; background: var(--bm-bila);
+  max-height: min(74vh, 900px);
+  position: relative;
+}
+.bm-osa__vnitrek {
+  display: grid;
+  grid-template-columns: var(--osa-sirka-casu) repeat(var(--sloupcu), var(--osa-sirka-sloupce));
+  width: max-content; min-width: 100%;
+}
+.bm-osa__roh {
+  position: sticky; top: 0; left: 0; z-index: 30;
+  background: var(--bm-bila);
+  border-right: var(--bm-ramecek); border-bottom: var(--bm-ramecek);
+  height: var(--osa-vyska-hlavicky);
+}
+.bm-osa__misto {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bm-svetla);
+  border-bottom: var(--bm-ramecek); border-right: 1px solid var(--bm-linka);
+  height: var(--osa-vyska-hlavicky);
+  padding: 7px 9px;
+  font-size: 12.5px; font-weight: 800; line-height: 1.15;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  hyphens: auto; overflow: hidden;
+}
+.bm-osa__misto span {
+  font-weight: 700; font-size: 9.5px; color: var(--bm-seda);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.bm-osa__misto b { font-weight: 800; display: block; }
+.bm-osa__casy {
+  position: sticky; left: 0; z-index: 15;
+  background: var(--bm-bila); border-right: var(--bm-ramecek);
+  height: var(--vyska);
+}
+.bm-osa__cas {
+  position: absolute; left: 0; right: 0;
+  font-size: 11px; font-weight: 700; color: var(--bm-seda);
+  padding-left: 7px; transform: translateY(-50%);
+}
+.bm-osa__sloupec {
+  position: relative; height: var(--vyska);
+  border-right: 1px solid var(--bm-linka);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--bm-svetla) 0, var(--bm-svetla) 1px,
+    transparent 1px, transparent var(--hodina)
+  );
+}
+.bm-osa__blok {
+  position: absolute; left: 3px; right: 3px; cursor: pointer; text-align: left;
+  border: 2px solid var(--bm-cerna); border-radius: 8px;
+  background: var(--kat, var(--bm-kat-vychozi));
+  padding: 5px 7px; overflow: hidden;
+  font-size: 12.5px; font-weight: 800; line-height: 1.16;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.bm-osa__blok:hover { box-shadow: var(--bm-stin-s); z-index: 12; }
+.bm-osa__blok small { font-weight: 600; font-size: 10.5px; opacity: .78; }
+.bm-osa__blok--mimo { opacity: .22; filter: grayscale(1); }
+.bm-osa__blok--moje { box-shadow: inset 0 0 0 3px var(--bm-cerna); }
+/* „Top představení“ = zaškrtnutý Feature Event u akce. */
+.bm-osa__blok--top { border-width: 4px; }
+.bm-osa__blok--kratky { padding: 2px 6px; font-size: 11px; }
+.bm-osa__blok--kratky small { display: none; }
+.bm-osa__hvezda {
+  position: absolute; top: 2px; right: 2px; z-index: 5;
+  border: 0; background: none; cursor: pointer; padding: 2px 4px; font-size: 13px; line-height: 1;
+}
+
+/* Čára „teď“ */
+.bm-osa__ted {
+  position: absolute; left: 0; right: 0; height: 0; z-index: 14;
+  border-top: 2px solid var(--bm-koral); pointer-events: none;
+}
+/* Popisek jen u prvního sloupce, čára jde přes všechny. */
+.bm-osa__ted--popisek::before {
+  content: "TEĎ"; position: absolute; left: 0; top: -9px;
+  background: var(--bm-koral); color: var(--bm-bila);
+  font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 3px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ZOBRAZENÍ „SEZNAM“
+   ════════════════════════════════════════════════════════════════════ */
+.bm-seznam { padding: 0 20px 40px; }
+.bm-slot { margin-bottom: 22px; }
+.bm-slot__cas {
+  position: sticky; top: var(--sticky-offset, 120px); z-index: 25;
+  background: var(--bm-bila);
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 6px 0 8px; margin-bottom: 10px;
+  border-bottom: var(--bm-ramecek);
+}
+.bm-slot__cas b { font-size: 26px; letter-spacing: -.02em; }
+.bm-slot__cas span { font-size: 13px; font-weight: 600; color: var(--bm-seda); }
+.bm-slot__den {
+  background: var(--bm-cerna); color: var(--bm-bila);
+  padding: 8px 14px; border-radius: var(--bm-radius-s);
+  font-size: 15px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .05em; margin: 26px 0 14px;
+}
+.bm-karty { display: grid; gap: 12px; grid-template-columns: 1fr; }
+
+.bm-karta {
+  position: relative; display: flex; gap: 0;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius-s);
+  background: var(--bm-bila); overflow: hidden; cursor: pointer;
+}
+.bm-karta:hover { box-shadow: var(--bm-stin-s); }
+.bm-karta__pruh { flex: 0 0 12px; background: var(--kat, var(--bm-kat-vychozi)); }
+.bm-karta__telo { flex: 1; padding: 11px 44px 11px 13px; min-width: 0; }
+.bm-karta__meta {
+  font-size: 12.5px; font-weight: 700; color: var(--bm-seda);
+  display: flex; flex-wrap: wrap; gap: 4px 9px; margin-bottom: 4px;
+}
+.bm-karta__nazev { font-size: 18px; letter-spacing: -.01em; }
+.bm-karta__nazev button {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; text-align: left; letter-spacing: inherit;
+}
+.bm-karta__stitky { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.bm-karta--moje { background: #FFFDF0; }
+.bm-karta--ted { border-color: var(--bm-koral); box-shadow: var(--bm-stin-s); }
+
+.bm-stitek {
+  font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 999px;
+  border: 1.5px solid var(--bm-cerna); background: var(--bm-bila);
+  text-transform: uppercase; letter-spacing: .03em;
+}
+.bm-stitek--kat { background: var(--kat, var(--bm-kat-vychozi)); }
+.bm-stitek--rez { background: var(--bm-zluta); }
+.bm-stitek--ted { background: var(--bm-koral); color: var(--bm-bila); border-color: var(--bm-koral); }
+.bm-stitek--kolize { background: var(--bm-koral); color: var(--bm-bila); }
+.bm-stitek--top { background: var(--bm-cerna); color: var(--bm-zluta); }
+.bm-stitek--misto { cursor: pointer; background: var(--bm-svetla); }
+.bm-stitek--misto:hover { background: var(--bm-zluta); }
+.bm-bez-barier { font-size: 11px; font-weight: 700; color: var(--bm-seda); text-transform: uppercase; letter-spacing: .04em; }
+
+.bm-hvezda {
+  position: absolute; top: 7px; right: 7px;
+  cursor: pointer; border: 2px solid var(--bm-cerna); border-radius: 50%;
+  background: var(--bm-bila); width: 30px; height: 30px; padding: 0;
+  font-size: 14px; line-height: 1; display: grid; place-items: center;
+}
+.bm-hvezda[aria-pressed="true"] { background: var(--bm-zluta); }
+
+/* ════════════════════════════════════════════════════════════════════
+   Detail akce
+   ════════════════════════════════════════════════════════════════════ */
+.bm-detail {
+  border: var(--bm-ramecek); border-radius: var(--bm-radius);
+  padding: 0; max-width: 620px; width: calc(100% - 32px);
+  background: var(--bm-bila); color: var(--bm-cerna);
+  max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
+}
+.bm-detail::backdrop { background: rgba(18, 18, 18, .66); }
+.bm-detail__obraz { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-bottom: var(--bm-ramecek); }
+.bm-detail__telo { padding: 20px 22px 24px; }
+.bm-detail__meta { font-size: 13px; font-weight: 700; color: var(--bm-seda); margin-bottom: 6px; }
+.bm-detail h2 { font-size: clamp(24px, 5vw, 32px); letter-spacing: -.02em; margin-bottom: 10px; padding-right: 42px; }
+.bm-detail__popis { font-size: 14.5px; margin: 14px 0; color: #2A2A2A; }
+.bm-detail__zaroven { margin-top: 16px; border-top: 1px dashed var(--bm-linka); padding-top: 12px; }
+.bm-detail__zaroven h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--bm-seda); margin-bottom: 8px; }
+.bm-detail__zaroven ul { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+.bm-detail__zaroven li { padding: 3px 0; }
+.bm-detail__zaroven li b { display: inline-block; min-width: 46px; }
+.bm-detail__zaroven b { font-weight: 700; }
+.bm-detail__akce { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+.bm-detail__akce .bm-btn--hlavni {
+  background: var(--bm-zluta); font-weight: 800; text-decoration: none; box-shadow: var(--bm-stin-s);
+}
+.bm-zavrit {
+  position: sticky; float: right; top: 10px; right: 10px; margin: 10px 10px -46px auto;
+  border: var(--bm-ramecek); border-radius: 50%; background: var(--bm-bila);
+  width: 36px; height: 36px; cursor: pointer; font-size: 17px; font-weight: 800; line-height: 1;
+}
+
+/* ── Záložní obsah, když JS neběží nebo se data nenačtou ──────────── */
+.bm-nouze {
+  margin: 28px 20px; padding: 22px;
+  border: var(--bm-ramecek); border-radius: var(--bm-radius);
+  background: var(--bm-svetla);
+}
+.bm-nouze h2 { font-size: 22px; margin-bottom: 8px; }
+.bm-nouze ul { margin: 12px 0 0; padding-left: 20px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   Větší obrazovky
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 700px) {
+  .bm-karty { grid-template-columns: repeat(2, 1fr); }
+  .bm-dny, .bm-radek, .bm-filtry, .bm-shrnuti { padding-left: calc((100vw - 1160px) / 2 + 20px); padding-right: calc((100vw - 1160px) / 2 + 20px); }
+  .bm-osa, .bm-seznam, .bm-celoden, .bm-stav, .bm-prazdno, .bm-nouze { margin-left: max(20px, calc((100vw - 1160px) / 2 + 20px)); margin-right: max(20px, calc((100vw - 1160px) / 2 + 20px)); }
+  .bm-seznam { padding-left: 0; padding-right: 0; }
+}
+@media (min-width: 1040px) {
+  .bm-karty { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Mobil (do 699 px)
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 699px) {
+  :root {
+    --osa-px-za-minutu: 1.15;
+    --osa-sirka-sloupce: 128px;
+    --osa-sirka-casu: 46px;
+  }
+  .bm-hlava { padding: 22px 0 20px; }
+  /* Ovládání musí zůstat na jedné řádce — lepivý pruh přes čtvrtinu
+     displeje je horší než kratší popisky. */
+  .bm-sirsi { display: none; }
+  .bm-prepinac button { padding: 9px 11px; font-size: 13px; }
+  .bm-radek { gap: 7px; padding-left: 14px; padding-right: 14px; }
+  .bm-dny { padding-left: 14px; padding-right: 14px; }
+  .bm-btn { padding: 9px 12px; font-size: 13px; }
+  .bm-osa { max-height: 70vh; }
+  /* Detail jede odspodu jako „bottom sheet“ — palec na něj dosáhne. */
+  .bm-detail {
+    width: 100%; max-width: none; margin: 0; position: fixed;
+    bottom: 0; left: 0; top: auto; max-height: 88vh;
+    border-radius: var(--bm-radius) var(--bm-radius) 0 0;
+    border-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bm-poznamka">
+  <div class="bm-obsah">
+    <b>PROTOTYP NÁVRHU</b> — skutečná data ročníku 2026 (102 vystoupení, 28 míst).
+    Odkazy „Detail akce“ míří na archivní web. Není to hotový web.
+  </div>
+</div>
+
+<header class="bm-hlava">
+  <div class="bm-obsah">
+    <p class="bm-hlava__nadlinka" id="bm-rocnik-popis">Program ročníku</p>
+    <h1>Program</h1>
+    <p class="bm-hlava__popis">
+      Sedm dní, 28 míst, přes sto vystoupení. Přepni si den a vyber, jestli chceš
+      vidět celý rozvrh vedle sebe, nebo akce pod sebou.
+    </p>
+  </div>
+</header>
+
+<!-- Záchranná brzda. Je v HTML vždycky; schová ji až skript, když se
+     program povede vykreslit. Kryje tím tři různá selhání najednou:
+     vypnutý JavaScript, chybu ve skriptu i nedostupné REST API. -->
+<div class="bm-nouze" id="bm-nouze">
+  <h2>Program</h2>
+  <p>Interaktivní program se nenačetl. Celý program je dostupný i v kalendáři akcí:</p>
+  <ul>
+    <li><a href="/events/list/">Výpis všech akcí</a></li>
+    <li><a href="/events/month/">Kalendář po měsících</a></li>
+    <li><a href="/events/today/">Dnešní den</a></li>
+  </ul>
+</div>
+
+<main id="bm-program" hidden>
+  <div class="bm-ovladani">
+    <div class="bm-dny" id="bm-dny" role="group" aria-label="Den festivalu"></div>
+
+    <div class="bm-radek">
+      <div class="bm-prepinac" role="group" aria-label="Zobrazení programu">
+        <button type="button" id="bm-zobr-lineup" aria-pressed="false">Lineup</button>
+        <button type="button" id="bm-zobr-seznam" aria-pressed="true">Seznam</button>
+      </div>
+      <button type="button" class="bm-btn" id="bm-filtry-prepinac" aria-expanded="false" aria-controls="bm-filtry">
+        <span>Filtry<span class="bm-sirsi"> a hledání</span></span><span class="bm-pocet" id="bm-filtry-pocet" hidden>0</span>
+      </button>
+      <button type="button" class="bm-btn bm-btn--moje" id="bm-moje" aria-pressed="false">
+        <span>★<span class="bm-sirsi"> Moje</span></span><span class="bm-pocet" id="bm-moje-pocet">0</span>
+      </button>
+    </div>
+
+    <div class="bm-filtry" id="bm-filtry" hidden>
+      <div class="bm-filtry__skupina">
+        <input type="search" class="bm-hledani" id="bm-hledani"
+               placeholder="Hledat kapelu, scénu, žánr…" aria-label="Hledat v programu">
+      </div>
+      <div class="bm-filtry__skupina">
+        <div class="bm-filtry__nazev">Kategorie</div>
+        <div class="bm-chipy" id="bm-chipy-kat"></div>
+      </div>
+      <div class="bm-filtry__skupina">
+        <div class="bm-filtry__nazev">Místo <span id="bm-mist-popis"></span></div>
+        <div class="bm-chipy" id="bm-chipy-misto"></div>
+      </div>
+      <div class="bm-radek bm-radek--filtry" style="padding-left:0;padding-right:0;">
+        <button type="button" class="bm-btn" id="bm-zrusit-filtry">Zrušit filtry</button>
+        <button type="button" class="bm-btn" id="bm-sdilet">Sdílet můj výběr</button>
+        <button type="button" class="bm-btn" id="bm-skoc-ted" hidden>Skoč na teď</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bm-shrnuti" id="bm-shrnuti" role="status" aria-live="polite"></div>
+  <div class="bm-stav" id="bm-stav" hidden></div>
+  <div class="bm-celoden" id="bm-celoden" hidden>
+    <div class="bm-celoden__nazev">Celý den</div>
+    <div class="bm-celoden__pasy" id="bm-celoden-pasy"></div>
+  </div>
+
+  <div id="bm-vysledek"></div>
+</main>
+
+<dialog class="bm-detail" id="bm-detail" aria-label="Detail akce">
+  <button type="button" class="bm-zavrit" id="bm-detail-zavrit" aria-label="Zavřít detail">✕</button>
+  <div id="bm-detail-obsah"></div>
+</dialog>
+
+<script type="application/json" id="bm-data">{"_poznamka":"Zmrazená odpověď /wp-json/tribe/events/v1/events (+ wp/v2 doplňky) — data ročníku 2026.","rocnik":{"name":"2026","datum_od":"2026-05-31","datum_do":"2026-06-06"},"venues":[{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","acf":{"bezbarierovost":false}},{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","acf":{"bezbarierovost":false}},{"id":104,"venue":"Kulturní centrum Rabenštejnská","slug":"kulturni-centrum-rabenstejnska","url":"https://novy.budejovickymajales.cz/misto-konani/kulturni-centrum-rabenstejnska/","acf":{"bezbarierovost":true}},{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","acf":{"bezbarierovost":true}},{"id":108,"venue":"Žižkárna - soud","slug":"zizkarna-soud","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-soud/","acf":{"bezbarierovost":false}},{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","acf":{"bezbarierovost":false}},{"id":112,"venue":"plachý café","slug":"plachy-cafe","url":"https://novy.budejovickymajales.cz/misto-konani/plachy-cafe/","acf":{"bezbarierovost":false}},{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","acf":{"bezbarierovost":false}},{"id":116,"venue":"Budějovický Budvar","slug":"budejovicky-budvar","url":"https://novy.budejovickymajales.cz/misto-konani/budejovicky-budvar/","acf":{"bezbarierovost":false}},{"id":118,"venue":"Skybar Střecha Budějc","slug":"skybar-strecha-budejc","url":"https://novy.budejovickymajales.cz/misto-konani/skybar-strecha-budejc/","acf":{"bezbarierovost":false}},{"id":120,"venue":"Radio Wave stage - Sokolák","slug":"radio-wave-stage-sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/radio-wave-stage-sokolak/","acf":{"bezbarierovost":false}},{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","acf":{"bezbarierovost":true}},{"id":124,"venue":"Kostel sv. Rodiny","slug":"kostel-sv-rodiny","url":"https://novy.budejovickymajales.cz/misto-konani/kostel-sv-rodiny/","acf":{"bezbarierovost":false}},{"id":126,"venue":"Zlatý most","slug":"zlaty-most","url":"https://novy.budejovickymajales.cz/misto-konani/zlaty-most/","acf":{"bezbarierovost":true}},{"id":128,"venue":"Meziprostor","slug":"meziprostor","url":"https://novy.budejovickymajales.cz/misto-konani/meziprostor/","acf":{"bezbarierovost":false}},{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","acf":{"bezbarierovost":false}},{"id":132,"venue":"MC Fabrika","slug":"mc-fabrika","url":"https://novy.budejovickymajales.cz/misto-konani/mc-fabrika/","acf":{"bezbarierovost":true}},{"id":134,"venue":"centrum města a okolí","slug":"centrum-mesta-a-okoli","url":"https://novy.budejovickymajales.cz/misto-konani/centrum-mesta-a-okoli/","acf":{"bezbarierovost":false}},{"id":136,"venue":"Gymnázium Jírovcova - třída","slug":"gymnazium-jirovcova-trida","url":"https://novy.budejovickymajales.cz/misto-konani/gymnazium-jirovcova-trida/","acf":{"bezbarierovost":false}},{"id":138,"venue":"Letní kino Háječek","slug":"letni-kino-hajecek","url":"https://novy.budejovickymajales.cz/misto-konani/letni-kino-hajecek/","acf":{"bezbarierovost":true}},{"id":140,"venue":"Biograf Kotva","slug":"biograf-kotva","url":"https://novy.budejovickymajales.cz/misto-konani/biograf-kotva/","acf":{"bezbarierovost":true}},{"id":142,"venue":"Náměstí Přemysla Otakara II.","slug":"namesti-premysla-otakara-ii","url":"https://novy.budejovickymajales.cz/misto-konani/namesti-premysla-otakara-ii/","acf":{"bezbarierovost":true}},{"id":144,"venue":"Žižkárna - garáž","slug":"zizkarna-garaz","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-garaz/","acf":{"bezbarierovost":false}},{"id":146,"venue":"Lidická/ u Gerbery","slug":"lidicka-u-gerbery","url":"https://novy.budejovickymajales.cz/misto-konani/lidicka-u-gerbery/","acf":{"bezbarierovost":false}},{"id":148,"venue":"Jihočeské divadlo","slug":"jihoceske-divadlo","url":"https://novy.budejovickymajales.cz/misto-konani/jihoceske-divadlo/","acf":{"bezbarierovost":true}},{"id":150,"venue":"Výměník1","slug":"vymenik1","url":"https://novy.budejovickymajales.cz/misto-konani/vymenik1/","acf":{"bezbarierovost":false}},{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","acf":{"bezbarierovost":false}},{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","acf":{"bezbarierovost":false}}],"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"acf":{"barva":"#1EA198"}},{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"acf":{"barva":"#F8E862"}},{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"acf":{"barva":"#8CD3CD"}},{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"acf":{"barva":"#F2A0A0"}},{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"acf":{"barva":"#EE7270"}},{"id":1010,"name":"Filmy","slug":"filmy","parent":0,"acf":{"barva":"#B6B4DA"}},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":0,"acf":{"barva":""}},{"id":2002,"name":"Výstava","slug":"vystava","parent":0,"acf":{"barva":""}},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":0,"acf":{"barva":""}},{"id":2006,"name":"Zahájení","slug":"zahajeni","parent":0,"acf":{"barva":""}},{"id":2008,"name":"Folklór","slug":"folklor","parent":0,"acf":{"barva":""}},{"id":2010,"name":"disco","slug":"disco","parent":0,"acf":{"barva":""}},{"id":2012,"name":"Soutěž","slug":"soutez","parent":0,"acf":{"barva":""}},{"id":2014,"name":"Instalace","slug":"instalace","parent":0,"acf":{"barva":""}},{"id":2016,"name":"Workshop","slug":"workshop","parent":0,"acf":{"barva":""}},{"id":2018,"name":"Alternative/indie","slug":"alternative-indie","parent":0,"acf":{"barva":""}},{"id":2020,"name":"Alternative-pop","slug":"alternative-pop","parent":0,"acf":{"barva":""}},{"id":2022,"name":"Vernisáž","slug":"vernisaz","parent":0,"acf":{"barva":""}},{"id":2024,"name":"indie/punk","slug":"indie-punk","parent":0,"acf":{"barva":""}},{"id":2026,"name":"rock/grunge","slug":"rock-grunge","parent":0,"acf":{"barva":""}},{"id":2028,"name":"punk - alternative","slug":"punk-alternative","parent":0,"acf":{"barva":""}},{"id":2030,"name":"punk/rock","slug":"punk-rock","parent":0,"acf":{"barva":""}},{"id":2032,"name":"Jamování","slug":"jamovani","parent":0,"acf":{"barva":""}},{"id":2034,"name":"Jóga","slug":"joga","parent":0,"acf":{"barva":""}},{"id":2036,"name":"různé","slug":"ruzne","parent":0,"acf":{"barva":""}},{"id":2038,"name":"Podcast","slug":"podcast","parent":0,"acf":{"barva":""}},{"id":2040,"name":"Činohra","slug":"cinohra","parent":0,"acf":{"barva":""}},{"id":2042,"name":"Autorské čtení","slug":"autorske-cteni","parent":0,"acf":{"barva":""}},{"id":2044,"name":"crossover","slug":"crossover","parent":0,"acf":{"barva":""}},{"id":2046,"name":"Tanec","slug":"tanec","parent":0,"acf":{"barva":""}},{"id":2048,"name":"Běh","slug":"beh","parent":0,"acf":{"barva":""}},{"id":2050,"name":"Beseda","slug":"beseda","parent":0,"acf":{"barva":""}},{"id":2052,"name":"Folk/pop","slug":"folk-pop","parent":0,"acf":{"barva":""}},{"id":2054,"name":"Hraný dokument","slug":"hrany-dokument","parent":0,"acf":{"barva":""}},{"id":2056,"name":"grunge/punk/ nu metal","slug":"grunge-punk-nu-metal","parent":0,"acf":{"barva":""}},{"id":2058,"name":"Okruh","slug":"okruh","parent":0,"acf":{"barva":""}},{"id":2060,"name":"Interaktivní inscenace","slug":"interaktivni-inscenace","parent":0,"acf":{"barva":""}},{"id":2062,"name":"Pop","slug":"pop","parent":0,"acf":{"barva":""}},{"id":2064,"name":"Shoegaze","slug":"shoegaze","parent":0,"acf":{"barva":""}},{"id":2066,"name":"Venkovní kino","slug":"venkovni-kino","parent":0,"acf":{"barva":""}},{"id":2068,"name":"pop-electronica","slug":"pop-electronica","parent":0,"acf":{"barva":""}},{"id":2070,"name":"Second hand","slug":"second-hand","parent":0,"acf":{"barva":""}},{"id":2072,"name":"Workshop s filmařem/fotografem","slug":"workshop-s-filmarem-fotografem","parent":0,"acf":{"barva":""}},{"id":2074,"name":"Divadelní performance","slug":"divadelni-performance","parent":0,"acf":{"barva":""}},{"id":2076,"name":"electronica / punk","slug":"electronica-punk","parent":0,"acf":{"barva":""}},{"id":2078,"name":"Rap/ synth punk","slug":"rap-synth-punk","parent":0,"acf":{"barva":""}},{"id":2080,"name":"Průvod","slug":"pruvod","parent":0,"acf":{"barva":""}},{"id":2082,"name":"Rap","slug":"rap","parent":0,"acf":{"barva":""}},{"id":2084,"name":"funk/rock","slug":"funk-rock","parent":0,"acf":{"barva":""}},{"id":2086,"name":"Rap - experimental","slug":"rap-experimental","parent":0,"acf":{"barva":""}},{"id":2088,"name":"bedroom rap / rap","slug":"bedroom-rap-rap","parent":0,"acf":{"barva":""}},{"id":2090,"name":"Alternative/elektronika","slug":"alternative-elektronika","parent":0,"acf":{"barva":""}},{"id":2092,"name":"kytarový pop / post punk","slug":"kytarovy-pop-post-punk","parent":0,"acf":{"barva":""}}],"total":102,"events":[{"id":776,"url":"https://2026.budejovickymajales.cz/program/776","title":"BROCK","excerpt":"&nbsp;&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-06 00:15:00","start_date_details":{"year":"2026","month":"06","day":"06","hour":"00","minutes":"15","seconds":"00"},"end_date":"2026-06-06 01:15:00","end_date_details":{"year":"2026","month":"06","day":"06","hour":"01","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":777,"url":"https://2026.budejovickymajales.cz/program/777","title":"HANZALL","excerpt":"&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-06 01:15:00","start_date_details":{"year":"2026","month":"06","day":"06","hour":"01","minutes":"15","seconds":"00"},"end_date":"2026-06-06 02:30:00","end_date_details":{"year":"2026","month":"06","day":"06","hour":"02","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":778,"url":"https://2026.budejovickymajales.cz/program/778","title":"BASSDEALER","excerpt":"&nbsp;&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-06 02:30:00","start_date_details":{"year":"2026","month":"06","day":"06","hour":"02","minutes":"30","seconds":"00"},"end_date":"2026-06-06 03:30:00","end_date_details":{"year":"2026","month":"06","day":"06","hour":"03","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":689,"url":"https://2026.budejovickymajales.cz/program/689","title":"Výstava ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/nis5ge2tm4.jpg"},"all_day":true,"start_date":"2026-05-31 11:00:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"11","minutes":"00","seconds":"00"},"end_date":"2026-05-31 23:59:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2002,"name":"Výstava","slug":"vystava","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":717,"url":"https://2026.budejovickymajales.cz/program/717","title":"Zprávy z ledu: Klimatická změna z pohledu polárního výzkumu","excerpt":"Jak se projevuje klimatická změna v polárních oblastech, kde jsou její dopady nejrychlejší? Mikrobioložka a polární výzkumnice Marie Šabacká přiblíží proměny Arktidy a Antarktidy na základě současných vědeckých poznatků i vlastních zkušeností z expedic.‼️Na pr","image":{"url":"https://2026.budejovickymajales.cz/uploads/l943kvakv9.jpg"},"all_day":false,"start_date":"2026-05-31 15:00:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-05-31 16:30:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"16","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":104,"venue":"Kulturní centrum Rabenštejnská","slug":"kulturni-centrum-rabenstejnska","url":"https://novy.budejovickymajales.cz/misto-konani/kulturni-centrum-rabenstejnska/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":682,"url":"https://2026.budejovickymajales.cz/program/682","title":"Zahájení a představení králů","excerpt":"Přijď zahájit Budějovický Majáles a zažij úžasnou atmosféru! Čeká tě představení králů, kteří vystoupí společně s Úsvitem, jihočeským souborem písní a tanců a chybět nebude ani jeho samostatné vystoupení. Jestli chceš poznat letošní krále a zároveň se vžít do ","image":{"url":"https://2026.budejovickymajales.cz/uploads/uobsnwumzn.jpg"},"all_day":false,"start_date":"2026-05-31 18:00:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"18","minutes":"00","seconds":"00"},"end_date":"2026-05-31 18:45:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"18","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":true,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2006,"name":"Zahájení","slug":"zahajeni","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":747,"url":"https://2026.budejovickymajales.cz/program/747","title":"Úsvit","excerpt":"Letošní Majáles zahájí jihočeský soubor písní a tanců s názvem Úsvit.&nbsp; Již několik desítek let patří tento folklórní soubor mezi špičkové soubory v regionu.Tento soubor byl založen v roce 1951, a dodnes lidem dělá radost svým tancem, zpěvem a dudáckou muz","image":{"url":"https://2026.budejovickymajales.cz/uploads/4jfp8onu71.jpg"},"all_day":false,"start_date":"2026-05-31 19:15:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"19","minutes":"15","seconds":"00"},"end_date":"2026-05-31 20:00:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2008,"name":"Folklór","slug":"folklor","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":748,"url":"https://2026.budejovickymajales.cz/program/748","title":"LOUD DISCO","excerpt":"Začátek Majálesu, ještě před SILENT discem, pořádně odpálíme LOUD discem.&nbsp;PřIjď si to pořádně užít s námi!","image":{"url":"https://2026.budejovickymajales.cz/uploads/1pa8u0nnda.jpg"},"all_day":false,"start_date":"2026-05-31 20:00:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"20","minutes":"00","seconds":"00"},"end_date":"2026-05-31 22:00:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2010,"name":"disco","slug":"disco","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":749,"url":"https://2026.budejovickymajales.cz/program/749","title":"SILENT DISCO","excerpt":"Silent disco - když tě song nebaví, přepni kanál! Hrát pro tebe budou hudební dramaturgové, včetně ELIHO!","image":{"url":"https://2026.budejovickymajales.cz/uploads/quofx4frge.jpg"},"all_day":false,"start_date":"2026-05-31 22:00:00","start_date_details":{"year":"2026","month":"05","day":"31","hour":"22","minutes":"00","seconds":"00"},"end_date":"2026-05-31 23:00:00","end_date_details":{"year":"2026","month":"05","day":"31","hour":"23","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2010,"name":"disco","slug":"disco","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":683,"url":"https://2026.budejovickymajales.cz/program/683","title":"Studentské piškvorkové klání","excerpt":"Prověř svou strategii, rychlé myšlení i trpělivost v napínavém piškvorkovém souboji. Postav se proti ostatním studentům a ukaž, kdo má nejlepší taktiku a pevné nervy. Ať už jdeš vyhrát, nebo si jen zahrát pro zábavu, čeká tě skvělá atmosféra a spousty napínavý","image":{"url":"https://2026.budejovickymajales.cz/uploads/v5lpss6txq.jpg"},"all_day":false,"start_date":"2026-06-01 14:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"14","minutes":"00","seconds":"00"},"end_date":"2026-06-01 15:45:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"15","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2012,"name":"Soutěž","slug":"soutez","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":724,"url":"https://2026.budejovickymajales.cz/program/724","title":"Kolemjdoucí","excerpt":"Tato instalace je součástí doprovodného programu festivalu Jižní Svéráz, multižánrového projektu, který oživuje veřejný prostor skrze umění.Pořadatelem festivalu je Jihočeské divadlo, jedna z nejvýznamnějších kulturních institucí regionu, která tímto projektem","image":{"url":"https://2026.budejovickymajales.cz/uploads/jmz9hbxemp.jpg"},"all_day":false,"start_date":"2026-06-01 14:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"14","minutes":"00","seconds":"00"},"end_date":"2026-06-01 16:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"16","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2014,"name":"Instalace","slug":"instalace","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":108,"venue":"Žižkárna - soud","slug":"zizkarna-soud","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-soud/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":698,"url":"https://2026.budejovickymajales.cz/program/698","title":"Stand UP proti obtěžování na veřejnosti","excerpt":"Nevítané komentáře, osahávání, zírání, obnažování se, sebeukájení, pronásledování … Sexuální obtěžování na veřejnosti podle dostupných dat zažila každá třetí žena a každý desátý muž (Focus, 2021). Pro obtěžované může být často složité se bránit, už jen kvůli s","image":{"url":"https://2026.budejovickymajales.cz/uploads/1qhvez482u.jpg"},"all_day":false,"start_date":"2026-06-01 15:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-01 16:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"16","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":696,"url":"https://2026.budejovickymajales.cz/program/696","title":"Práce s informacemi a bezpečností ve válečném prostředí","excerpt":"Darja Stomatová a Ján Schürger jsou zpravodajský tým ČT, který od začátku pokrývají válku na Ukrajině. Pravidelně jezdí na frontu, odkud přinášejí reportáže o utrpení místních obyvatel, fungování vojáků i technologiích, které definují moderní bojiště. Budou vá","image":{"url":"https://2026.budejovickymajales.cz/uploads/dsa7x9p2ag.jpg"},"all_day":false,"start_date":"2026-06-01 16:30:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-01 18:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"18","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":725,"url":"https://2026.budejovickymajales.cz/program/725","title":"Kolemjdoucí","excerpt":"Tato instalace je součástí doprovodného programu festivalu Jižní Svéráz, multižánrového projektu, který oživuje veřejný prostor skrze umění.Pořadatelem festivalu je Jihočeské divadlo, jedna z nejvýznamnějších kulturních institucí regionu, která tímto projektem","image":{"url":"https://2026.budejovickymajales.cz/uploads/fawgdilbef.jpg"},"all_day":false,"start_date":"2026-06-01 17:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-01 19:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2014,"name":"Instalace","slug":"instalace","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":108,"venue":"Žižkárna - soud","slug":"zizkarna-soud","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-soud/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":704,"url":"https://2026.budejovickymajales.cz/program/704","title":"speed friending","excerpt":"Někdo tě pustil na houpačku a za pět minut jste byli nejlepší kámoši na světě. Bez rozmýšlení, bez tří měsíců opatrného lajkování storíček.Houpačku teda mít nebudeme — ale kafíčko a dobrou náladu zajistíme. A vše ostatní zařídíme tak, aby pak zaznělo to důleži","image":{"url":"https://2026.budejovickymajales.cz/uploads/dghd6jorne.jpg"},"all_day":false,"start_date":"2026-06-01 18:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"18","minutes":"00","seconds":"00"},"end_date":"2026-06-01 19:30:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":112,"venue":"plachý café","slug":"plachy-cafe","url":"https://novy.budejovickymajales.cz/misto-konani/plachy-cafe/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":752,"url":"https://2026.budejovickymajales.cz/program/752","title":"Malá Knížka Klidu akusticky","excerpt":"Klasika Majálesové recyklát stage. Malá Knížka Klidu!&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/uploads/dlgf2lf4ep.jpg"},"all_day":false,"start_date":"2026-06-01 18:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"18","minutes":"00","seconds":"00"},"end_date":"2026-06-01 19:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2018,"name":"Alternative/indie","slug":"alternative-indie","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":750,"url":"https://2026.budejovickymajales.cz/program/750","title":"La Fólie","excerpt":"La Fólie, dechy, bicí, strunné perkusi, dutina ústní i psíkusy jsou součástí naší kapely. Jsme dvě holky jdoucí skrz na skrz krajinou, kterou společně objevujeme a kde plyneme rychleji než voda. Řešíme každý odraz slunce ve skle a všechny typy zamilovanosti. T","image":{"url":"https://2026.budejovickymajales.cz/uploads/3068fng8nu.jpg"},"all_day":false,"start_date":"2026-06-01 18:15:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"18","minutes":"15","seconds":"00"},"end_date":"2026-06-01 19:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2020,"name":"Alternative-pop","slug":"alternative-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":690,"url":"https://2026.budejovickymajales.cz/program/690","title":"Vernisáž ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/n807pasnme.jpg"},"all_day":false,"start_date":"2026-06-01 19:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"00","seconds":"00"},"end_date":"2026-06-01 20:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2022,"name":"Vernisáž","slug":"vernisaz","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":753,"url":"https://2026.budejovickymajales.cz/program/753","title":"Bonnie","excerpt":"Bonnie z Plzně!","image":{"url":"https://2026.budejovickymajales.cz/uploads/kb0ir45j73.jpg"},"all_day":false,"start_date":"2026-06-01 19:30:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"30","seconds":"00"},"end_date":"2026-06-01 20:30:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2024,"name":"indie/punk","slug":"indie-punk","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":735,"url":"https://2026.budejovickymajales.cz/program/735","title":"Johanela","excerpt":"Mladá zpěvačka a skladatelka Johanela loni vydala své druhé album Kdo jsi ty, ve kterém se věnuje osobním a náročným tématům. Při poslechu její hudby ve stylu alternative pop, se chce posluchači jenom zavřít oči a vcítit se do sebe, svých myšlenek, a nechat se","image":{"url":"https://2026.budejovickymajales.cz/uploads/vjtnal4o9m.jpg"},"all_day":false,"start_date":"2026-06-01 19:45:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"19","minutes":"45","seconds":"00"},"end_date":"2026-06-01 20:30:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2020,"name":"Alternative-pop","slug":"alternative-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":712,"url":"https://2026.budejovickymajales.cz/program/712","title":"Dopamine Youth","excerpt":"Cítím se jak pavouk na dně tvého dřezu – tenhle refrén, pokud žijete v Budějcích, a občas se vydáte do města, jste pravděpodobně už někdy slyšeli. Pokud ne, tak je určitě čas to napravit, právě na Majálesu!&nbsp;Dopamine Youth je 4 členná kapela z ČB, pro kter","image":{"url":"https://2026.budejovickymajales.cz/uploads/o4xjbnt7jy.jpg"},"all_day":false,"start_date":"2026-06-01 21:00:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"21","minutes":"00","seconds":"00"},"end_date":"2026-06-01 21:45:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"21","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2026,"name":"rock/grunge","slug":"rock-grunge","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":751,"url":"https://2026.budejovickymajales.cz/program/751","title":"Mucha","excerpt":"Muchu zná skoro každý a jestli máš pocit, že ne, tak si jen zkus vzpomenout, kolikrát ti v lehce přestimulovaném stavu v hlavě běželo „m*dá mi v hlavě“.&nbsp;Brněnská stálice české scény už roky objíždí kluby i festivaly po celé republice a pořád si drží pověs","image":{"url":"https://2026.budejovickymajales.cz/uploads/zia99u3xgq.jpg"},"all_day":false,"start_date":"2026-06-01 21:15:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"21","minutes":"15","seconds":"00"},"end_date":"2026-06-01 22:00:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2028,"name":"punk - alternative","slug":"punk-alternative","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":732,"url":"https://2026.budejovickymajales.cz/program/732","title":"Nastřižená hráz","excerpt":"Jestli máš rád kapely, co si na nic nehrajou a jedou si svůj vibe bez filtru, přijď na koncert Nastřižené hráze.&nbsp;Budějcká parta, jejíž název ti v podstatě řekne všechno, co potřebuješ vědět – a zbytek ti dojde po prvních pár textech. S křehkým (a dost spe","image":{"url":"https://2026.budejovickymajales.cz/uploads/zsj62lcand.jpg"},"all_day":false,"start_date":"2026-06-01 22:45:00","start_date_details":{"year":"2026","month":"06","day":"01","hour":"22","minutes":"45","seconds":"00"},"end_date":"2026-06-01 23:45:00","end_date_details":{"year":"2026","month":"06","day":"01","hour":"23","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2030,"name":"punk/rock","slug":"punk-rock","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":767,"url":"https://2026.budejovickymajales.cz/program/767","title":"Výstava ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/jg8vfz8oe0.jpg"},"all_day":true,"start_date":"2026-06-02 11:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"11","minutes":"00","seconds":"00"},"end_date":"2026-06-02 23:59:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2002,"name":"Výstava","slug":"vystava","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":679,"url":"https://2026.budejovickymajales.cz/program/679","title":"Studentský jam","excerpt":"Přijď zažít večer plný talentu, kreativity a skvělé atmosféry! Studentský jam přinese vystoupení budějckých studentů, kteří ukážou svůj talent v hudbě, tanci i dalších druzích umění. Na pódiu se představí jak začínající, tak i zkušení tvůrci, takže se máš rozh","image":{"url":"https://2026.budejovickymajales.cz/uploads/v9lfmnf24x.jpg"},"all_day":false,"start_date":"2026-06-02 15:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-02 16:45:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2032,"name":"Jamování","slug":"jamovani","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":718,"url":"https://2026.budejovickymajales.cz/program/718","title":"Škola čepování","excerpt":"Na Škole čepování piva se dozvíte jak Budějovický Budvar vaří své pivo, jaká je denní rutina výčepního i jak se správně myje sklo. Nenechte si ujít možnost praktického tréninku čepování budějckého zlata pod vedením odborníků z národního pivovaru. Upozorňujeme,","image":{"url":"https://2026.budejovickymajales.cz/uploads/4rw48n2cty.jpg"},"all_day":false,"start_date":"2026-06-02 15:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-02 18:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":116,"venue":"Budějovický Budvar","slug":"budejovicky-budvar","url":"https://novy.budejovickymajales.cz/misto-konani/budejovicky-budvar/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":741,"url":"https://2026.budejovickymajales.cz/program/741","title":"Energizující hatha jóga","excerpt":"Středně dynamická jógová praxe, přístupná i začátečníkům,&nbsp;která propojuje plynulý pohyb s dechem a vědomou pozorností. Prozkoumáme&nbsp;možnosti flexibility a mobility našeho těla. Součástí budou dechové techniky, krátká&nbsp;meditace. Lekce je vhodná pro","image":{"url":"https://2026.budejovickymajales.cz/uploads/gtl8ehkk1z.jpg"},"all_day":false,"start_date":"2026-06-02 15:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-02 16:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2034,"name":"Jóga","slug":"joga","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":118,"venue":"Skybar Střecha Budějc","slug":"skybar-strecha-budejc","url":"https://novy.budejovickymajales.cz/misto-konani/skybar-strecha-budejc/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":702,"url":"https://2026.budejovickymajales.cz/program/702","title":"Řekni to maskou!","excerpt":"Řekni to maskou! K čemu je dobrá satira v ulicích.Sametové posvícení je karnevalový průvod, který už 15 let upozorňuje satirickou formou na různé společenské problémy. Zapojují se do něj občanské iniciativy, studenti a umělci. Dlouholetý hlavní výtvarník Josef","image":{"url":"https://2026.budejovickymajales.cz/uploads/7f38epwc2y.jpg"},"all_day":false,"start_date":"2026-06-02 16:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"00","seconds":"00"},"end_date":"2026-06-02 18:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":765,"url":"https://2026.budejovickymajales.cz/program/765","title":"Startér naživo","excerpt":"Letos u nás vystoupí účastníci hudební soutěže Startér pořádané Rádiem Wave. Startér je hitparáda pro nové naděje domácí hudební scény.Přijď objevit někoho, koho možná ještě neznáš!&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/uploads/2t2w5khv90.jpg"},"all_day":false,"start_date":"2026-06-02 16:15:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"15","seconds":"00"},"end_date":"2026-06-02 17:45:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2036,"name":"různé","slug":"ruzne","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":120,"venue":"Radio Wave stage - Sokolák","slug":"radio-wave-stage-sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/radio-wave-stage-sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":705,"url":"https://2026.budejovickymajales.cz/program/705","title":"Leisureshop: tlenivění","excerpt":"Míň růst a dělat, víc tlít a lenivět - tlenivět.&nbsp;Tlenivění jako vědomé srůstání s ekosystémem. Tlenivění jako způsob hlubokého naslouchání potřebám naší planety. Tlenivění jako bezpečný přístav, ze kterého můžeme odjíždět pomáhat a zase se do něj vracet p","image":{"url":"https://2026.budejovickymajales.cz/uploads/bum0k2w9nh.jpg"},"all_day":false,"start_date":"2026-06-02 16:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-02 17:15:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":710,"url":"https://2026.budejovickymajales.cz/program/710","title":"Podhoubí","excerpt":"Podhoubí je podcast Magdaleny Kořenové a Prokopa Pitharta o prostředí, ve kterém žijeme a o lidech, kteří nás inspirují. Přinášíme v něm rozhovory s odborníky, ochranáři, zemědělci a dalšími.","image":{"url":"https://2026.budejovickymajales.cz/uploads/ouvuf1xen3.jpg"},"all_day":false,"start_date":"2026-06-02 16:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-02 17:30:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2038,"name":"Podcast","slug":"podcast","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":118,"venue":"Skybar Střecha Budějc","slug":"skybar-strecha-budejc","url":"https://novy.budejovickymajales.cz/misto-konani/skybar-strecha-budejc/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":742,"url":"https://2026.budejovickymajales.cz/program/742","title":"BudeCirkus – Workshop pro kolemjdoucí a cirkusácká vystoupení","excerpt":"Workshop pro kolemjdoucí zve všechny zvídavé návštěvníky, bez ohledu na věk či zkušenosti, aby si na vlastní kůži vyzkoušeli kouzlo nového cirkusu. Pod vedením zkušených lektorů se seznámíte se základy závěsné akrobacie na šále, naučíte se první žonglérské tri","image":{"url":"https://2026.budejovickymajales.cz/uploads/v0upuq2rwp.jpg"},"all_day":false,"start_date":"2026-06-02 16:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-02 18:30:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":678,"url":"https://2026.budejovickymajales.cz/program/678","title":"V mojim cukru","excerpt":"Hodně jsem nad tím přemýšlel, proč vždycky šlápnou na to prkno, proč se mu nemůžou prostě vyhnout, a teď tu stáli přede dveřmi a klepali. Pokud chceme zjistit vyzářenou energii – ta je v Joulech, tak musíme použít vzorec.&nbsp;Energie [Joulech] = výkon [WJ • č","image":{"url":"https://2026.budejovickymajales.cz/uploads/gsjtq1udah.jpg"},"all_day":false,"start_date":"2026-06-02 17:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-02 17:45:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2040,"name":"Činohra","slug":"cinohra","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":124,"venue":"Kostel sv. Rodiny","slug":"kostel-sv-rodiny","url":"https://novy.budejovickymajales.cz/misto-konani/kostel-sv-rodiny/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":695,"url":"https://2026.budejovickymajales.cz/program/695","title":"Literární odpoledne","excerpt":"Přijďte si vychutnat inspirativní literární odpoledne plné živých slov a jedinečných textů. Čeká vás čtení autorských textů, které vás pobaví, dojmou i přimějí k zamyšlení.","image":{"url":"https://2026.budejovickymajales.cz/uploads/31mbte23lv.jpg"},"all_day":false,"start_date":"2026-06-02 17:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"30","seconds":"00"},"end_date":"2026-06-02 18:15:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2042,"name":"Autorské čtení","slug":"autorske-cteni","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":706,"url":"https://2026.budejovickymajales.cz/program/706","title":"Leisureshop: tlenivění","excerpt":"Míň růst a dělat, víc tlít a lenivět - tlenivět.&nbsp;Tlenivění jako vědomé srůstání s ekosystémem. Tlenivění jako způsob hlubokého naslouchání potřebám naší planety. Tlenivění jako bezpečný přístav, ze kterého můžeme odjíždět pomáhat a zase se do něj vracet p","image":{"url":"https://2026.budejovickymajales.cz/uploads/05osf5jdna.jpg"},"all_day":false,"start_date":"2026-06-02 17:45:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"17","minutes":"45","seconds":"00"},"end_date":"2026-06-02 18:30:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":694,"url":"https://2026.budejovickymajales.cz/program/694","title":"Open mic","excerpt":"Letos jsme si připravili i otevřené autorské čtení. Píšeš svoje texty, neváhej se přihlásit, stačí vyplnit jednoduchý formulář, nahrát svůj text a je to! Jestli nepíšeš vůbec nevadí, přijď si vychutnat příjemnou atmosféru na piaristickém náměstí. Budeme se na ","image":{"url":"https://2026.budejovickymajales.cz/uploads/ghn1wzei8b.jpg"},"all_day":false,"start_date":"2026-06-02 18:15:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"15","seconds":"00"},"end_date":"2026-06-02 19:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2042,"name":"Autorské čtení","slug":"autorske-cteni","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":782,"url":"https://2026.budejovickymajales.cz/program/782","title":"Bea.K","excerpt":"Bea.K je mladá, teprve patnáctiletá zpěvačka a songwriterka, která si na hudební scéně rychle získává pozornost svou autentickou tvorbou, charakteristicky zbarveným hlasem a neokázalým projevem. Její tvorba je velmi rozmanitá – od melancholicky laděných songů ","image":{"url":"https://2026.budejovickymajales.cz/uploads/y9zp269rjj.jpg"},"all_day":false,"start_date":"2026-06-02 18:15:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"18","minutes":"15","seconds":"00"},"end_date":"2026-06-02 19:15:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"19","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2020,"name":"Alternative-pop","slug":"alternative-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":120,"venue":"Radio Wave stage - Sokolák","slug":"radio-wave-stage-sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/radio-wave-stage-sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":703,"url":"https://2026.budejovickymajales.cz/program/703","title":"Škola salsy","excerpt":"Salsa Escuela je taneční škola, která přináší do Česka autentickou energii latinskoamerických tanců.&nbsp;Jejich lekce nejsou jen o krocích, jsou o atmosféře, radosti z pohybu a o komunitě lidí, kteří milují hudbu a chtějí si tanec opravdu užít. Salsa Escuela ","image":{"url":"https://2026.budejovickymajales.cz/uploads/a23sv5k5x9.jpg"},"all_day":false,"start_date":"2026-06-02 19:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"19","minutes":"30","seconds":"00"},"end_date":"2026-06-02 20:30:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"optional"},{"id":731,"url":"https://2026.budejovickymajales.cz/program/731","title":"Marjari","excerpt":"Chceš se na chvíli přenést do léta? Na rozkvetlou louku, kde je všechno o něco klidnější?&nbsp;Marjari je českobudějovická umělkyně (a taky bývalá členka Majátýmu) balancující mezi indiepopem a alternativou. Její tvorba stojí na vrstvení kytarových smyček přes","image":{"url":"https://2026.budejovickymajales.cz/uploads/kezyb0lgw1.jpg"},"all_day":false,"start_date":"2026-06-02 19:45:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"19","minutes":"45","seconds":"00"},"end_date":"2026-06-02 20:30:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2020,"name":"Alternative-pop","slug":"alternative-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":120,"venue":"Radio Wave stage - Sokolák","slug":"radio-wave-stage-sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/radio-wave-stage-sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":745,"url":"https://2026.budejovickymajales.cz/program/745","title":"Scoliose","excerpt":"Grungové vokály, dunící basa, našlapané rytmy a ostré kytarové riffy – to vše v jednom.Scoliose je pětičlenná kapela z Českých Budějovic hrající crossover. V květnu vydali své první demo, a s ním i CD.Za dobu svého působení stihli odehrát několik koncertů v ok","image":{"url":"https://2026.budejovickymajales.cz/uploads/jqorfpyuga.jpg"},"all_day":false,"start_date":"2026-06-02 20:00:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"20","minutes":"00","seconds":"00"},"end_date":"2026-06-02 20:45:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"20","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2044,"name":"crossover","slug":"crossover","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":723,"url":"https://2026.budejovickymajales.cz/program/723","title":"Tančírna","excerpt":"Pojď s námi roztančit piaristické náměstí, tančírna nabídne prostor pro volný pohyb, radost z hudby a sdílenou atmosféru pod širým nebem. Hrát se bude především jazz a swing. Nezáleží na tom, jestli jsi začátečník nebo zkušený tanečník – vítaný je úplně každý.","image":{"url":"https://2026.budejovickymajales.cz/uploads/ufuwpxj1rp.jpg"},"all_day":false,"start_date":"2026-06-02 20:30:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"20","minutes":"30","seconds":"00"},"end_date":"2026-06-02 21:15:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"21","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2046,"name":"Tanec","slug":"tanec","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":106,"venue":"Piaristické náměstí","slug":"piaristicke-namesti","url":"https://novy.budejovickymajales.cz/misto-konani/piaristicke-namesti/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":744,"url":"https://2026.budejovickymajales.cz/program/744","title":"Septum Šejdrem","excerpt":"Ať už máte septum rovně nebo šejdrem, ale máte rádi punk, tahle kapela je přímo pro vás.Septum Šejdrem je tří člená kapela z brna.Texty sypou v češtině i slovenštině a míchají je do jedný poctivý punkový jízdy.Minulý rok vydali svoje první punk - rockové album","image":{"url":"https://2026.budejovickymajales.cz/uploads/jk6426ui7h.jpg"},"all_day":false,"start_date":"2026-06-02 21:15:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"21","minutes":"15","seconds":"00"},"end_date":"2026-06-02 22:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2028,"name":"punk - alternative","slug":"punk-alternative","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":781,"url":"https://2026.budejovickymajales.cz/program/781","title":"Curtains Please","excerpt":"curtains please (CZ/LT) se jako novinka na české scéně objevili teprve loni. Duo usazené v Praze momentálně tvořící hudbu ve sklepním studiu do dnešního dne vydalo dva singly: Rain for you a Hearts of steel, se kterým aktuálně bodují v soutěži Startér na Rádiu","image":{"url":"https://2026.budejovickymajales.cz/uploads/qbcz5g9q4w.jpg"},"all_day":false,"start_date":"2026-06-02 21:15:00","start_date_details":{"year":"2026","month":"06","day":"02","hour":"21","minutes":"15","seconds":"00"},"end_date":"2026-06-02 22:00:00","end_date_details":{"year":"2026","month":"06","day":"02","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2018,"name":"Alternative/indie","slug":"alternative-indie","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":120,"venue":"Radio Wave stage - Sokolák","slug":"radio-wave-stage-sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/radio-wave-stage-sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":772,"url":"https://2026.budejovickymajales.cz/program/772","title":"MORNIN9 run: ranní běh za kávou","excerpt":"MORNIN9 running club propojuje běžeckou komunitu s milovníky kávy. Ať už tě baví svižné tempo, dlouhé běhy nebo pohodový klus, při kterém si chceš popovídat, u nás si přijdeš na své.Jedeme na přátelské vlně, bez stresu a s důrazem na společný zážitek. Naše tra","image":{"url":"https://2026.budejovickymajales.cz/uploads/cfhgwcpz5d.jpg"},"all_day":false,"start_date":"2026-06-03 09:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"09","minutes":"30","seconds":"00"},"end_date":"2026-06-03 10:30:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"10","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2048,"name":"Běh","slug":"beh","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":126,"venue":"Zlatý most","slug":"zlaty-most","url":"https://novy.budejovickymajales.cz/misto-konani/zlaty-most/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":768,"url":"https://2026.budejovickymajales.cz/program/768","title":"Výstava ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/6fbd43mifx.jpg"},"all_day":true,"start_date":"2026-06-03 11:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"11","minutes":"00","seconds":"00"},"end_date":"2026-06-03 23:59:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2002,"name":"Výstava","slug":"vystava","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":726,"url":"https://2026.budejovickymajales.cz/program/726","title":"Kolemjdoucí","excerpt":"Tato instalace je součástí doprovodného programu festivalu Jižní Svéráz, multižánrového projektu, který oživuje veřejný prostor skrze umění.Pořadatelem festivalu je Jihočeské divadlo, jedna z nejvýznamnějších kulturních institucí regionu, která tímto projektem","image":{"url":"https://2026.budejovickymajales.cz/uploads/oi46regywv.jpg"},"all_day":false,"start_date":"2026-06-03 14:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"14","minutes":"00","seconds":"00"},"end_date":"2026-06-03 16:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"16","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2014,"name":"Instalace","slug":"instalace","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":108,"venue":"Žižkárna - soud","slug":"zizkarna-soud","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-soud/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":687,"url":"https://2026.budejovickymajales.cz/program/687","title":"Moon Cat Tattoo","excerpt":"Moon Cat Tattoo na Majálesu🖤Letos ti přivezeme na Majáles náš oblíbený pop-up stánek. Zastav se na spontánní tetování nebo piercing za SPECIÁLNÍ MAJÁLESOVÉ CENY🤩Objednání není potřeba – prostě přijď a jde se na věc. Naše tatérky a piercerka jsou 100% profesion","image":{"url":"https://2026.budejovickymajales.cz/uploads/ewk17hxw17.jpg"},"all_day":false,"start_date":"2026-06-03 14:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"14","minutes":"30","seconds":"00"},"end_date":"2026-06-03 20:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":721,"url":"https://2026.budejovickymajales.cz/program/721","title":"Prohlídka Budějovického Budvaru","excerpt":"S výrobou originálního Budějovického piva se můžete podrobně seznámit během prohlídky výrobních prostor pivovaru. Budete se pohybovat přímo ve výrobních prostorách a pozorovat zaměstnance při práci. Povedou vás odborně vyškolení průvodci. Součástí prohlídky je","image":{"url":"https://2026.budejovickymajales.cz/uploads/up1z7y06vx.jpg"},"all_day":false,"start_date":"2026-06-03 15:20:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"15","minutes":"20","seconds":"00"},"end_date":"2026-06-03 17:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"17","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":116,"venue":"Budějovický Budvar","slug":"budejovicky-budvar","url":"https://novy.budejovickymajales.cz/misto-konani/budejovicky-budvar/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":728,"url":"https://2026.budejovickymajales.cz/program/728","title":"doprovodný program k filmu Vladimíra Turnera - pseudovýtvarný workshop a procházka","excerpt":"Tento program je doprovodným programem k promítáním filmu Veřejně prospěšné práce od Vladimíra Turnera, na oba z programů lze ale dorazit i jednotlivě.&nbsp;Veřejně prospěšné práce jsou snímkem znázorňujícím skutečnost toho, že naše města&nbsp;se mění pod tlak","image":{"url":"https://2026.budejovickymajales.cz/uploads/4dlsclu42k.jpg"},"all_day":false,"start_date":"2026-06-03 15:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"15","minutes":"30","seconds":"00"},"end_date":"2026-06-03 18:15:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"18","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":128,"venue":"Meziprostor","slug":"meziprostor","url":"https://novy.budejovickymajales.cz/misto-konani/meziprostor/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":685,"url":"https://2026.budejovickymajales.cz/program/685","title":"Královský běh","excerpt":"Ať už si rád zaběháš, nebo chceš jen nasát atmosféru a podpořit ostatní, tenhle běh je pro tebe. Zapojit se můžeš aktivně - proběhnout či projít trasu a přispět tak body své škole - nebo fandit běžcům podél trati. Čeká tě i malé překvapení, takže neváhej a vez","image":{"url":"https://2026.budejovickymajales.cz/uploads/psglmcdm0l.jpg"},"all_day":false,"start_date":"2026-06-03 16:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"16","minutes":"00","seconds":"00"},"end_date":"2026-06-03 17:45:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2012,"name":"Soutěž","slug":"soutez","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":707,"url":"https://2026.budejovickymajales.cz/program/707","title":"Sexbyznys v čase: od ulic k OnlyFans","excerpt":"Jak se proměnila sexuální práce za posledních 20 let? Co znamenal začátek tisíciletí, nástup internetu, sociálních sítí a dnes i platforem jako OnlyFans? Přednáška nabídne pohled na vývoj sexbyznysu od roku 2000 do současnosti. Od práce na ulici a v privátech ","image":{"url":"https://2026.budejovickymajales.cz/uploads/3c1jpdmkeq.jpg"},"all_day":false,"start_date":"2026-06-03 16:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"16","minutes":"00","seconds":"00"},"end_date":"2026-06-03 17:30:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"17","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2050,"name":"Beseda","slug":"beseda","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":771,"url":"https://2026.budejovickymajales.cz/program/771","title":"Aplikace Nepanikař - první psychická pomoc v kapse","excerpt":"Festivalový shon a do toho tlak blížících se deadlinů? Zastavte se na chvíli a přijďte se zhluboka nadechnout. Představíme si českou aplikaci Nepanikař, která funguje jako praktická první pomoc pro duši přímo ve vaší kapse. Přímo na místě si vyzkoušíme relaxač","image":{"url":"https://2026.budejovickymajales.cz/uploads/9czihrfpxd.jpg"},"all_day":false,"start_date":"2026-06-03 17:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-03 18:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"18","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":722,"url":"https://2026.budejovickymajales.cz/program/722","title":"Prohlídka Budějovického Budvaru","excerpt":"S výrobou originálního Budějovického piva se můžete podrobně seznámit během prohlídky výrobních prostor pivovaru. Budete se pohybovat přímo ve výrobních prostorách a pozorovat zaměstnance při práci. Povedou vás odborně vyškolení průvodci. Součástí prohlídky je","image":{"url":"https://2026.budejovickymajales.cz/uploads/1h17patbfb.jpg"},"all_day":false,"start_date":"2026-06-03 17:20:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"17","minutes":"20","seconds":"00"},"end_date":"2026-06-03 19:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":116,"venue":"Budějovický Budvar","slug":"budejovicky-budvar","url":"https://novy.budejovickymajales.cz/misto-konani/budejovicky-budvar/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":714,"url":"https://2026.budejovickymajales.cz/program/714","title":"Kruh 19","excerpt":"Kluci z Kruhu 19 jsou úkaz – nejen že zvládnou počítat derivace, ale i skládat songy, které Vám uvíznou v hlavě. Asi skoro každý zná jejich singl „Dinosaur“, každopádně nově mají venku i EP “noční tramvaj 93”.&nbsp;Jejich show je pro všechny, kteří se v životě","image":{"url":"https://2026.budejovickymajales.cz/uploads/ec7dba80lb.jpg"},"all_day":false,"start_date":"2026-06-03 18:15:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"18","minutes":"15","seconds":"00"},"end_date":"2026-06-03 19:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2052,"name":"Folk/pop","slug":"folk-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":700,"url":"https://2026.budejovickymajales.cz/program/700","title":"Z kasina až k sekvojím","excerpt":"Z kasina až k sekvojím aneb jak si užít (a přežít) roadtrip po americkém západě Vyrazit na roadtrip po americkém západě je sen spousty lidí, ale kde začít a jak to celé naplánovat, aby to opravdu fungovalo? My jsme si tenhle sen loni splnili, když jsme ve čtyř","image":{"url":"https://2026.budejovickymajales.cz/uploads/7yzvsre3cq.jpg"},"all_day":false,"start_date":"2026-06-03 18:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"18","minutes":"30","seconds":"00"},"end_date":"2026-06-03 20:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2050,"name":"Beseda","slug":"beseda","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":729,"url":"https://2026.budejovickymajales.cz/program/729","title":"Veřejně prospěšné práce - promítání filmu Vladimíra Turnera","excerpt":"Promítání filmu předchází doprovodný program, tím je pseudovýtvarný aktivistický workshop. Na oba programy lze ale dorazit i jednotlivě.&nbsp;Film zkoumá proměňující se dynamiku veřejného prostoru ve velkých městech a ukazuje, jak může umění inspirovat lidi k ","image":{"url":"https://2026.budejovickymajales.cz/uploads/811s5m28x3.jpg"},"all_day":false,"start_date":"2026-06-03 18:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"18","minutes":"30","seconds":"00"},"end_date":"2026-06-03 20:15:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1010,"name":"Filmy","slug":"filmy","parent":0,"taxonomy":"tribe_events_cat"},{"id":2054,"name":"Hraný dokument","slug":"hrany-dokument","parent":1010,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":128,"venue":"Meziprostor","slug":"meziprostor","url":"https://novy.budejovickymajales.cz/misto-konani/meziprostor/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":684,"url":"https://2026.budejovickymajales.cz/program/684","title":"DJ battle králů","excerpt":"Přijď zažít DJ souboj letošních králů, kde rozhodují beaty, energie a reakce publika. Každý DJ předvede svůj styl a pokusí se rozpohybovat dav víc než ostatní. Čeká tě plno energické hudby, tance a napjaté atmosféry. Kdo si získá publikum a odnese si vítězství","image":{"url":"https://2026.budejovickymajales.cz/uploads/ggrm9b6jlk.jpg"},"all_day":false,"start_date":"2026-06-03 19:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"00","seconds":"00"},"end_date":"2026-06-03 21:45:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2032,"name":"Jamování","slug":"jamovani","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":743,"url":"https://2026.budejovickymajales.cz/program/743","title":"Cornea","excerpt":"Jestli chceš slyšet žánr, kterého je v českobudějovickém undergroundu pořád málo, zaujme tě kapela Cornea.Cornea je mladá kapela z Českých Budějovic, složená ze tří kluků a jedné holky. Slovo cornea pochází z latiny a znamená rohovku. V místním undergroundu se","image":{"url":"https://2026.budejovickymajales.cz/uploads/t48v1dqi1z.jpg"},"all_day":false,"start_date":"2026-06-03 19:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"00","seconds":"00"},"end_date":"2026-06-03 19:45:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2056,"name":"grunge/punk/ nu metal","slug":"grunge-punk-nu-metal","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":132,"venue":"MC Fabrika","slug":"mc-fabrika","url":"https://novy.budejovickymajales.cz/misto-konani/mc-fabrika/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":780,"url":"https://2026.budejovickymajales.cz/program/780","title":"Barbus & DJ Eli","excerpt":"Barbus - speciálně upravený autobus od Dopravního podniku České Budějovice. Projeďte si okružní jízdou město a u toho si vychutnejte čepované pivo od Budějovického Budvaru, přímo v autobusu městské hromadné dopravy.Trasa autobusu bude okružní a budete moct nas","image":{"url":"https://2026.budejovickymajales.cz/uploads/hxu431fa94.jpg"},"all_day":false,"start_date":"2026-06-03 19:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"00","seconds":"00"},"end_date":"2026-06-03 21:30:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2058,"name":"Okruh","slug":"okruh","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":134,"venue":"centrum města a okolí","slug":"centrum-mesta-a-okoli","url":"https://novy.budejovickymajales.cz/misto-konani/centrum-mesta-a-okoli/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":727,"url":"https://2026.budejovickymajales.cz/program/727","title":"Richard 3, 2, 1... teď!","excerpt":"Program ve spolupráci s Jihočeským divadlem z repertoáru Malého divadla.&nbsp;Království za trochu empatie! Hra o trůn, které se může zúčastnit každý i bez dědičného práva! Nemůžete se dočkat další řady Zrádců a nedaří se vám sehnat dost lidí, abyste si mohli ","image":{"url":"https://2026.budejovickymajales.cz/uploads/zifh9rt7pg.jpg"},"all_day":false,"start_date":"2026-06-03 19:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"30","seconds":"00"},"end_date":"2026-06-03 20:30:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2060,"name":"Interaktivní inscenace","slug":"interaktivni-inscenace","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":136,"venue":"Gymnázium Jírovcova - třída","slug":"gymnazium-jirovcova-trida","url":"https://novy.budejovickymajales.cz/misto-konani/gymnazium-jirovcova-trida/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":713,"url":"https://2026.budejovickymajales.cz/program/713","title":"Good times only","excerpt":"Good times only – pro nás naprostá feel good kapela na léto. Líbila se nám natolik, že jsme ji po 2 letech museli pozvat znova. Ideální popová kapela na houpání se v náruči svýho kluka, nebo kámošky. Na poslech v přírodě, na louce, nebo u vody.&nbsp;&nbsp;Ješt","image":{"url":"https://2026.budejovickymajales.cz/uploads/pyyjex4dhy.jpg"},"all_day":false,"start_date":"2026-06-03 19:45:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"19","minutes":"45","seconds":"00"},"end_date":"2026-06-03 20:30:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2062,"name":"Pop","slug":"pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":746,"url":"https://2026.budejovickymajales.cz/program/746","title":"Došli nápadi","excerpt":"448 442 – pro někoho jen sudá čísla, pro českobudějovickou underground scénu ale hit, u kterého se rozhýbe skoro každý.Došli Nápadi jsou kvintet kluků ze sklepa Gymnázia J. V. Jirsíka, kteří dali vzniknout svébytnému žánru – punkové opeře. Srdce publika si zís","image":{"url":"https://2026.budejovickymajales.cz/uploads/bkn2snt3ut.jpg"},"all_day":false,"start_date":"2026-06-03 20:15:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"20","minutes":"15","seconds":"00"},"end_date":"2026-06-03 21:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2030,"name":"punk/rock","slug":"punk-rock","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":132,"venue":"MC Fabrika","slug":"mc-fabrika","url":"https://novy.budejovickymajales.cz/misto-konani/mc-fabrika/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":754,"url":"https://2026.budejovickymajales.cz/program/754","title":"Eternity Again","excerpt":"Pražská kapela Eternity Again dorazí na Majáles v rámci turné k desce Prophecy, která vyšla minulý rok v srpnu. Projekt zpěvačky a songwriterky Barbora Cihak kombinuje shoegaze, dream pop i elektronické prvky.&nbsp;Kromě alba Prophecy mají na svém kontě napřík","image":{"url":"https://2026.budejovickymajales.cz/uploads/i11mu1qehi.jpg"},"all_day":false,"start_date":"2026-06-03 21:15:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"15","seconds":"00"},"end_date":"2026-06-03 22:00:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2064,"name":"Shoegaze","slug":"shoegaze","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":736,"url":"https://2026.budejovickymajales.cz/program/736","title":"Venkovní kino - Noc na Karlštejně, S tebou mě baví svět","excerpt":"Jako každý rok nás ve středu čeká všemi oblíbené velké kino! Letos nebude tradiční autokino, bude ale venkovní kino v Háječku! Máme pro vás připravené legendární české filmy - Můžete těšit na Noc na Karlštejně a na S tebou mě baví svět! Tak určitě přijďte ve s","image":{"url":"https://2026.budejovickymajales.cz/uploads/d6b6z8vzfq.jpg"},"all_day":false,"start_date":"2026-06-03 21:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"30","seconds":"00"},"end_date":"2026-06-04 01:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"01","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1010,"name":"Filmy","slug":"filmy","parent":0,"taxonomy":"tribe_events_cat"},{"id":2066,"name":"Venkovní kino","slug":"venkovni-kino","parent":1010,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":138,"venue":"Letní kino Háječek","slug":"letni-kino-hajecek","url":"https://novy.budejovickymajales.cz/misto-konani/letni-kino-hajecek/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":759,"url":"https://2026.budejovickymajales.cz/program/759","title":"Prášek proti Blbosti","excerpt":"Již tradičně na Majálesu také vystoupí punková kapela z Hluboké nad Vltavou, kterou asi všichni znáte. Prášek proti blbosti je na hudební scéne už od roku 2012. Ke svému 10 výročí v roce 2023 vydali své 3. album Nejseš!&nbsp;Hudbou vyjadřují kritiku k politice","image":{"url":"https://2026.budejovickymajales.cz/uploads/le21j0fh7k.jpg"},"all_day":false,"start_date":"2026-06-03 21:30:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"21","minutes":"30","seconds":"00"},"end_date":"2026-06-03 22:15:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"22","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2030,"name":"punk/rock","slug":"punk-rock","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":132,"venue":"MC Fabrika","slug":"mc-fabrika","url":"https://novy.budejovickymajales.cz/misto-konani/mc-fabrika/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":739,"url":"https://2026.budejovickymajales.cz/program/739","title":"DJ Eli and friends","excerpt":"Na BM si již tradičně zahraje i budějovický DJ Eli.&nbsp;Tak to nepropásni!","image":{"url":"https://2026.budejovickymajales.cz/uploads/a8qvd14irm.jpg"},"all_day":false,"start_date":"2026-06-03 22:00:00","start_date_details":{"year":"2026","month":"06","day":"03","hour":"22","minutes":"00","seconds":"00"},"end_date":"2026-06-03 23:59:00","end_date_details":{"year":"2026","month":"06","day":"03","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2068,"name":"pop-electronica","slug":"pop-electronica","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":769,"url":"https://2026.budejovickymajales.cz/program/769","title":"Výstava ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/gtio5buc17.jpg"},"all_day":true,"start_date":"2026-06-04 11:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"11","minutes":"00","seconds":"00"},"end_date":"2026-06-04 23:59:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2002,"name":"Výstava","slug":"vystava","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":699,"url":"https://2026.budejovickymajales.cz/program/699","title":"SWAP","excerpt":"Vyprázdni skříň a pojď na swap. Nejde jen o oblečení – donést můžeš i knížky, doplňky, dekorace nebo drobnosti, které si zaslouží nový domov. Přines, co už nevyužiješ, a odnes si něco, co ti udělá radost. &nbsp;Těšíme se na tebe!💕","image":{"url":"https://2026.budejovickymajales.cz/uploads/xmnwwl1rur.jpg"},"all_day":false,"start_date":"2026-06-04 14:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"14","minutes":"00","seconds":"00"},"end_date":"2026-06-04 19:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2070,"name":"Second hand","slug":"second-hand","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":688,"url":"https://2026.budejovickymajales.cz/program/688","title":"Moon Cat Tattoo","excerpt":"Moon Cat Tattoo na Majálesu🖤Letos ti přivezeme na Majáles náš oblíbený pop-up stánek. Zastav se na spontánní tetování nebo piercing za SPECIÁLNÍ MAJÁLESOVÉ CENY🤩Objednání není potřeba – prostě přijď a jde se na věc. Naše tatérky a piercerka jsou 100% profesion","image":{"url":"https://2026.budejovickymajales.cz/uploads/zxozuhno0f.jpg"},"all_day":false,"start_date":"2026-06-04 14:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"14","minutes":"30","seconds":"00"},"end_date":"2026-06-04 20:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":720,"url":"https://2026.budejovickymajales.cz/program/720","title":"škola čepování","excerpt":"Na Škole čepování piva se dozvíte jak Budějovický Budvar vaří své pivo, jaká je denní rutina výčepního i jak se správně myje sklo. Nenechte si ujít možnost praktického tréninku čepování budějckého zlata pod vedením odborníků z národního pivovaru. Upozorňujeme,","image":{"url":"https://2026.budejovickymajales.cz/uploads/u9zze2v3zk.jpg"},"all_day":false,"start_date":"2026-06-04 15:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-04 17:45:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":116,"venue":"Budějovický Budvar","slug":"budejovicky-budvar","url":"https://novy.budejovickymajales.cz/misto-konani/budejovicky-budvar/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":737,"url":"https://2026.budejovickymajales.cz/program/737","title":"Workshop s ERROR1KEM - naučte se základy editování","excerpt":"ERROR1K je český youtuber, filmař, fotograf a rapper (prostě talentovanej kluk), který za námi už druhý rok po sobě přijede na Budějovický Majáles! Tento rok se můžete těšit na to, že vás naučí jak editovat fotky. V oboru editování fotek (a videí) má Erik už d","image":{"url":"https://2026.budejovickymajales.cz/uploads/e4pf7f6yu2.jpg"},"all_day":false,"start_date":"2026-06-04 15:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-04 17:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1010,"name":"Filmy","slug":"filmy","parent":0,"taxonomy":"tribe_events_cat"},{"id":2072,"name":"Workshop s filmařem/fotografem","slug":"workshop-s-filmarem-fotografem","parent":1010,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":128,"venue":"Meziprostor","slug":"meziprostor","url":"https://novy.budejovickymajales.cz/misto-konani/meziprostor/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":740,"url":"https://2026.budejovickymajales.cz/program/740","title":"Jemná hatha jóga","excerpt":"Jemná jógová praxe, vhodná pro začátečníky i pokročilé. Budemecvičit v pomalejším tempu, s důrazem na vědomý pohyb a vnímání vlastního těla. Čeká nás jemná práce s flexibilitou a mobilitou. Zaměříme se na harmonizaci nervového systému prostřednictvím jógových ","image":{"url":"https://2026.budejovickymajales.cz/uploads/j68632f7bb.jpg"},"all_day":false,"start_date":"2026-06-04 15:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"15","minutes":"00","seconds":"00"},"end_date":"2026-06-04 16:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"16","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2034,"name":"Jóga","slug":"joga","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":118,"venue":"Skybar Střecha Budějc","slug":"skybar-strecha-budejc","url":"https://novy.budejovickymajales.cz/misto-konani/skybar-strecha-budejc/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":719,"url":"https://2026.budejovickymajales.cz/program/719","title":"Procestuj Evropu","excerpt":"Láká Tě vyjet do Evropy, potkávat nové přátele a poznávat svět? A navíc – získat na to finanční podporu od Evropské unie?Přijď si poslechnout zážitky mladých cestovatelek. Báry, která opakovaně jezdí na výměny mládeže do různých zemí Evropy, a Marušky, která s","image":{"url":"https://2026.budejovickymajales.cz/uploads/3uwc751anq.jpg"},"all_day":false,"start_date":"2026-06-04 16:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"16","minutes":"00","seconds":"00"},"end_date":"2026-06-04 17:15:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2004,"name":"Přednáška","slug":"prednaska","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":140,"venue":"Biograf Kotva","slug":"biograf-kotva","url":"https://novy.budejovickymajales.cz/misto-konani/biograf-kotva/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":693,"url":"https://2026.budejovickymajales.cz/program/693","title":"RANT Prostoru","excerpt":"RANT Prostoru živě Co štve známého kuchaře a absolventa Biskupského gymnázia Martina Škodu a absolventku Gymnázia Jírovcova Barboru Hanišovou z majálesového týmu? Přijď na živé natáčení podcastu pro nas*rané lidi Revue Prostor na Budějovickém Majálesu, ve kter","image":{"url":"https://2026.budejovickymajales.cz/uploads/z7bknmy3si.jpg"},"all_day":false,"start_date":"2026-06-04 16:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-04 17:30:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2038,"name":"Podcast","slug":"podcast","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":734,"url":"https://2026.budejovickymajales.cz/program/734","title":"Psychologie sociálních sítí","excerpt":"Zamýšleli jste se někdy, proč je používání sociálních sítí tak jednoduché a příjemné? Proč se tam zasekneme na několik hodin a ani si to neuvědomíme? Nebo co nás vede vracet se tam znovu&nbsp;a znovu, i když víme, že tam často jen ztrácíme čas... Na tyto a pod","image":{"url":"https://2026.budejovickymajales.cz/uploads/5gocmaxpza.jpg"},"all_day":false,"start_date":"2026-06-04 16:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"16","minutes":"30","seconds":"00"},"end_date":"2026-06-04 18:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"18","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2016,"name":"Workshop","slug":"workshop","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":110,"venue":"Divoko","slug":"divoko","url":"https://novy.budejovickymajales.cz/misto-konani/divoko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":680,"url":"https://2026.budejovickymajales.cz/program/680","title":"Královská fashion show","excerpt":"Styl, kreativita a udržitelnost na jednom místě! Přijď se podívat na jedinečnou fashion show, kde se majálesoví králové představí v outfitech poskládaných ze swapu konaném ve stejném čase v Široku. Čekají tě originální kombinace, nečekané nápady a důkaz, že mó","image":{"url":"https://2026.budejovickymajales.cz/uploads/j15ai8dbhb.jpg"},"all_day":false,"start_date":"2026-06-04 17:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-04 18:15:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"18","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":true,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2012,"name":"Soutěž","slug":"soutez","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":142,"venue":"Náměstí Přemysla Otakara II.","slug":"namesti-premysla-otakara-ii","url":"https://novy.budejovickymajales.cz/misto-konani/namesti-premysla-otakara-ii/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":701,"url":"https://2026.budejovickymajales.cz/program/701","title":"Dobre už bolo","excerpt":"Audiovizuální pátrání po vztahu s dědečkem.Student umění žijící v Praze a vysloužilý agronom se setkávají na gauči v třígenerační domácnosti, aby diskutovali o budoucnosti světa. Setkání dvou zkušeností jako pokus o zjištění, do jaké míry člověka formuje jeho ","image":{"url":"https://2026.budejovickymajales.cz/uploads/rhgy82gmac.jpg"},"all_day":false,"start_date":"2026-06-04 17:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-04 17:45:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2074,"name":"Divadelní performance","slug":"divadelni-performance","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Slovensko","slug":"slovensko"}],"venue":{"id":144,"venue":"Žižkárna - garáž","slug":"zizkarna-garaz","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna-garaz/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":733,"url":"https://2026.budejovickymajales.cz/program/733","title":"Vizuální smog ve veřejném prostoru: Komentovaná procházka s Hanou Chalupskou","excerpt":"Město není jen kulisa, je to prostor, ve kterém žijeme. Proč nás ale v některých ulicích bolí oči a jinde se cítíme skvěle? Architektka Hana Chalupská z ateliéru A8000 vás provede centrem Českých Budějovic a ukáže vám město bez filtrů. Společně se podíváme na ","image":{"url":"https://2026.budejovickymajales.cz/uploads/0u6ic0c9pc.jpg"},"all_day":false,"start_date":"2026-06-04 17:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-04 19:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2058,"name":"Okruh","slug":"okruh","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":134,"venue":"centrum města a okolí","slug":"centrum-mesta-a-okoli","url":"https://novy.budejovickymajales.cz/misto-konani/centrum-mesta-a-okoli/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":697,"url":"https://2026.budejovickymajales.cz/program/697","title":"SKATECONTEST","excerpt":"I letos se uskuteční oblíbený skatecontest, klasicky v prostoru mezi KD Gerbera a Knihovnou na Lidické. Stejně jako loni se můžete těšit na věcné ceny.","image":{"url":"https://2026.budejovickymajales.cz/uploads/xvahdgyhy3.jpg"},"all_day":false,"start_date":"2026-06-04 17:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"17","minutes":"30","seconds":"00"},"end_date":"2026-06-04 20:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":146,"venue":"Lidická/ u Gerbery","slug":"lidicka-u-gerbery","url":"https://novy.budejovickymajales.cz/misto-konani/lidicka-u-gerbery/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":709,"url":"https://2026.budejovickymajales.cz/program/709","title":"Dance Battle","excerpt":"I letos se uskuteční další Dance Battle v Žižkárně. Těšit se můžeš na skvělou kombinaci energie, stylu a napínavých soubojů. Bude se soutěžit v streetdance 1vs1 a breakdance 7 to smoke.&nbsp;Nejlepší tanečníci si odnesou atraktivní ceny.&nbsp; Tanečníci se můž","image":{"url":"https://2026.budejovickymajales.cz/uploads/13o6ozfxze.jpg"},"all_day":false,"start_date":"2026-06-04 18:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"18","minutes":"00","seconds":"00"},"end_date":"2026-06-04 20:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":114,"venue":"Žižkárna","slug":"zizkarna","url":"https://novy.budejovickymajales.cz/misto-konani/zizkarna/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"optional"},{"id":760,"url":"https://2026.budejovickymajales.cz/program/760","title":"Kosmetik Institut","excerpt":"Kosmetik Institut, je mužské duo z Brna, které tvoří elektronicko - kytarovou hudbu. My je máme ve svém hledáčku již delší dobu, a proto jsme moc rádi, že je tu letos budeme mít.Určitě na koncertě zahrají písně z EP, které tento rok vydali s názvem Lhal jsem v","image":{"url":"https://2026.budejovickymajales.cz/uploads/f4ozesr3v7.jpg"},"all_day":false,"start_date":"2026-06-04 18:15:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"18","minutes":"15","seconds":"00"},"end_date":"2026-06-04 19:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2076,"name":"electronica / punk","slug":"electronica-punk","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":692,"url":"https://2026.budejovickymajales.cz/program/692","title":"Na stáže do médií. Beseda s Tobiášem Wágnerem","excerpt":"Na stáže do médií. Beseda s Tobiášem Wagnerem Zajímá tě studium žurnalistiky a praxe v médiích? Přijď na besedu s Tobiášem Wagnerem, který ti poví, jak získal stáž v České televizi a v Revue Prostor. Co je náplní stáží? Jak náročné je skloubit stáž se studiem ","image":{"url":"https://2026.budejovickymajales.cz/uploads/81zidmxt26.jpg"},"all_day":false,"start_date":"2026-06-04 18:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"18","minutes":"30","seconds":"00"},"end_date":"2026-06-04 19:30:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1004,"name":"Vnitřní scéna","slug":"vnitrni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2050,"name":"Beseda","slug":"beseda","parent":1004,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":128,"venue":"Meziprostor","slug":"meziprostor","url":"https://novy.budejovickymajales.cz/misto-konani/meziprostor/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":773,"url":"https://2026.budejovickymajales.cz/program/773","title":"MORNIN9 run: večerní běh za kulturou","excerpt":"MORNIN9 running club propojuje běžeckou komunitu s milovníky kávy. Ať už tě baví svižné tempo, dlouhé běhy nebo pohodový klus, při kterém si chceš popovídat, u nás si přijdeš na své.Jedeme na přátelské vlně, bez stresu a s důrazem na společný zážitek. Naše tra","image":{"url":"https://2026.budejovickymajales.cz/uploads/8gzl35ofn8.jpg"},"all_day":false,"start_date":"2026-06-04 19:00:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"00","seconds":"00"},"end_date":"2026-06-04 21:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"21","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2048,"name":"Běh","slug":"beh","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":148,"venue":"Jihočeské divadlo","slug":"jihoceske-divadlo","url":"https://novy.budejovickymajales.cz/misto-konani/jihoceske-divadlo/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":686,"url":"https://2026.budejovickymajales.cz/program/686","title":"Kuchyňské p0rno","excerpt":"Nebojsy: KUCHYŇSKÉ PORNO Je libo teplá večeře? Není problém jen si vezmemdovolenou.Kuchyně – dominanta každé domácnosti. Kuchyně, ve které hospodyňky rozpustile štěbetají o věcech, které pro muže zůstávají věčným tajemstvím. Místo, kde se v troubě peče nedělní","image":{"url":"https://2026.budejovickymajales.cz/uploads/l43o0uenp5.jpg"},"all_day":false,"start_date":"2026-06-04 19:30:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"30","seconds":"00"},"end_date":"2026-06-04 20:30:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1008,"name":"Divadlo","slug":"divadlo","parent":0,"taxonomy":"tribe_events_cat"},{"id":2040,"name":"Činohra","slug":"cinohra","parent":1008,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":150,"venue":"Výměník1","slug":"vymenik1","url":"https://novy.budejovickymajales.cz/misto-konani/vymenik1/","city":"České Budějovice"},"ticketed":["rsvp"],"_bm_rezervace":"mandatory"},{"id":756,"url":"https://2026.budejovickymajales.cz/program/756","title":"Pokoj25","excerpt":"Pokoj25 je jednočlenný projekt z Prahy, působící od leta 2019. Balancuje na okraji rapu a do své tvorby přidává i prvky synth punku. Za projektem stojí producent a student skladby na Pražské konzervatoři Scorn.&nbsp;V létě 2019 vydal debutové EP Noční hudba, k","image":{"url":"https://2026.budejovickymajales.cz/uploads/r5b2rks7fd.jpg"},"all_day":false,"start_date":"2026-06-04 19:45:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"19","minutes":"45","seconds":"00"},"end_date":"2026-06-04 20:30:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"20","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2078,"name":"Rap/ synth punk","slug":"rap-synth-punk","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":763,"url":"https://2026.budejovickymajales.cz/program/763","title":"něco něco","excerpt":"Něco něco je prostě skvělá kapela! Hraje taneční indie pop, elektroniku a místy post-punkové písně. Hráli na velkých festivalech jako Colours of Ostrava, nebo Slunovrat. Byli nominováni na hudební ceny Vinyla a Apollo.&nbsp;V polovině června budou křtít svou 4","image":{"url":"https://2026.budejovickymajales.cz/uploads/2lpqusgmdl.jpg"},"all_day":false,"start_date":"2026-06-04 21:15:00","start_date_details":{"year":"2026","month":"06","day":"04","hour":"21","minutes":"15","seconds":"00"},"end_date":"2026-06-04 22:00:00","end_date_details":{"year":"2026","month":"06","day":"04","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2068,"name":"pop-electronica","slug":"pop-electronica","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":130,"venue":"Sokolák - Beduín","slug":"sokolak-beduin","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak-beduin/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":770,"url":"https://2026.budejovickymajales.cz/program/770","title":"Výstava ŠIROKO HLUBOKO","excerpt":"Vše kolem nás má svou hloubku myšlenky, činy, zážitky, slova nebo i věci naprosto obyčejné. Někdy je vidět na první pohled a jindy ji musíme hledat. A možná se pro nás stává povrchem. “Snažila jsem se pozorovat předměty kolem sebe, které se na první pohled zda","image":{"url":"https://2026.budejovickymajales.cz/uploads/jm4lmk6l7y.jpg"},"all_day":true,"start_date":"2026-06-05 11:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"11","minutes":"00","seconds":"00"},"end_date":"2026-06-05 23:59:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1002,"name":"Venkovní scéna","slug":"venkovni-scena","parent":0,"taxonomy":"tribe_events_cat"},{"id":2002,"name":"Výstava","slug":"vystava","parent":1002,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":102,"venue":"Široko","slug":"siroko","url":"https://novy.budejovickymajales.cz/misto-konani/siroko/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":681,"url":"https://2026.budejovickymajales.cz/program/681","title":"Majálesový průvod a finální disciplína","excerpt":"Chceš zažít atmosféru plnou emocí, barev a studentské energie? Pojď se zapojit do majálesového průvodu, kde tě čekají originální kostýmy, hlasité pokřiky a studenti, kteří s nadšením reprezentují své školy.Po průvodu přijde vrchol celého Budějovického Majálesu","image":{"url":"https://2026.budejovickymajales.cz/uploads/jkylgfzh5z.jpg"},"all_day":false,"start_date":"2026-06-05 12:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"12","minutes":"00","seconds":"00"},"end_date":"2026-06-05 14:00:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"14","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":true,"hide_from_listings":false,"categories":[{"id":1006,"name":"Volba krále","slug":"volba-krale","parent":0,"taxonomy":"tribe_events_cat"},{"id":2080,"name":"Průvod","slug":"pruvod","parent":1006,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":122,"venue":"Sokolák","slug":"sokolak","url":"https://novy.budejovickymajales.cz/misto-konani/sokolak/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":758,"url":"https://2026.budejovickymajales.cz/program/758","title":"Jelení lawyers","excerpt":"Jelení Lawyers jsou již majálesová tradice.&nbsp;Pokud je náhodou neznáte, jde o dva mladé budějovické právníky s kytarou a originálním hudebním výkladem historie a právních předpisů.&nbsp;Pokud se chcete pobavit nad historii, politikou a právem, tak určitě do","image":{"url":"https://2026.budejovickymajales.cz/uploads/4rhkpuqvev.jpg"},"all_day":false,"start_date":"2026-06-05 14:30:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"14","minutes":"30","seconds":"00"},"end_date":"2026-06-05 15:30:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"15","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2052,"name":"Folk/pop","slug":"folk-pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":762,"url":"https://2026.budejovickymajales.cz/program/762","title":"SEBE","excerpt":"Sebe je&nbsp;hudební projekt českého herce a rappera Adama Ernesta.&nbsp; V loňském roce vydal své album s názvem Šmejd, o kterém v Českém Rozhlase řekl toto:&nbsp;„Je to velká věc, ta deska je hodně expresivní, otevřená, bez příkras, místy extrémně vulgární. ","image":{"url":"https://2026.budejovickymajales.cz/uploads/dzmuvkdggk.jpg"},"all_day":false,"start_date":"2026-06-05 15:30:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"15","minutes":"30","seconds":"00"},"end_date":"2026-06-05 16:15:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"16","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2082,"name":"Rap","slug":"rap","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":738,"url":"https://2026.budejovickymajales.cz/program/738","title":"Batáty","excerpt":"Hej ty, pojď s náma rozjet funky vlak! - to ti vzkazují členové kapely Batáty.&nbsp;&nbsp;Již po několikáté si zahrají na Budějovickém Majálesu, poprvé však na pátečním Open Airu, a rovnou na velké stagy. Na Majálesu mají totiž vždy přeplněný sál, tak nastal č","image":{"url":"https://2026.budejovickymajales.cz/uploads/l1m5qmrsq7.jpg"},"all_day":false,"start_date":"2026-06-05 16:15:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"16","minutes":"15","seconds":"00"},"end_date":"2026-06-05 17:00:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"17","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2084,"name":"funk/rock","slug":"funk-rock","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":761,"url":"https://2026.budejovickymajales.cz/program/761","title":"Stříbrný Rafael","excerpt":"Máme velkou radost, že k nám letos zamíří rapper Stříbrný Rafael. Pokud ho neznáte, tak ho určitě s radostí poznáte.&nbsp; Jeho songy jsou správně ujetý a je v nich určitá genialita. Některá jeho slovní spojení jsou tak absurdní, ale výstižná, že se chce člově","image":{"url":"https://2026.budejovickymajales.cz/uploads/4bsed4awyc.jpg"},"all_day":false,"start_date":"2026-06-05 17:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"17","minutes":"00","seconds":"00"},"end_date":"2026-06-05 17:45:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"17","minutes":"45","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2086,"name":"Rap - experimental","slug":"rap-experimental","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":715,"url":"https://2026.budejovickymajales.cz/program/715","title":"KULE","excerpt":"Kluci z kapely KULE sice tvrdí, že nejsou žádní básníci, ale dobrou písničku vám rozhodně složí. Tahle brněnská parta se pohybuje na hranici indie-popu, alternativy a taneční elektroniky, díky tomu jsou těžko zařaditelní, ale o to zajímavejší. Mají za sebou ús","image":{"url":"https://2026.budejovickymajales.cz/uploads/vviu99pzzm.jpg"},"all_day":false,"start_date":"2026-06-05 17:45:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"17","minutes":"45","seconds":"00"},"end_date":"2026-06-05 18:30:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"18","minutes":"30","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2062,"name":"Pop","slug":"pop","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":716,"url":"https://2026.budejovickymajales.cz/program/716","title":"Cringe prince","excerpt":"Tohle není ordinary sound a ty víš to, dej to k uchu kuchne ti to mind a ty víš to – citace z jeho písně s jejímž obsahem nelze nesouhlasit.&nbsp;&nbsp;Jeho přezdívka je naprosto trefná, je to totiž cringe princ a my to milujeme. Jeho celá tvorba včetně alba D","image":{"url":"https://2026.budejovickymajales.cz/uploads/p9035yanr6.jpg"},"all_day":false,"start_date":"2026-06-05 18:30:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"18","minutes":"30","seconds":"00"},"end_date":"2026-06-05 19:15:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"19","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2088,"name":"bedroom rap / rap","slug":"bedroom-rap-rap","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":755,"url":"https://2026.budejovickymajales.cz/program/755","title":"Meowlau","excerpt":"Jestli tě zajímá kombinace indie a post-punku, tohle je přesně pro tebe. Meowlau (aka Laura Jašková), která působí v Billy Barman a byla součástí projektu Meowlau x Val, se vydala sólově – a stojí to za to.&nbsp;&nbsp;Čerstvě vydala debut album KVETY, které vn","image":{"url":"https://2026.budejovickymajales.cz/uploads/ysu2pb7d01.jpg"},"all_day":false,"start_date":"2026-06-05 19:15:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"19","minutes":"15","seconds":"00"},"end_date":"2026-06-05 20:00:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"20","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2024,"name":"indie/punk","slug":"indie-punk","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":711,"url":"https://2026.budejovickymajales.cz/program/711","title":"Media service","excerpt":"Stýská se vám po nulté dekádě, starým iphonu a mp3 – tak tohle je show pro Vás. Duo media service je součástí Posh boys creative club tvořící převážně elektronickou hudbu.&nbsp;&nbsp;V loňském roce několikrát vystupovali s pražskou kapelou Dukla a byly součást","image":{"url":"https://2026.budejovickymajales.cz/uploads/9sjf0pqakk.jpg"},"all_day":false,"start_date":"2026-06-05 20:05:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"20","minutes":"05","seconds":"00"},"end_date":"2026-06-05 20:50:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"20","minutes":"50","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2090,"name":"Alternative/elektronika","slug":"alternative-elektronika","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":730,"url":"https://2026.budejovickymajales.cz/program/730","title":"Dukla","excerpt":"Pražská kapela Dukla dělá hudbu přesně pro momenty, kdy se touláš městem, venku už tři dny v kuse mrholí a ty vlastně netušíš, jestli je brzo ráno, nebo pozdní odpoledne. Jejich kytarovka v sobě míchá post-punk i devadesátkovou nostalgii, v poslední době do to","image":{"url":"https://2026.budejovickymajales.cz/uploads/twflpuooao.jpg"},"all_day":false,"start_date":"2026-06-05 21:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"21","minutes":"00","seconds":"00"},"end_date":"2026-06-05 22:00:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"22","minutes":"00","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":true,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2092,"name":"kytarový pop / post punk","slug":"kytarovy-pop-post-punk","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":779,"url":"https://2026.budejovickymajales.cz/program/779","title":"PALINDROM","excerpt":"&nbsp;&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-05 21:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"21","minutes":"00","seconds":"00"},"end_date":"2026-06-05 22:15:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"22","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":764,"url":"https://2026.budejovickymajales.cz/program/764","title":"Punkinson","excerpt":"Punkinson je slovenský producent a rapper, který nás velice zaujal. Jeho hudba má nápaditý a dynamický zvuk, společně s trefnými texty. Je to fakt kalba!V loňském roce vystoupil na největším slovenském festivalu Pohoda, a letos vydal své nové album s názvem Kľ","image":{"url":"https://2026.budejovickymajales.cz/uploads/hx2tguscoy.jpg"},"all_day":false,"start_date":"2026-06-05 22:10:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"22","minutes":"10","seconds":"00"},"end_date":"2026-06-05 22:55:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"22","minutes":"55","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2082,"name":"Rap","slug":"rap","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Slovensko","slug":"slovensko"}],"venue":{"id":154,"venue":"Malá stage","slug":"mala-stage","url":"https://novy.budejovickymajales.cz/misto-konani/mala-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":774,"url":"https://2026.budejovickymajales.cz/program/774","title":"G:RAMEZZ & MC HUGOTEYY","excerpt":".","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-05 22:15:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"22","minutes":"15","seconds":"00"},"end_date":"2026-06-05 23:15:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"23","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":757,"url":"https://2026.budejovickymajales.cz/program/757","title":"FVLCRVM","excerpt":"FVLCRVM je slovenský producent, dj, zpěvák a song writer, který se pohybuje na pomezí elektroniky, popu a klubové experimentální scény. Jeho přístup k hudbě vznikal v době, kdy se po pádu železné opony do regionu naplno dostala západní hudba — formovala ho est","image":{"url":"https://2026.budejovickymajales.cz/uploads/488ir8briq.jpg"},"all_day":false,"start_date":"2026-06-05 23:00:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"23","minutes":"00","seconds":"00"},"end_date":"2026-06-05 23:59:00","end_date_details":{"year":"2026","month":"06","day":"05","hour":"23","minutes":"59","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":true,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2090,"name":"Alternative/elektronika","slug":"alternative-elektronika","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Slovensko","slug":"slovensko"}],"venue":{"id":152,"venue":"Velká stage","slug":"velka-stage","url":"https://novy.budejovickymajales.cz/misto-konani/velka-stage/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""},{"id":775,"url":"https://2026.budejovickymajales.cz/program/775","title":"HUGOTEYY","excerpt":"&nbsp;&nbsp;","image":{"url":"https://2026.budejovickymajales.cz/assets/img/og.png"},"all_day":false,"start_date":"2026-06-05 23:15:00","start_date_details":{"year":"2026","month":"06","day":"05","hour":"23","minutes":"15","seconds":"00"},"end_date":"2026-06-06 00:15:00","end_date_details":{"year":"2026","month":"06","day":"06","hour":"00","minutes":"15","seconds":"00"},"timezone":"Europe/Prague","cost":"","featured":false,"hide_from_listings":false,"categories":[{"id":1000,"name":"Hudba","slug":"hudba","parent":0,"taxonomy":"tribe_events_cat"},{"id":2000,"name":"Drum'n'bass","slug":"drum-n-bass","parent":1000,"taxonomy":"tribe_events_cat"}],"tags":[{"name":"Česko","slug":"cesko"}],"venue":{"id":100,"venue":"K2","slug":"k2","url":"https://novy.budejovickymajales.cz/misto-konani/k2/","city":"České Budějovice"},"ticketed":[],"_bm_rezervace":""}]}</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   PROGRAM + LINEUP
+
+   Data mají tvar odpovědi The Events Calendar (/wp-json/tribe/events/v1/
+   events), doplněný o dvě věci z /wp-json/wp/v2/ — barvu kategorie
+   (acf.barva) a bezbariérovost místa (acf.bezbarierovost). V prototypu jsou
+   data vlepená dovnitř stránky. Na ostrém webu se stejná struktura načte
+   z REST API; měnit se bude jen funkce nactiData().
+   ════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* Hodina, kterou končí festivalový den. Co začíná dřív, patří ještě
+     ke včerejšku — jinak by tři ranní sety na K2 vypadaly jako samostatná
+     sobota s programem od 00:15 do 03:30. Stará časová osa je neukázala
+     vůbec. */
+  var HRANICE_DNE = 6;
+
+  var DNY_CZ = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+  var DNY_ZKR = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
+  var KLIC_ULOZISTE = 'bm-program-moje';
+
+  var DATA = JSON.parse(document.getElementById('bm-data').textContent);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     1. Normalizace dat
+     ───────────────────────────────────────────────────────────────────── */
+
+  function naDatum(det) {
+    return new Date(+det.year, +det.month - 1, +det.day, +det.hour, +det.minutes, 0);
+  }
+  function klicDne(d) {
+    var p = new Date(d.getTime() - HRANICE_DNE * 3600e3);
+    return p.getFullYear() + '-' + String(p.getMonth() + 1).padStart(2, '0') + '-' + String(p.getDate()).padStart(2, '0');
+  }
+  function hhmm(d) {
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  function odstranEntity(s) {
+    var t = document.createElement('textarea');
+    t.innerHTML = s || '';
+    return t.value;
+  }
+  function bezDiakritiky(s) {
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  var BARVA_KAT = {}, BEZBARIEROVE = {};
+  (DATA.categories || []).forEach(function (c) {
+    if (c.parent === 0 && c.acf && c.acf.barva) BARVA_KAT[c.slug] = c.acf.barva;
+  });
+  (DATA.venues || []).forEach(function (v) {
+    if (v.acf && v.acf.bezbarierovost) BEZBARIEROVE[v.slug] = true;
+  });
+
+  var AKCE = (DATA.events || [])
+    .filter(function (e) { return !e.hide_from_listings; })
+    .map(function (e) {
+      var zac = naDatum(e.start_date_details);
+      var kon = naDatum(e.end_date_details);
+      /* Kategorie = termín bez rodiče, žánr = termín s rodičem.
+         Když chybí obojí, akce zůstane v programu, jen bez barvy. */
+      var kat = (e.categories || []).filter(function (c) { return c.parent === 0; })[0] || null;
+      var zan = (e.categories || []).filter(function (c) { return c.parent !== 0; })[0] || null;
+      var misto = e.venue && e.venue.venue ? odstranEntity(e.venue.venue) : '';
+      return {
+        id: e.id,
+        nazev: odstranEntity(e.title),
+        zac: zac, kon: kon,
+        den: klicDne(zac),
+        celyDen: !!e.all_day,
+        misto: misto,
+        mistoSlug: (e.venue && e.venue.slug) || '',
+        bezbarierove: !!BEZBARIEROVE[(e.venue && e.venue.slug) || ''],
+        kat: kat ? odstranEntity(kat.name) : '',
+        katSlug: kat ? kat.slug : '',
+        barva: kat ? BARVA_KAT[kat.slug] : '',
+        zanr: zan ? odstranEntity(zan.name) : '',
+        zeme: (e.tags || []).map(function (t) { return odstranEntity(t.name); }).join(', '),
+        rezervace: (e.ticketed || []).length > 0,
+        rezervacePovinna: e._bm_rezervace === 'mandatory',
+        top: !!e.featured,
+        obraz: e.image ? e.image.url : '',
+        popis: odstranEntity(e.excerpt || ''),
+        url: e.url
+      };
+    })
+    .sort(function (a, b) { return a.zac - b.zac || a.nazev.localeCompare(b.nazev, 'cs'); });
+
+  AKCE.forEach(function (a) {
+    a.hledatelne = bezDiakritiky([a.nazev, a.misto, a.kat, a.zanr, a.zeme].join(' '));
+  });
+
+  /* Dny festivalu — odvozené z dat, ne natvrdo zapsané. */
+  var DNY = [];
+  AKCE.forEach(function (a) { if (DNY.indexOf(a.den) < 0) DNY.push(a.den); });
+  DNY.sort();
+
+  function popisDne(klic) {
+    var c = klic.split('-');
+    var d = new Date(+c[0], +c[1] - 1, +c[2]);
+    return {
+      klic: klic,
+      zkratka: DNY_ZKR[d.getDay()],
+      nazev: DNY_CZ[d.getDay()],
+      datum: d.getDate() + '. ' + (d.getMonth() + 1) + '.',
+      datumObj: d
+    };
+  }
+  var DNY_INFO = DNY.map(popisDne);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. „Teď“ a výchozí den
+
+     Pravidlo je jedno a drží i jedenáct měsíců v roce, kdy žádný festival
+     neběží: když dnešek padne do některého festivalového dne, ukáže se on;
+     jinak první den ročníku. Stejná funkce HRANICE_DNE hlídá i to, že ve
+     dvě ráno pořád platí včerejšek.
+     ───────────────────────────────────────────────────────────────────── */
+
+  var param = new URLSearchParams(location.search);
+  /* ?ted=2026-06-03T20:10 — jen pro prototyp, aby šlo ukázat festivalový
+     provoz mimo termín festivalu. Na ostrém webu se bere new Date(). */
+  var TED = param.get('ted') ? new Date(param.get('ted')) : new Date();
+
+  function vychoziDen() {
+    if (!DNY.length) return null;
+    var dnes = klicDne(TED);
+    /* Jedenáct měsíců v roce žádný „dnešek festivalu“ neexistuje. Pravidlo je
+       proto jedno: když dnešek padne do ročníku, ukáže se on, jinak první den. */
+    if (DNY.indexOf(dnes) >= 0) return dnes;
+    return DNY[0];
+  }
+  function stavRocniku() {
+    if (!DNY.length) return 'prazdno';
+    var dnes = klicDne(TED);
+    if (DNY.indexOf(dnes) >= 0) return 'behem';
+    if (dnes < DNY[0]) return 'pred';
+    return 'po';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     3. Stav
+     ───────────────────────────────────────────────────────────────────── */
+
+  var stav = {
+    den: vychoziDen(),
+    zobrazeni: window.matchMedia('(min-width: 700px)').matches ? 'lineup' : 'seznam',
+    mista: new Set(),
+    kategorie: new Set(),
+    hledani: '',
+    jenMoje: false,
+    moje: new Set()
+  };
+
+  try {
+    var ulozene = JSON.parse(localStorage.getItem(KLIC_ULOZISTE) || '[]');
+    ulozene.forEach(function (id) { stav.moje.add(+id); });
+  } catch (e) { /* soukromé okno nebo zakázané úložiště — výběr prostě nepřežije */ }
+
+  /* Výběr se dá poslat kamarádovi odkazem, žádný účet k tomu není. */
+  var prisloOdkazem = 0;
+  if (param.get('moje')) {
+    /* Sdílený výběr se k mému přidá, nepřepíše ho — přijít o vlastní
+       program kliknutím na cizí odkaz by bylo horší než mít ho navíc. */
+    param.get('moje').split(',').forEach(function (id) {
+      if (+id && !stav.moje.has(+id)) { stav.moje.add(+id); prisloOdkazem++; }
+    });
+    ulozMoje();
+  }
+  if (prisloOdkazem) {
+    /* Kdo přijde po odkazu „tohle je můj program“, má ho vidět hned,
+       ne ho hledat pod hvězdičkou. */
+    stav.jenMoje = true;
+    stav.den = 'vse';
+    stav.zobrazeni = 'seznam';
+  }
+  if (param.get('den') && (param.get('den') === 'vse' || DNY.indexOf(param.get('den')) >= 0)) stav.den = param.get('den');
+  if (param.get('zobrazeni') === 'lineup' || param.get('zobrazeni') === 'seznam') stav.zobrazeni = param.get('zobrazeni');
+  /* Osa umí jeden den — celý týden na jedné svislici by byl nesmysl.
+     Když se obojí sejde (z adresy nebo ze širokého displeje), vyhraje den
+     a zobrazení se přepne na seznam. */
+  if (stav.den === 'vse' && stav.zobrazeni === 'lineup') stav.zobrazeni = 'seznam';
+
+  function ulozMoje() {
+    try { localStorage.setItem(KLIC_ULOZISTE, JSON.stringify([].concat(Array.from(stav.moje)))); }
+    catch (e) { /* viz výše */ }
+  }
+
+  function zapisAdresu() {
+    var p = new URLSearchParams();
+    if (stav.den) p.set('den', stav.den);
+    p.set('zobrazeni', stav.zobrazeni);
+    if (param.get('ted')) p.set('ted', param.get('ted'));
+    /* Zapsání adresy je jen pohodlí (dá se poslat odkaz na konkrétní den).
+       Některé prohlížeče ho u souboru otevřeného z disku zakazují, a to nesmí
+       shodit celou stránku do záchranného bloku. */
+    try {
+      history.replaceState(null, '', location.pathname + '?' + p.toString());
+    } catch (e) { /* schválně nic */ }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     4. Výběr akcí podle stavu
+     ───────────────────────────────────────────────────────────────────── */
+
+  function proDen(klic) {
+    return AKCE.filter(function (a) { return a.den === klic; });
+  }
+  function projdiFiltry(a) {
+    if (stav.jenMoje && !stav.moje.has(a.id)) return false;
+    if (stav.mista.size && !stav.mista.has(a.mistoSlug)) return false;
+    if (stav.kategorie.size && !stav.kategorie.has(a.katSlug || '_bez')) return false;
+    if (stav.hledani && a.hledatelne.indexOf(stav.hledani) < 0) return false;
+    return true;
+  }
+  function viditelne() {
+    var zaklad = stav.den === 'vse' ? AKCE : proDen(stav.den);
+    return zaklad.filter(projdiFiltry);
+  }
+
+  /* Kolize: dvě vybrané akce, které se časově překrývají. To je jediný
+     důvod, proč si člověk program vůbec skládá předem. */
+  function kolize(seznam) {
+    var moje = seznam.filter(function (a) { return stav.moje.has(a.id) && !a.celyDen; });
+    var kol = new Set();
+    for (var i = 0; i < moje.length; i++) {
+      for (var j = i + 1; j < moje.length; j++) {
+        if (moje[i].zac < moje[j].kon && moje[j].zac < moje[i].kon) {
+          kol.add(moje[i].id); kol.add(moje[j].id);
+        }
+      }
+    }
+    return kol;
+  }
+
+  function bezi(a) { return TED >= a.zac && TED < a.kon; }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     5. Vykreslení — ovládání
+     ───────────────────────────────────────────────────────────────────── */
+
+  var el = {
+    dny: document.getElementById('bm-dny'),
+    vysledek: document.getElementById('bm-vysledek'),
+    shrnuti: document.getElementById('bm-shrnuti'),
+    stav: document.getElementById('bm-stav'),
+    celoden: document.getElementById('bm-celoden'),
+    celodenPasy: document.getElementById('bm-celoden-pasy'),
+    chipyKat: document.getElementById('bm-chipy-kat'),
+    chipyMisto: document.getElementById('bm-chipy-misto'),
+    mojePocet: document.getElementById('bm-moje-pocet'),
+    filtryPocet: document.getElementById('bm-filtry-pocet'),
+    detail: document.getElementById('bm-detail'),
+    detailObsah: document.getElementById('bm-detail-obsah'),
+    skocTed: document.getElementById('bm-skoc-ted')
+  };
+
+  function vykresliDny() {
+    var html = '';
+    /* „Vše“ dává smysl jen v seznamu — osa potřebuje jeden den. Kdo na něj
+       klikne a je v lineupu, přepne se do seznamu; je to menší překvapení
+       než prázdná osa. */
+    if (!DNY.length) { el.dny.innerHTML = ''; return; }
+    html += tlacitkoDne('vse', 'VŠE', stav.jenMoje ? pocetMoje(null) + '×' : 'celý týden', false);
+    DNY_INFO.forEach(function (d) {
+      var popisek = stav.jenMoje ? d.datum + ' · ' + pocetMoje(d.klic) + '×' : d.datum;
+      html += tlacitkoDne(d.klic, d.zkratka, popisek, klicDne(TED) === d.klic);
+    });
+    el.dny.innerHTML = html;
+  }
+  function pocetMoje(klicDneNeboNull) {
+    return AKCE.filter(function (a) {
+      return stav.moje.has(a.id) && (!klicDneNeboNull || a.den === klicDneNeboNull);
+    }).length;
+  }
+  function tlacitkoDne(klic, zkratka, datum, dnes) {
+    return '<button type="button" class="bm-den' + (dnes ? ' bm-den--dnes' : '') + '" ' +
+      'data-den="' + klic + '" aria-pressed="' + (stav.den === klic) + '">' +
+      '<span class="bm-den__zkratka">' + zkratka + '</span>' +
+      '<span class="bm-den__datum">' + datum + '</span></button>';
+  }
+
+  function vykresliFiltry() {
+    var zaklad = stav.den === 'vse' ? AKCE : proDen(stav.den);
+
+    var kat = [];
+    zaklad.forEach(function (a) {
+      var s = a.katSlug || '_bez', n = a.kat || 'Bez kategorie';
+      if (!kat.some(function (k) { return k.slug === s; })) kat.push({ slug: s, nazev: n });
+    });
+    kat.sort(function (a, b) { return a.nazev.localeCompare(b.nazev, 'cs'); });
+    el.chipyKat.innerHTML = kat.map(function (k) {
+      return '<button type="button" class="bm-chip bm-chip--kat" data-kat="' + k.slug + '" ' +
+        'data-filtr-kat="' + k.slug + '" aria-pressed="' + stav.kategorie.has(k.slug) + '">' +
+        '<span class="bm-chip__tecka"></span>' + k.nazev + '</button>';
+    }).join('');
+
+    var mista = seraditMista(zaklad);
+    document.getElementById('bm-mist-popis').textContent = '(' + mista.length + ')';
+    el.chipyMisto.innerHTML = mista.map(function (m) {
+      return '<button type="button" class="bm-chip" data-filtr-misto="' + m.slug + '" ' +
+        'aria-pressed="' + stav.mista.has(m.slug) + '">' + m.nazev +
+        ' <span style="font-weight:600;opacity:.65">' + m.pocet + '</span></button>';
+    }).join('');
+
+    var pocet = stav.mista.size + stav.kategorie.size + (stav.hledani ? 1 : 0);
+    el.filtryPocet.hidden = pocet === 0;
+    el.filtryPocet.textContent = pocet;
+  }
+
+  /* Pořadí scén. The Events Calendar u místa žádné pořadí nedrží, takže si
+     ho musíme odvodit. Pravidlo: čím víc akcí daný den, tím dřív — a při
+     shodě rozhoduje první začátek. Je to deterministické a nikdo to nemusí
+     udržovat ručně. Kdyby organizátoři chtěli vlastní pořadí, přibude
+     u místa číselné pole a předřadí se téhle úvaze. */
+  function seraditMista(seznam) {
+    var mapa = {};
+    seznam.forEach(function (a) {
+      if (!a.mistoSlug) return;
+      if (!mapa[a.mistoSlug]) mapa[a.mistoSlug] = { slug: a.mistoSlug, nazev: a.misto, pocet: 0, prvni: a.zac, bezbarierove: a.bezbarierove };
+      mapa[a.mistoSlug].pocet++;
+      if (a.zac < mapa[a.mistoSlug].prvni) mapa[a.mistoSlug].prvni = a.zac;
+    });
+    return Object.keys(mapa).map(function (k) { return mapa[k]; })
+      .sort(function (a, b) {
+        return b.pocet - a.pocet || a.prvni - b.prvni || a.nazev.localeCompare(b.nazev, 'cs');
+      });
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     6. Vykreslení — obsah
+     ───────────────────────────────────────────────────────────────────── */
+
+  function vykresli() {
+    vykresliDny();
+    vykresliFiltry();
+
+    document.getElementById('bm-zobr-lineup').setAttribute('aria-pressed', stav.zobrazeni === 'lineup');
+    document.getElementById('bm-zobr-seznam').setAttribute('aria-pressed', stav.zobrazeni === 'seznam');
+    document.getElementById('bm-moje').setAttribute('aria-pressed', stav.jenMoje);
+    el.mojePocet.textContent = stav.moje.size;
+
+    var akce = viditelne();
+    var kol = kolize(akce);
+    var casove = akce.filter(function (a) { return !a.celyDen; });
+    var celodenni = akce.filter(function (a) { return a.celyDen; });
+
+    vykresliShrnuti(akce, casove, kol);
+    vykresliCelyDen(celodenni);
+
+    if (!akce.length) {
+      el.vysledek.innerHTML = prazdno();
+    } else if (stav.zobrazeni === 'lineup') {
+      el.vysledek.innerHTML = vykresliOsu(casove);
+      umistiTedVOse();
+    } else {
+      el.vysledek.innerHTML = vykresliSeznam(casove, kol);
+    }
+    el.skocTed.hidden = stavRocniku() !== 'behem';
+    zapisAdresu();
+  }
+
+  function vykresliShrnuti(akce, casove, kol) {
+    var mista = seraditMista(akce).length;
+    var popis = (!stav.den || stav.den === 'vse')
+      ? 'celý týden'
+      : (function () { var d = popisDne(stav.den); return d.nazev + ' ' + d.datum; })();
+    var h = '<div><strong>' + akce.length + '</strong> ' + sklonuj(akce.length, 'vystoupení', 'vystoupení', 'vystoupení') + '</div>';
+    h += '<div><strong>' + mista + '</strong> ' + sklonuj(mista, 'místo', 'místa', 'míst') + '</div>';
+    if (casove.length && stav.den !== 'vse') {
+      h += '<div>' + hhmm(casove[0].zac) + '–' + hhmm(casove[casove.length - 1].kon) + '</div>';
+    }
+    h += '<div style="margin-left:auto">' + popis + '</div>';
+    el.shrnuti.innerHTML = h;
+
+    var zprava = '';
+    if (prisloOdkazem) {
+      zprava = '★ Ze sdíleného odkazu přibylo ' + prisloOdkazem + ' ' +
+        sklonuj(prisloOdkazem, 'vystoupení', 'vystoupení', 'vystoupení') + ' k tvému výběru.';
+    } else if (kol.size) {
+      zprava = '⚠ Ve výběru máš ' + kol.size + ' ' + sklonuj(kol.size, 'akci, která se', 'akce, které se', 'akcí, které se') +
+        ' časově překrývá' + (kol.size === 1 ? '' : 'jí') + ' s jinou — jsou označené štítkem KOLIZE.';
+    } else if (stavRocniku() === 'pred') {
+      zprava = 'Festival ještě nezačal. Ukazujeme první den ročníku — ' +
+        DNY_INFO[0].nazev + ' ' + DNY_INFO[0].datum + '.';
+    } else if (stavRocniku() === 'po') {
+      zprava = 'Ročník už skončil. Tohle je jeho program, ne nadcházející. Nový se objeví, až ho dramaturgie zveřejní.';
+    }
+    el.stav.hidden = !zprava;
+    el.stav.textContent = zprava;
+  }
+
+  function sklonuj(n, j, d, m) { return n === 1 ? j : (n >= 2 && n <= 4 ? d : m); }
+
+  function vykresliCelyDen(seznam) {
+    el.celoden.hidden = !seznam.length;
+    if (!seznam.length) return;
+    /* Výstava otevřená od jedenácti do půlnoci by v ose udělala sloupec
+       vysoký přes celý den a ostatní bloky by se do něj schovaly. Proto má
+       vlastní pás nad osou — a v seznamu je nahoře, ne mezi sety. */
+    el.celodenPasy.innerHTML = seznam.map(function (a) {
+      return '<button type="button" class="bm-celoden__pas" data-kat="' + a.katSlug + '" data-akce="' + a.id + '"' +
+        (a.barva ? ' style="background:' + a.barva + '"' : '') + '>' +
+        esc(a.nazev) + '<small>' + hhmm(a.zac) + '–' + hhmm(a.kon) + ' · ' + esc(a.misto) + '</small></button>';
+    }).join('');
+  }
+
+  function prazdno() {
+    if (stavRocniku() === 'prazdno') {
+      return '<div class="bm-prazdno"><h3>Program se připravuje</h3>' +
+        '<p>Dramaturgie ho ladí. Jakmile bude hotový, objeví se tady.</p>' +
+        '<p><a class="bm-btn bm-btn--zvyrazneny" style="text-decoration:none" href="/aktuality/">Aktuality</a></p></div>';
+    }
+    return '<div class="bm-prazdno"><h3>Tady zatím nic není</h3>' +
+      '<p>' + (stav.jenMoje ? 'V tenhle den nemáš vybranou žádnou akci. Hvězdičkou si přidej, co tě zajímá.'
+        : 'Zkus zrušit filtry nebo přepnout den.') + '</p></div>';
+  }
+
+  /* ── Lineup (časová osa) ───────────────────────────────────────────── */
+
+  function vykresliOsu(akce) {
+    if (!akce.length) return prazdno();
+
+    var mista = seraditMista(akce);
+    var zac = new Date(Math.min.apply(null, akce.map(function (a) { return +a.zac; })));
+    var kon = new Date(Math.max.apply(null, akce.map(function (a) { return +a.kon; })));
+    zac.setMinutes(0, 0, 0);
+    kon.setMinutes(0, 0, 0); kon.setHours(kon.getHours() + 1);
+
+    var minut = (kon - zac) / 60000;
+    var pxm = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--osa-px-za-minutu')) || 1.4;
+    var vyska = Math.round(minut * pxm);
+
+    var casy = '';
+    for (var t = new Date(zac); t < kon; t.setHours(t.getHours() + 1)) {
+      casy += '<div class="bm-osa__cas" style="top:' + Math.round((t - zac) / 60000 * pxm) + 'px">' + hhmm(t) + '</div>';
+    }
+
+    var hlavicky = '', sloupce = '';
+    mista.forEach(function (m) {
+      hlavicky += '<div class="bm-osa__misto" title="' + esc(m.nazev) + '"><b>' + esc(m.nazev) + '</b>' +
+        (m.bezbarierove ? '<span>bezbariérové</span>' : '') + '</div>';
+
+      var vMiste = akce.filter(function (a) { return a.mistoSlug === m.slug; })
+        .sort(function (a, b) { return a.zac - b.zac; });
+      sloupce += '<div class="bm-osa__sloupec" data-sloupec="' + m.slug + '">' +
+        vMiste.map(function (a) { return blokOsy(a, zac, pxm, vMiste); }).join('') +
+        '</div>';
+    });
+
+    return '<div class="bm-osa" id="bm-osa" style="--sloupcu:' + mista.length +
+      ';--vyska:' + vyska + 'px;--hodina:' + Math.round(60 * pxm) + 'px">' +
+      '<div class="bm-osa__vnitrek">' +
+      '<div class="bm-osa__roh"></div>' + hlavicky +
+      '<div class="bm-osa__casy">' + casy + '</div>' + sloupce +
+      '</div></div>';
+  }
+
+  function blokOsy(a, zacDne, pxm, sousede) {
+    var top = Math.round((a.zac - zacDne) / 60000 * pxm);
+    var v = Math.max(26, Math.round((a.kon - a.zac) / 60000 * pxm) - 3);
+    /* Na jednom místě se občas dvě akce překrývají (workshop běžící přes
+       koncert). Místo schovávání se rozdělí šířka sloupce. */
+    var prekryv = sousede.filter(function (b) { return b !== a && b.zac < a.kon && a.zac < b.kon; });
+    var sirka = '';
+    if (prekryv.length) {
+      var skupina = [a].concat(prekryv).sort(function (x, y) { return x.zac - y.zac || x.id - y.id; });
+      var i = skupina.indexOf(a), n = skupina.length;
+      sirka = 'left:calc(3px + ' + (i / n * 100) + '%);width:calc(' + (100 / n) + '% - 6px);right:auto;';
+    }
+    return '<button type="button" class="bm-osa__blok' +
+      (v < 42 ? ' bm-osa__blok--kratky' : '') +
+      (a.top ? ' bm-osa__blok--top' : '') +
+      (stav.moje.has(a.id) ? ' bm-osa__blok--moje' : '') +
+      '" data-kat="' + a.katSlug + '" data-akce="' + a.id + '"' +
+      ' style="top:' + top + 'px;height:' + v + 'px;' + sirka +
+      (a.barva ? 'background:' + a.barva + ';' : '') + '">' +
+      '<span>' + esc(a.nazev) + '</span>' +
+      '<small>' + hhmm(a.zac) + '–' + hhmm(a.kon) + (a.rezervace ? ' · rezervace' : '') + '</small>' +
+      '</button>';
+  }
+
+  function umistiTedVOse() {
+    if (stavRocniku() !== 'behem' || klicDne(TED) !== stav.den) return;
+    var osa = document.getElementById('bm-osa');
+    if (!osa) return;
+    var akce = viditelne().filter(function (a) { return !a.celyDen; });
+    if (!akce.length) return;
+    var zac = new Date(Math.min.apply(null, akce.map(function (a) { return +a.zac; })));
+    zac.setMinutes(0, 0, 0);
+    var pxm = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--osa-px-za-minutu')) || 1.4;
+    var top = Math.round((TED - zac) / 60000 * pxm);
+    if (top < 0) return;
+    osa.querySelectorAll('.bm-osa__sloupec').forEach(function (s, i) {
+      var c = document.createElement('div');
+      c.className = 'bm-osa__ted' + (i === 0 ? ' bm-osa__ted--popisek' : '');
+      c.style.top = top + 'px';
+      s.appendChild(c);
+    });
+    osa.scrollTop = Math.max(0, top - 140);
+  }
+
+  /* ── Seznam ────────────────────────────────────────────────────────── */
+
+  function vykresliSeznam(akce, kol) {
+    if (!akce.length) return prazdno();
+    var html = '<div class="bm-seznam">', poslDen = '', poslCas = '';
+    akce.forEach(function (a) {
+      if (stav.den === 'vse' && a.den !== poslDen) {
+        poslDen = a.den; poslCas = '';
+        var d = popisDne(a.den);
+        html += (html ? '</div></section>' : '') +
+          '<div class="bm-slot__den">' + d.nazev + ' ' + d.datum + '</div>';
+        html = html.replace('</div></section><div class="bm-slot__den">', '</div></section><div class="bm-slot__den">');
+      }
+      var cas = hhmm(a.zac);
+      if (cas !== poslCas) {
+        if (poslCas) html += '</div></section>';
+        poslCas = cas;
+        /* Nadpis s časem drží nahoře, takže při scrollování je pořád vidět,
+           u kolikáté hodiny člověk je. To je celá odpověď na otázku
+           „co hraje ve 20:00“ — všechno, co je pod tímhle nadpisem. */
+        html += '<section class="bm-slot"><h3 class="bm-slot__cas"><b>' + cas + '</b>' +
+          '<span>' + pocetVSlotu(akce, cas) + '</span></h3><div class="bm-karty">';
+      }
+      html += karta(a, kol.has(a.id));
+    });
+    return html + (poslCas ? '</div></section>' : '') + '</div>';
+  }
+
+  function pocetVSlotu(akce, cas) {
+    var n = akce.filter(function (a) { return hhmm(a.zac) === cas; }).length;
+    return n > 1 ? n + ' akce současně' : '';
+  }
+
+  function karta(a, jeKolize) {
+    var moje = stav.moje.has(a.id);
+    return '<article class="bm-karta' + (moje ? ' bm-karta--moje' : '') +
+      (bezi(a) ? ' bm-karta--ted' : '') + '" data-kat="' + a.katSlug + '" data-akce="' + a.id + '">' +
+      '<div class="bm-karta__pruh"' + (a.barva ? ' style="background:' + a.barva + '"' : '') + '></div>' +
+      '<div class="bm-karta__telo">' +
+      '<div class="bm-karta__meta">' +
+      '<span>' + hhmm(a.zac) + '–' + hhmm(a.kon) + '</span>' +
+      '<button type="button" class="bm-stitek bm-stitek--misto" data-filtr-misto="' + a.mistoSlug + '">' +
+      esc(a.misto) + '</button>' +
+      (a.bezbarierove ? '<span class="bm-bez-barier">bez bariér</span>' : '') +
+      '</div>' +
+      '<h3 class="bm-karta__nazev"><button type="button" data-akce="' + a.id + '">' + esc(a.nazev) + '</button></h3>' +
+      '<div class="bm-karta__stitky">' +
+      (a.kat ? '<span class="bm-stitek bm-stitek--kat"' + (a.barva ? ' style="background:' + a.barva + '"' : '') + '>' + esc(a.kat) + '</span>' : '') +
+      (a.zanr ? '<span class="bm-stitek">' + esc(a.zanr) + '</span>' : '') +
+      (a.rezervace ? '<span class="bm-stitek bm-stitek--rez">' + (a.rezervacePovinna ? 'Nutná rezervace' : 'Rezervace') + '</span>' : '') +
+      (a.top ? '<span class="bm-stitek bm-stitek--top">Top</span>' : '') +
+      (bezi(a) ? '<span class="bm-stitek bm-stitek--ted">Teď hraje</span>' : '') +
+      (jeKolize ? '<span class="bm-stitek bm-stitek--kolize">Kolize</span>' : '') +
+      '</div></div>' +
+      '<button type="button" class="bm-hvezda" data-hvezda="' + a.id + '" aria-pressed="' + moje + '" ' +
+      'aria-label="' + (moje ? 'Odebrat z mého programu' : 'Přidat do mého programu') + '">★</button>' +
+      '</article>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     7. Detail akce
+     ───────────────────────────────────────────────────────────────────── */
+
+  function otevriDetail(id) {
+    var a = AKCE.filter(function (x) { return x.id === id; })[0];
+    if (!a) return;
+    var zaroven = AKCE.filter(function (x) {
+      return x.id !== a.id && !x.celyDen && x.zac < a.kon && a.zac < x.kon;
+    }).slice(0, 6);
+    var moje = stav.moje.has(a.id);
+
+    el.detailObsah.innerHTML =
+      /* Když obrázek chybí nebo se nenačte, ať po něm nezbyde prázdná díra. */
+      (a.obraz ? '<img class="bm-detail__obraz" src="' + esc(a.obraz) + '" alt="" ' +
+        'onerror="this.remove()">' : '') +
+      '<div class="bm-detail__telo">' +
+      '<p class="bm-detail__meta">' + popisDne(a.den).nazev + ' ' + popisDne(a.den).datum + ' · ' +
+      hhmm(a.zac) + '–' + hhmm(a.kon) + ' · ' + esc(a.misto) +
+      (a.bezbarierove ? ' · bezbariérové' : '') + '</p>' +
+      '<h2>' + esc(a.nazev) + '</h2>' +
+      '<div class="bm-karta__stitky">' +
+      (a.kat ? '<span class="bm-stitek bm-stitek--kat" data-kat="' + a.katSlug + '">' + esc(a.kat) + '</span>' : '') +
+      (a.zanr ? '<span class="bm-stitek">' + esc(a.zanr) + '</span>' : '') +
+      (a.zeme ? '<span class="bm-stitek">' + esc(a.zeme) + '</span>' : '') +
+      (a.rezervace ? '<span class="bm-stitek bm-stitek--rez">' + (a.rezervacePovinna ? 'Nutná rezervace' : 'Rezervace') + '</span>' : '') +
+      (a.top ? '<span class="bm-stitek bm-stitek--top">Top představení</span>' : '') +
+      '</div>' +
+      (a.popis ? '<div class="bm-detail__popis">' + esc(a.popis) + '…</div>' : '') +
+      (zaroven.length ? '<div class="bm-detail__zaroven"><h3>Ve stejnou dobu jinde</h3><ul>' +
+        zaroven.map(function (z) {
+          return '<li><b>' + hhmm(z.zac) + '</b>' + esc(z.nazev) +
+            ' <span style="color:var(--bm-seda)">· ' + esc(z.misto) + '</span></li>';
+        }).join('') + '</ul></div>' : '') +
+      '<div class="bm-detail__akce">' +
+      '<button type="button" class="bm-btn' + (moje ? ' bm-btn--zvyrazneny' : '') + '" data-hvezda="' + a.id + '" aria-pressed="' + moje + '">' +
+      '★ ' + (moje ? 'V mém programu' : 'Přidat do mého programu') + '</button>' +
+      '<a class="bm-btn bm-btn--hlavni" href="' + esc(a.url) + '">Detail akce</a>' +
+      '</div></div>';
+    el.detail.showModal();
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     8. Události
+     ───────────────────────────────────────────────────────────────────── */
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-den],[data-hvezda],[data-akce],[data-filtr-misto],[data-filtr-kat]');
+    if (!t) return;
+
+    if (t.hasAttribute('data-hvezda')) {
+      var hid = +t.getAttribute('data-hvezda');
+      if (stav.moje.has(hid)) stav.moje.delete(hid); else stav.moje.add(hid);
+      ulozMoje();
+      if (el.detail.open) otevriDetail(hid);
+      vykresli();
+      ev.stopPropagation();
+      return;
+    }
+    if (t.hasAttribute('data-filtr-misto')) {
+      var ms = t.getAttribute('data-filtr-misto');
+      if (stav.mista.has(ms)) stav.mista.delete(ms); else stav.mista.add(ms);
+      vykresli();
+      ev.stopPropagation();
+      return;
+    }
+    if (t.hasAttribute('data-filtr-kat')) {
+      var ks = t.getAttribute('data-filtr-kat');
+      if (stav.kategorie.has(ks)) stav.kategorie.delete(ks); else stav.kategorie.add(ks);
+      vykresli();
+      return;
+    }
+    if (t.hasAttribute('data-den')) {
+      stav.den = t.getAttribute('data-den');
+      if (stav.den === 'vse' && stav.zobrazeni === 'lineup') stav.zobrazeni = 'seznam';
+      /* Scény se den ode dne mění, kategorie ne. Filtr místa by tedy po
+         přepnutí dne většinou ukázal prázdno — proto se maže, kategorie ne. */
+      stav.mista.clear();
+      vykresli();
+      return;
+    }
+    if (t.hasAttribute('data-akce')) {
+      otevriDetail(+t.getAttribute('data-akce'));
+    }
+  });
+
+  document.getElementById('bm-zobr-lineup').addEventListener('click', function () {
+    stav.zobrazeni = 'lineup';
+    if (stav.den === 'vse') stav.den = vychoziDen();
+    vykresli();
+  });
+  document.getElementById('bm-zobr-seznam').addEventListener('click', function () {
+    stav.zobrazeni = 'seznam';
+    vykresli();
+  });
+  /* Vybrané akce jsou skoro vždycky rozházené po celém týdnu. Kdyby
+     „Jen moje“ nechalo zapnutý jeden den, většina lidí by poprvé uviděla
+     prázdnou stránku. Proto se zapnutím přepne na celý týden a při vypnutí
+     se vrátí den, na kterém člověk byl. */
+  var denPredMoje = null;
+  document.getElementById('bm-moje').addEventListener('click', function () {
+    stav.jenMoje = !stav.jenMoje;
+    if (stav.jenMoje) {
+      denPredMoje = stav.den;
+      stav.den = 'vse';
+      stav.zobrazeni = 'seznam';
+    } else if (denPredMoje) {
+      stav.den = denPredMoje;
+      denPredMoje = null;
+    }
+    vykresli();
+  });
+  document.getElementById('bm-filtry-prepinac').addEventListener('click', function () {
+    var p = document.getElementById('bm-filtry');
+    p.hidden = !p.hidden;
+    this.setAttribute('aria-expanded', String(!p.hidden));
+  });
+  document.getElementById('bm-zrusit-filtry').addEventListener('click', function () {
+    stav.mista.clear(); stav.kategorie.clear(); stav.hledani = '';
+    document.getElementById('bm-hledani').value = '';
+    vykresli();
+  });
+  document.getElementById('bm-sdilet').addEventListener('click', function () {
+    var u = location.origin + location.pathname + '?den=' + stav.den +
+      '&zobrazeni=' + stav.zobrazeni + '&moje=' + Array.from(stav.moje).join(',');
+    var btn = this;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(u).then(function () {
+        btn.textContent = 'Odkaz zkopírován ✓';
+        setTimeout(function () { btn.textContent = 'Sdílet můj výběr'; }, 2200);
+      });
+    } else {
+      prompt('Odkaz na tvůj výběr:', u);
+    }
+  });
+  document.getElementById('bm-skoc-ted').addEventListener('click', function () {
+    stav.den = vychoziDen();
+    vykresli();
+    var ted = document.querySelector('.bm-osa__ted, .bm-karta--ted');
+    if (ted) ted.scrollIntoView({ block: 'center' });
+  });
+
+  var casovacHledani;
+  document.getElementById('bm-hledani').addEventListener('input', function (e) {
+    var v = bezDiakritiky(e.target.value.trim());
+    clearTimeout(casovacHledani);
+    casovacHledani = setTimeout(function () { stav.hledani = v; vykresli(); }, 180);
+  });
+
+  document.getElementById('bm-detail-zavrit').addEventListener('click', function () { el.detail.close(); });
+  el.detail.addEventListener('click', function (e) { if (e.target === el.detail) el.detail.close(); });
+
+  /* ─────────────────────────────────────────────────────────────────────
+     9. Start
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Kdyby cokoli spadlo, zůstane na stránce záchranný blok s odkazy
+     do kalendáře — návštěvník se k programu dostane i tak. */
+  /* Odkrýt se musí dřív, než se kreslí: osa si po vykreslení sama doscrolluje
+     na „teď“, a to v zakrytém prvku nejde spočítat (nemá výšku). */
+  document.getElementById('bm-program').hidden = false;
+  try {
+    document.getElementById('bm-rocnik-popis').textContent =
+      'Program ročníku ' + (DATA.rocnik ? DATA.rocnik.name : '');
+
+    /* ?akce=<id> otevře rovnou detail — aby se dala poslat jedna kapela. */
+    var odkazNaAkci = +param.get('akce');
+    if (odkazNaAkci) {
+      var cil = AKCE.filter(function (a) { return a.id === odkazNaAkci; })[0];
+      if (cil) stav.den = cil.den;
+    }
+    vykresli();
+    document.getElementById('bm-nouze').remove();
+    if (odkazNaAkci) otevriDetail(odkazNaAkci);
+  } catch (e) {
+    document.getElementById('bm-program').hidden = true;
+    if (window.console) console.error('[bm-program]', e);
+    return;
+  }
+
+  /* Posun lepivých nadpisů v seznamu o výšku ovládacího pruhu. */
+  function dopocitejOffset() {
+    var o = document.querySelector('.bm-ovladani');
+    if (o) document.documentElement.style.setProperty('--sticky-offset', o.offsetHeight + 'px');
+  }
+  dopocitejOffset();
+  window.addEventListener('resize', dopocitejOffset);
+})();
+</script>
+</body>
+</html>

@@ -31,6 +31,7 @@ v [docs/wordpress/00-analyza.md](docs/wordpress/00-analyza.md).
 | [docs/wordpress/07-nasazeni.md](docs/wordpress/07-nasazeni.md) | Jak se web nasadil a na co jsem narazil |
 | [docs/wordpress/08-vzhled.md](docs/wordpress/08-vzhled.md) | Jak je postavený vzhled a kde se co mění |
 | [docs/wordpress/09-schuzka-marketing.md](docs/wordpress/09-schuzka-marketing.md) | Příprava na schůzku se zadavatelem |
+| [docs/wordpress/11-lineup-navrh/](docs/wordpress/11-lineup-navrh/) | **Návrh stránky Program a lineup** s klikatelným prototypem. Čeká na schválení, nic z toho není postavené |
 
 Dokumenty `01`–`04` jsou podkladová analýza z první fáze: otázky na zadavatele, detailní návrh
 modulů, ověřená fakta o pluginech a test ovládání WordPressu přes MCP. Jsou referenční —
