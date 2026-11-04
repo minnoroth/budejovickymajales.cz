@@ -1111,11 +1111,15 @@ a { color: var(--bm-hlavni-tmav); }
     var html = '<div class="bm-seznam">', poslDen = '', poslCas = '';
     akce.forEach(function (a) {
       if (stav.den === 'vse' && a.den !== poslDen) {
-        poslDen = a.den; poslCas = '';
+        /* Zavřít se musí jen slot, který je opravdu otevřený. Podmínka
+           dřív koukala na `html`, jenže to je po inicializaci neprázdné,
+           takže se u prvního dne vypsalo </div></section> navíc a předčasně
+           zavřelo obal .bm-seznam — celý týdenní výpis pak vypadl z odsazení. */
+        if (poslCas) { html += '</div></section>'; }
+        poslDen = a.den;
+        poslCas = '';
         var d = popisDne(a.den);
-        html += (html ? '</div></section>' : '') +
-          '<div class="bm-slot__den">' + d.nazev + ' ' + d.datum + '</div>';
-        html = html.replace('</div></section><div class="bm-slot__den">', '</div></section><div class="bm-slot__den">');
+        html += '<div class="bm-slot__den">' + d.nazev + ' ' + d.datum + '</div>';
       }
       var cas = hhmm(a.zac);
       if (cas !== poslCas) {
