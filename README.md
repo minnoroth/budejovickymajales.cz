@@ -48,6 +48,7 @@ wordpress/
 ```
 
 Jak se vzhled postaví znovu od nuly, popisuje [wordpress/vzhled/README.md](wordpress/vzhled/README.md).
+Pravidla práce v repozitáři a nasbírané pasti jsou v [CLAUDE.md](CLAUDE.md).
 Přihlašovací údaje v repozitáři nejsou a nebudou — **repozitář je veřejný**. Skripty je čtou
 ze souboru, na který ukazuje proměnná `BM_WP`.
 
