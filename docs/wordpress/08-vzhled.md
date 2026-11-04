@@ -19,7 +19,8 @@ přepisování stylů. Když přijde nová grafika na konci roku 2026, tohle je 
 | 3–6 | šedé | text od nejsilnějšího po linky |
 | 7–9 | světlé | pozadí a bílá |
 | 10 | `#EE7270` korálová | druhý barevný pás (Volba krále) |
-| 11–14 | — | systémové stavy (úspěch, chyba…), vzhled se jich netýká |
+| 11–13 | — | systémové stavy (úspěch, informace, chyba), vzhled se jich netýká |
+| 14 | `#B6B4DA` levandulová | třetí barevný pás a kategorie Divadlo |
 | 15 | `#F8E862` žlutá | akcent — tlačítka, běžící pás, aktivní položka menu |
 
 Levandulová `#B6B4DA` se do palety nevešla a bydlí jako proměnná `--bm-levandulova`
@@ -76,7 +77,10 @@ jako logo a v Hlavička → Logo přepnout rozvržení na „jen logo".
   s podpoložkami, plus žluté tlačítko na e-shop.
 - **Titulkový pás** na všech ostatních stránkách a u příspěvků.
 - **Patička** — tmavá, se znakem a jednou větou.
-- **Kalendář akcí** — barvy pluginu dotažené na paletu ročníku.
+- **Kalendář akcí** — barvy pluginu dotažené na paletu ročníku a od 4. 11. 2026
+  i celý vzhled výpisů: seznam, měsíc, den a detail akce. Je v samostatném
+  [`bm-akce.css`](../../wordpress/vzhled/bm-akce.css) a popisuje ho
+  [10-vypis-akci-navrh.md](10-vypis-akci-navrh.md).
 
 ## Co hotové není
 
@@ -115,8 +119,10 @@ python3 program.py      # obsah stránky Program
 Soubor s údaji má tvar `klíč = hodnota` a potřebuje `web`, `user`, `pass`
 (aplikační heslo z Uživatelé → Profil) a `adminpass` (jen pro Customizer).
 
-Zdrojem pravdy pro doplňkové CSS je [`wordpress/vzhled/bm.css`](../../wordpress/vzhled/bm.css).
-Když ho někdo upraví přímo v administraci, nezapomeňte změnu vrátit i sem —
+Zdrojem pravdy pro doplňkové CSS jsou **dva** soubory, které `nastaveni.py` spojí
+v tomhle pořadí (konstanta `CSS_SOUBORY`): [`bm.css`](../../wordpress/vzhled/bm.css)
+a za ním [`bm-akce.css`](../../wordpress/vzhled/bm-akce.css) s kalendářem.
+Když je někdo upraví přímo v administraci, nezapomeňte změnu vrátit i sem —
 jinak příští běh `nastaveni.py` úpravu přepíše.
 
 ## Dvě pasti, na které jsem narazil

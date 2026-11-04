@@ -42,20 +42,20 @@ def sloupce(items):
     return f'<!-- wp:columns -->\n<div class="wp-block-columns">{inner}</div>\n<!-- /wp:columns -->\n'
 
 
-T, K, Z, L = "var(--global-palette1)", "var(--global-palette10)", "var(--global-palette15)", "var(--bm-levandulova)"
+T, K, Z, L = "var(--global-palette1)", "var(--global-palette10)", "var(--global-palette15)", "var(--global-palette14)"
 B3, B9 = "var(--global-palette3)", "var(--global-palette9)"
 
 obsah = ""
 
 # hero
 obsah += sekce("bm-pas-hlavni",
-    odstavec("30. 5. – 5. 6. 2027", "bm-nadlinka")
+    odstavec("[bm_termin]", "bm-nadlinka")
     + nadpis("Studentský festival, který dělá věci jinak.", 1)
     + odstavec("Sedm dní programu po celých Budějovicích. Divadlo, hudba, filmy, přednášky i volba krále. Vstup na všechno zdarma.")
     + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/program/">Prohlédnout program</a></p>\n<!-- /wp:html -->\n')
 
 # běžící pás
-slogan = "30. 5. – 5. 6. 2027 · VSTUP ZDARMA · SEDM DNÍ · 100+ AKCÍ · ČESKÉ BUDĚJOVICE · "
+slogan = "[bm_termin] · VSTUP ZDARMA · SEDM DNÍ · 100+ AKCÍ · ČESKÉ BUDĚJOVICE · "
 kopie = ('<span class="bm-bezici__text">' + slogan * 4 + '</span>'
          '<span class="bm-bezici__text" aria-hidden="true">' + slogan * 4 + '</span>')
 obsah += ('<!-- wp:html -->\n<div class="bm-bezici alignfull">'

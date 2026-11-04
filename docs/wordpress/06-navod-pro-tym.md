@@ -780,9 +780,12 @@ A nese datumy festivalu pro úvodní stránku.
 6. **Description** — nepovinné.
 7. **Datum od** — klikni do pole, vyskočí kalendář, vyber **první den festivalu**.
 8. **Datum do** — stejně vyber **poslední den festivalu**.
-9. **Text na homepage** — volný text s termínem, který se vypisuje na úvodní stránce.
-   Napiš ho přesně tak, jak to má lidi vidět, i s mezerami a pomlčkou:
-   `30. 5. – 5. 6. 2027`
+9. **Text na homepage** — volný text s termínem, který se vypisuje na úvodní stránce
+   nad nadpisem a v běžícím pásu. Napiš ho přesně tak, jak to mají lidi vidět,
+   i s mezerami a pomlčkou: `30. 5. – 5. 6. 2027`
+
+   > Když ho necháš prázdný, web si termín poskládá z **Datum od** a **Datum do**
+   > sám. Vyplň ho jen tehdy, když chceš jiné znění.
 10. Klikni na **Přidat ročník**.
 
 > **Zakládej ročník jen jednou.** Když se překlepneš, **uprav existující** termín —
