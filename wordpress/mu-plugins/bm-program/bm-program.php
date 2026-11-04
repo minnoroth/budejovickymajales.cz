@@ -97,7 +97,10 @@ function bm_program_zkratka() {
 		return '<div id="bm-program" class="bmp" data-bm-zaklad="' . esc_url( rest_url() ) . '">'
 			. '<div id="bm-nouze" class="bmp-nouze">'
 			. '<h2>Program</h2>'
-			. '<p>Interaktivní program se nenačetl. Celý program je dostupný i v kalendáři akcí:</p>'
+			// Tahle věta visí na stránce i během načítání, které při studené
+			// cache trvá několik sekund. Nesmí proto znít jako hlášení o chybě
+			// — musí dávat smysl, ať se program nakonec vykreslí, nebo ne.
+			. '<p>Program se načítá. Celý je dostupný i v kalendáři akcí:</p>'
 			. '<ul>' . $polozky . '</ul>'
 			. '</div></div>';
 	} catch ( Throwable $e ) {

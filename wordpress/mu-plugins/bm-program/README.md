@@ -147,6 +147,22 @@ Návod tím ale neztrácí smysl: zaškrtnutý ročník pořád něco znamená p
 Jak tu větu přeformulovat, **je rozhodnutí pro zadavatele**, ne pro toho, kdo opravuje
 program. Proto je tady poznámka a ne oprava.
 
+## Proč to při první návštěvě trvá
+
+Každý dotaz na REST API stojí na sdíleném Wedosu **přes vteřinu**, i když vrací pár
+kilobajtů. Naměřeno 4. 11. 2026: `wp/v2/rocnik` 1,25 s, sonda na ročník 1,5 s, stránka
+akcí 1,3 s.
+
+Pod tři kolečka se to dostat nedá — termín ročníku se musí znát dřív, než se dá zeptat na
+akce. Všechno ostatní jede souběžně: sondy na ročníky po trojicích, a jakmile je ročník
+známý, zbývající stránky akcí spolu s barvami kategorií a bezbariérovostí míst naráz. Tím
+se celek drží kolem **4 vteřin při studené cache** (101 akcí ročníku 2026); postupné
+dotazování stálo 5,2 s.
+
+Po tu dobu je na stránce vidět záchranný blok. **Proto v něm stojí „Program se načítá",
+a ne „Program se nenačetl"** — ta věta musí dávat smysl, ať se program nakonec vykreslí,
+nebo ne.
+
 ## Jak to ověřit, když je na webu málo dat
 
 ```bash
