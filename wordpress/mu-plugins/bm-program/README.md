@@ -159,7 +159,9 @@ První běh prožene datovou vrstvu 102 vystoupeními a 28 místy a kontroluje m
 počty akcí a scén po dnech sedí na tabulku z návrhu. Druhý běh ověřuje mechaniku proti
 skutečnému API a na webu nic nemění.
 
-`overeni.mjs` je vývojářský nástroj — **na hosting se nenahrává.**
+`overeni.mjs` je vývojářský nástroj. `upload.py` prochází složky do hloubky, takže ho na
+hosting nahraje spolu se zbytkem — nevadí to: WordPress `.mjs` nespouští, soubor nic
+nevykonává a žádné přihlašovací údaje v něm nejsou.
 
 ## Jak ověřit, že doplněk žije
 
