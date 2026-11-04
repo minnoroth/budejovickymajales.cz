@@ -30,6 +30,7 @@ v [docs/wordpress/00-analyza.md](docs/wordpress/00-analyza.md).
 | [docs/wordpress/06-navod-pro-tym.md](docs/wordpress/06-navod-pro-tym.md) | Návod pro toho, kdo web plní. Česky, krok za krokem |
 | [docs/wordpress/07-nasazeni.md](docs/wordpress/07-nasazeni.md) | Jak se web nasadil a na co jsem narazil |
 | [docs/wordpress/08-vzhled.md](docs/wordpress/08-vzhled.md) | Jak je postavený vzhled a kde se co mění |
+| [docs/wordpress/10-vypis-akci-navrh.md](docs/wordpress/10-vypis-akci-navrh.md) | Vzhled výpisu akcí a kde je strop čistého CSS |
 | [docs/wordpress/09-schuzka-marketing.md](docs/wordpress/09-schuzka-marketing.md) | Příprava na schůzku se zadavatelem |
 
 Dokumenty `01`–`04` jsou podkladová analýza z první fáze: otázky na zadavatele, detailní návrh

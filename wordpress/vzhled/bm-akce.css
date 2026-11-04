@@ -1,0 +1,1071 @@
+/* ══════════════════════════════════════════════════════════════
+   Budějovický Majáles — výpis akcí (The Events Calendar)
+
+   Navazuje na bm.css a vkládá se ZA něj. Bere odtamtud
+   --bm-levandulova, --bm-ramecek a --bm-radius; samostatně
+   tenhle soubor nefunguje. Nahrává ho nastaveni.py společně
+   s bm.css do Customizeru → Doplňkové CSS.
+
+   TŘI PRAVIDLA, KTERÁ TU PLATÍ
+
+   1. Barvy nikdy natvrdo. Všechno jde přes var(--global-paletteN),
+      aby rebranding na nový ročník zůstal přepsáním palety
+      v Customizeru. Platí to i pro barvy kategorií.
+
+   2. Žádné úpravy šablon pluginu. Každý selektor míří na třídu,
+      kterou The Events Calendar sám vypisuje. Když plugin třídu
+      přejmenuje, zmizí ozdoba — ne obsah.
+
+   3. Každé pravidlo začíná :is(#primary, body).
+      Není to kvůli výběru (body projde vždycky), ale kvůli váze:
+      Kadence píše barvy kalendáře selektory jako
+      „#primary .tribe-events .tribe-common-h6 { color: … }".
+      ID přebije libovolný počet tříd, takže obyčejné
+      „.tribe-events .tribe-common-h6" by neprošlo. :is() si bere
+      váhu nejsilnější položky, tedy #primary — a tím se váha
+      dorovná. Když budeš přidávat pravidlo, zachovej prefix.
+   ══════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════
+   0 — SPOLEČNÉ: tokeny, barvy kategorií, proměnné pluginu
+   ══════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) :is(.tribe-common, .tribe-events, .tribe-events-single) {
+  /* Plakátový stín: posun bez rozostření, jako na úvodní stránce. */
+  --bm-stin: 5px 5px 0 0 var(--global-palette3);
+  --bm-stin-hover: 9px 9px 0 0 var(--global-palette3);
+
+  /* Výchozí barva kategorie. Akce bez kategorie dostane černé
+     razítko — čitelné, nenápadné, a je hned vidět, že chybí. */
+  --bm-kat: var(--global-palette3);
+  --bm-kat-text: var(--global-palette9);
+
+  /* Proměnné pluginu. Nejodolnější vrstva ze všech: tohle čte
+     The Events Calendar sám, takže i místa, na která se níž
+     nesahá, zešednou do palety ročníku. Blok sem přešel z bm.css,
+     ať je všechno ke kalendáři na jednom místě. */
+  --tec-color-accent-primary-hover: var(--global-palette2);
+  --tec-color-accent-primary-active: var(--global-palette2);
+  --tec-color-link-accent-hover: var(--global-palette2);
+  --tec-color-accent-primary-background: var(--global-palette7);
+  --tec-color-background-primary-multiday-hover: var(--global-palette7);
+  --tec-color-accent-primary-week-event: var(--global-palette7);
+  --tec-color-accent-primary-week-event-hover: var(--global-palette7);
+  --tec-color-text-primary: var(--global-palette3);
+  --tec-color-text-event-title: var(--global-palette3);
+  --tec-color-border-default: var(--global-palette3);
+  --tec-color-border-secondary: var(--global-palette3);
+  --tec-color-border-secondary-month-grid: var(--global-palette3);
+}
+
+/* ── Barvy kategorií ──────────────────────────────────────────
+   Plugin dává každé akci třídu podle rubriky (tribe_events_cat-hudba)
+   a must-use doplněk bm-rubriky.php hlídá, že akce se žánrem má
+   vždycky i nadřazenou kategorii. Na tyhle třídy se dá spolehnout.
+
+   Barvy ročníku jsou čtyři, obsahových kategorií šest. Pět jich
+   tedy má vlastní barvu a zbytek (obě scény, Online, akce bez
+   kategorie) je černý. Vědomý kompromis, ne opomenutí —
+   zdůvodnění v docs/wordpress/10-vypis-akci-navrh.md.
+
+   Text je na každé barvě černý kromě tmavé zelenomodré a černé,
+   kde by měl kontrast 3,5 : 1 a neprošel by.
+
+   Druhý selektor v každé dvojici je detail akce: tam plugin třídu
+   kategorie pověsí až na vnořený div pod pásem s datem, takže se
+   k pásu dědičností nedostane. :has() ji vytáhne nahoru.
+
+   Proč je :has() ještě zabalené v :is(): kdyby ho prohlížeč neuměl,
+   zahodil by celé pravidlo včetně prvního selektoru a barvy kategorií
+   by zmizely i z výpisů. Uvnitř :is() se neznámý selektor jen
+   přeskočí, takže by přišel o barvu jen pás na detailu. */
+:is(#primary, body) .tribe-events .tribe_events_cat-hudba,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-hudba)) {
+  --bm-kat: var(--global-palette1);
+  --bm-kat-text: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe_events_cat-divadlo,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-divadlo)) {
+  --bm-kat: var(--bm-levandulova);
+  --bm-kat-text: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe_events_cat-filmy,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-filmy)) {
+  --bm-kat: var(--global-palette15);
+  --bm-kat-text: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe_events_cat-program-pro-nejmensi,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-program-pro-nejmensi)) {
+  --bm-kat: var(--global-palette2);
+  --bm-kat-text: var(--global-palette9);
+}
+/* Volba krále je korálová i na úvodní stránce. Stojí schválně až
+   tady: když akce spadne do dvou barevných kategorií, vyhraje
+   poslední pravidlo a to má být tohle. */
+:is(#primary, body) .tribe-events .tribe_events_cat-volba-krale,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-volba-krale)) {
+  --bm-kat: var(--global-palette10);
+  --bm-kat-text: var(--global-palette3);
+}
+
+/* Pojistka pro funkci „Category Colors" (Akce → Nastavení →
+   Zobrazení → Category Colors). Když ji tým zapne, plugin si
+   vygeneruje vlastní pravidla s barvami zadanými natvrdo
+   v administraci. Tahle tři přiřazení je přebijí a vrátí barvu
+   do palety ročníku, takže rebranding dál znamená jen přepsat
+   paletu v Customizeru. Hranatý selektor bere všechny akce
+   bez ohledu na to, jakou rubriku mají. */
+:is(#primary, body) .tribe-events [class*="tribe_events_cat-"],
+:is(#primary, body) .tribe-events-single [class*="tribe_events_cat-"] {
+  --tec-color-category-primary: var(--bm-kat);
+  --tec-color-category-secondary: var(--global-palette9);
+  --tec-color-category-text: var(--bm-kat-text);
+}
+
+/* Názvy akcí jsou tučné jako nadpisy na zbytku webu. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title,
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-title,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month-mobile-events__mobile-event-title,
+:is(#primary, body) .tribe-events-single .tribe-events-single-event-title {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   1 — LIŠTA FILTRŮ (hledání, přepínač pohledů, horní lišta)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Celá lišta je jeden plakátový blok místo tenké šedé linky.
+   Kadence jí dává pozadí i rámeček selektorem o váze 1-4-0,
+   proto je tady selektor stejně dlouhý. */
+:is(#primary, body) .tribe-events .tribe-events-header .tribe-events-header__events-bar.tribe-events-c-events-bar,
+:is(#primary, body) .tribe-events .tribe-events-c-events-bar {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  box-shadow: var(--bm-stin);
+  background-color: var(--global-palette9);
+  padding: 8px 10px;
+  margin-bottom: 26px;
+}
+
+/* Pole hledání bez vlastního rámečku — rámeček nese celá lišta. */
+:is(#primary, body) .tribe-events .tribe-events-c-search__input-control {
+  border: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-search__input {
+  font-weight: 600;
+}
+
+/* Tlačítka pluginu jako žluté pilulky s černým okrajem — stejné
+   jako .bm-tlacitko na úvodní stránce. */
+:is(#primary, body) .tribe-common .tribe-common-c-btn,
+:is(#primary, body) .tribe-events .tribe-common-c-btn.tribe-events-c-search__button {
+  background-color: var(--global-palette15);
+  color: var(--global-palette3);
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 10px 22px;
+}
+:is(#primary, body) .tribe-common .tribe-common-c-btn:hover,
+:is(#primary, body) .tribe-common .tribe-common-c-btn:focus,
+:is(#primary, body) .tribe-events .tribe-common-c-btn.tribe-events-c-search__button:hover,
+:is(#primary, body) .tribe-events .tribe-common-c-btn.tribe-events-c-search__button:focus {
+  background-color: var(--global-palette9);
+  color: var(--global-palette3);
+}
+
+/* Přepínač Seznam / Měsíc / Den: pilulky místo podtržené záložky. */
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector__list-item {
+  padding: 0;
+  margin-left: 6px;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector__list-item-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector__list-item-link:hover,
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector__list-item-link:focus {
+  background-color: var(--global-palette7);
+  border-color: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector__list-item--active .tribe-events-c-view-selector__list-item-link {
+  background-color: var(--global-palette15);
+  border-color: var(--global-palette3);
+}
+/* Plugin kreslí aktivní záložku ještě podtržením přes ::after. */
+:is(#primary, body) .tribe-events .tribe-events-c-view-selector--tabs .tribe-events-c-view-selector__list-item--active .tribe-events-c-view-selector__list-item-link::after {
+  display: none;
+}
+
+/* Horní lišta s datem, šipkami a tlačítkem Dnes. */
+:is(#primary, body) .tribe-events .tribe-events-c-top-bar__datepicker-button {
+  font-weight: 800;
+}
+:is(#primary, body) .tribe-events.tribe-common .tribe-common-c-btn-border-small {
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  color: var(--global-palette3);
+  background-color: var(--global-palette9);
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events.tribe-common .tribe-common-c-btn-border-small:hover,
+:is(#primary, body) .tribe-events.tribe-common .tribe-common-c-btn-border-small:focus {
+  background-color: var(--global-palette15);
+  border-color: var(--global-palette3);
+  color: var(--global-palette3);
+}
+:is(#primary, body) .tribe-common .tribe-common-c-btn-icon {
+  border-radius: 999px;
+}
+:is(#primary, body) .tribe-common .tribe-common-c-btn-icon:hover,
+:is(#primary, body) .tribe-common .tribe-common-c-btn-icon:focus {
+  background-color: var(--global-palette15);
+}
+
+/* Spodní stránkování a odběr kalendáře. */
+:is(#primary, body) .tribe-events.tribe-common .tribe-events-c-nav {
+  border-top: var(--bm-ramecek);
+  padding-top: 18px;
+  margin-top: 26px;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-nav__prev,
+:is(#primary, body) .tribe-events .tribe-events-c-nav__next,
+:is(#primary, body) .tribe-events .tribe-events-c-nav__today {
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-subscribe-dropdown .tribe-common-c-btn-border {
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  color: var(--global-palette3);
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-subscribe-dropdown__content {
+  border: 2px solid var(--global-palette3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   2 — SEZNAM
+   ══════════════════════════════════════════════════════════════ */
+
+/* Měsíc jako plnohodnotný předěl, ne šedý popisek s linkou.
+   Při stovce akcí je tohle jediná orientace ve svislém scrollu. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__month-separator {
+  margin: 42px 0 18px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__month-separator::after {
+  display: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__month-separator-text {
+  display: inline-block;
+  background-color: var(--global-palette3);
+  color: var(--global-palette9);
+  font-size: clamp(15px, 1.8vw, 19px);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 7px 20px;
+  border-radius: 999px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__month-separator:first-child {
+  margin-top: 0;
+}
+
+/* Řádek akce = kartička. Plugin ho má jako flex řádek se zápornými
+   okraji (margin: 40px -24px 64px) a vnitřní odsazení dává sloupcům;
+   tady se to ruší, aby rámeček seděl na hraně kartičky. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row {
+  margin: 0 0 18px;
+  padding: 0;
+  align-items: stretch;
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  overflow: hidden;
+  background-color: var(--global-palette9);
+  box-shadow: var(--bm-stin);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--bm-stin-hover);
+}
+
+/* Datumové razítko v barvě kategorie. Nese ho levý sloupec, který
+   plugin vypisuje i na mobilu, takže je vidět na všech šířkách. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag {
+  flex: 0 0 92px;
+  width: 92px;
+  padding: 16px 8px;
+  background-color: var(--bm-kat);
+  color: var(--bm-kat-text);
+  border-right: var(--bm-ramecek);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-datetime {
+  display: block;
+  text-align: center;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-weekday {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: inherit;
+  margin-bottom: 2px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-daynum {
+  display: block;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  color: inherit;
+}
+
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event {
+  margin: 0;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-details {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  padding: 16px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* Plakát akce. Plugin kartičku skládá přes row-reverse, takže
+   obrázek vychází napravo; necháváme ho tam a jen ho roztáhneme
+   na výšku kartičky. Bez obrázku se text roztáhne přes celou šířku. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-featured-image-wrapper {
+  flex: 0 0 220px;
+  width: 220px;
+  padding: 0;
+  margin: 0;
+  border-left: var(--bm-ramecek);
+  overflow: hidden;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-featured-image {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+}
+
+/* Název nese kartičku — velký, tučný, těsný proklad. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title {
+  margin: 0;
+  font-size: clamp(21px, 2.2vw, 28px);
+  line-height: 1.1;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title-link {
+  color: var(--global-palette3);
+  text-decoration: none;
+  box-shadow: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title-link:hover,
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title-link:focus {
+  color: var(--global-palette3);
+  box-shadow: inset 0 -3px 0 0 var(--global-palette15);
+}
+
+/* Čas je nadlinka nad názvem, stejně jako .bm-nadlinka na úvodu.
+   Plugin ho vypisuje až za názvem, proto order: -1. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-datetime-wrapper {
+  order: -1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--global-palette5);
+  margin: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-venue {
+  font-size: 15px;
+  color: var(--global-palette5);
+  margin: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-venue-title {
+  color: var(--global-palette3);
+  font-weight: 700;
+}
+/* Město a země jsou u všech akcí stejné, na kartičce jen zabírají
+   řádek. Název místa zůstává, zbytek adresy je v detailu. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-venue-address {
+  display: none;
+}
+
+/* Cena a rezervace jako štítky, ne jako podtržený odkaz v textu. */
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta__price {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background-color: var(--global-palette7);
+  color: var(--global-palette3);
+  border: 2px solid var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta__link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background-color: var(--global-palette15);
+  color: var(--global-palette3);
+  border: 2px solid var(--global-palette3);
+  text-decoration: none;
+  box-shadow: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta__link:hover,
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta__link:focus {
+  background-color: var(--global-palette9);
+  color: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe-events-c-small-cta__stock {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--global-palette5);
+}
+
+/* ── Doporučená akce ──────────────────────────────────────────
+   Zaškrtávátko „Doporučená akce" u akce v administraci. Plugin ji
+   značí tenkým akcentním proužkem u razítka a slovem „Doporučené",
+   které ale na úzkých displejích schovává pro odečítače obrazovky.
+   Tady se slovo zviditelní a udělá se z něj žlutý štítek — text si
+   tak dál překládá WordPress a v CSS není napsaný. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row--featured .tribe-events-calendar-list__event-datetime-featured-text,
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event--featured .tribe-events-calendar-day__event-datetime-featured-text {
+  position: static;
+  clip: auto;
+  width: auto;
+  height: auto;
+  margin: 0 8px 0 0;
+  display: inline-block;
+  padding: 2px 10px;
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  background-color: var(--global-palette15);
+  color: var(--global-palette3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+/* Ikona záložky i akcentní proužek by vedle štítku jen hlučely. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-datetime-featured-icon,
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-datetime-featured-icon,
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row--featured .tribe-events-calendar-list__event-date-tag-datetime::after,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event--featured::before {
+  display: none;
+}
+/* V mřížce měsíce na štítek nezbývá místo, doporučená akce proto
+   dostane silnější rámeček a vlastní stín. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event--featured {
+  border-width: 3px;
+  box-shadow: 3px 3px 0 0 var(--global-palette3);
+}
+
+/* Popisek kartičku natahuje a při stovce akcí z výpisu dělá blog.
+   Čas, místo, barva kategorie a plakát stačí na rozhodnutí; text
+   je v detailu. Kdyby ho tým chtěl zpátky, smažte tohle pravidlo.
+
+   Jediné !important v souboru, a bez něj to nejde: plugin popisek
+   zapíná pravidlem „display: block !important". */
+:is(#primary, body) .tribe-events .tribe-events-calendar-list__event-description,
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-description {
+  display: none !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   3 — MĚSÍC
+   ══════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .tribe-events .tribe-events-calendar-month {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  background-color: var(--global-palette9);
+  box-shadow: var(--bm-stin);
+}
+/* Hlavička s názvy dnů je černý pás. Řádky tabulky plugin kreslí
+   jako grid, takže pozadí musí nést <tr>, ne <thead>. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__header tr {
+  background-color: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__header-column {
+  width: 100%;
+  justify-self: stretch;
+  padding: 9px 4px;
+  text-align: center;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__header-column-title {
+  color: var(--global-palette9);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:is(#primary, body) .tribe-events.tribe-common .tribe-events-calendar-month__day {
+  border-top: 2px solid var(--global-palette3);
+  border-right: 2px solid var(--global-palette3);
+  padding: 0;
+}
+:is(#primary, body) .tribe-events.tribe-common .tribe-events-calendar-month__day:last-child {
+  border-right: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-cell--desktop {
+  padding: 8px 8px 10px;
+  min-height: 116px;
+}
+/* Uplynulé dny ustupují do pozadí. Pozor na třídu --other-month:
+   plugin ji dává proti aktuálnímu měsíci, ne proti zobrazenému,
+   takže při listování dopředu ji nese celá mřížka. Proto se tu
+   nepoužívá — odlišovat se dá jen podle --past. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day--past .tribe-events-calendar-month__day-date {
+  opacity: 0.45;
+}
+/* Dnešek je žlutý, ne modrý puntík. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day--current {
+  background-color: var(--global-palette15);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day .tribe-events-calendar-month__day-date,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day .tribe-events-calendar-month__day-date-link {
+  color: var(--global-palette3);
+  font-weight: 800;
+  text-decoration: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-date {
+  margin-bottom: 6px;
+}
+
+/* Akce v mřížce = barevný štítek podle kategorie. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event {
+  background-color: var(--bm-kat);
+  color: var(--bm-kat-text);
+  border: 2px solid var(--global-palette3);
+  border-radius: 10px;
+  padding: 5px 8px;
+  margin-bottom: 5px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-datetime {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: inherit;
+  margin-bottom: 1px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-title {
+  margin: 0;
+  line-height: 1.15;
+  color: inherit;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-title-link {
+  color: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-title-link:hover,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__calendar-event-title-link:focus {
+  color: inherit;
+  text-decoration: underline;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__more-events-link {
+  font-weight: 800;
+  color: var(--global-palette3);
+}
+
+/* Bublina po najetí myší. Plugin ji věší na konec <body>, mimo
+   #primary — proto je v prefixu i body. */
+:is(#primary, body) .tribe-events-calendar-month__calendar-event-tooltip {
+  border: var(--bm-ramecek);
+  border-radius: 14px;
+}
+:is(#primary, body) .tooltipster-base.tribe-events-tooltip-theme .tooltipster-box {
+  border: var(--bm-ramecek);
+  border-radius: 14px;
+  box-shadow: var(--bm-stin);
+}
+
+/* Měsíc na mobilu: plugin mřížku zúží a akce vypíše pod kalendář
+   jako seznam. Ten dostane stejné kartičky jako pohled Seznam. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month-mobile-events__mobile-event {
+  border: var(--bm-ramecek);
+  border-left-width: 10px;
+  border-left-color: var(--bm-kat);
+  border-radius: 14px;
+  padding: 13px 15px;
+  margin-bottom: 12px;
+  background-color: var(--global-palette9);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month-mobile-events__mobile-event-datetime {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--global-palette5);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month-mobile-events__mobile-event-title {
+  margin: 2px 0 0;
+  font-size: 19px;
+  line-height: 1.15;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month-mobile-events__mobile-event-title-link {
+  color: var(--global-palette3);
+  text-decoration: none;
+}
+/* Tečka pod dnem, který má program, a vybraný den. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__mobile-events-icon--event {
+  background-color: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-cell--selected {
+  background-color: var(--global-palette3);
+  border-radius: 10px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-cell--selected .tribe-events-calendar-month__day-date,
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-cell--selected .tribe-events-calendar-month__day-date-link {
+  color: var(--global-palette15);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-month__day-cell--selected .tribe-events-calendar-month__mobile-events-icon--event {
+  background-color: var(--global-palette15);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   4 — DEN
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hodina jako předěl přes celou šířku. V programu festivalu se
+   člověk rozhoduje podle času dřív než podle názvu. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__time-separator {
+  margin: 28px 0 14px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__time-separator::after {
+  background-color: var(--global-palette3);
+  height: 3px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__time-separator-heading {
+  background-color: var(--global-palette15);
+  color: var(--global-palette3);
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  padding: 5px 18px;
+  font-size: clamp(15px, 1.8vw, 18px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* Kartička dne. Oproti seznamu nemá datumové razítko (datum je
+   v hlavičce pohledu), barvu kategorie proto nese levý pruh. */
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event {
+  margin: 0 0 16px;
+  padding: 0;
+  border: var(--bm-ramecek);
+  border-left-width: 12px;
+  border-left-color: var(--bm-kat);
+  border-radius: var(--bm-radius);
+  background-color: var(--global-palette9);
+  box-shadow: var(--bm-stin);
+  flex-wrap: nowrap;
+  align-items: stretch;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--bm-stin-hover);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-content {
+  padding: 15px 22px;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-datetime-wrapper {
+  order: -1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--global-palette5);
+  margin: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.1;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title-link {
+  color: var(--global-palette3);
+  text-decoration: none;
+  box-shadow: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title-link:hover,
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title-link:focus {
+  box-shadow: inset 0 -3px 0 0 var(--global-palette15);
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-venue {
+  font-size: 15px;
+  color: var(--global-palette5);
+  margin: 0;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-venue-title {
+  color: var(--global-palette3);
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-venue-address {
+  display: none;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-featured-image-wrapper {
+  flex: 0 0 200px;
+  width: 200px;
+  padding: 0;
+  border-left: var(--bm-ramecek);
+  overflow: hidden;
+}
+:is(#primary, body) .tribe-events .tribe-events-calendar-day__event-featured-image {
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   5 — DETAIL AKCE
+   Detail jede na staré šabloně pluginu (.tribe-events-single),
+   ne na třídách v2 jako výpisy — proto jiná rodina názvů.
+   ══════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .tribe-events-single .tribe-events-back a {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  color: var(--global-palette3);
+  text-decoration: none;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-back a:hover,
+:is(#primary, body) .tribe-events-single .tribe-events-back a:focus {
+  background-color: var(--global-palette15);
+}
+
+:is(#primary, body) .tribe-events-single .tribe-events-single-event-title {
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.04;
+  margin: 16px 0 0;
+}
+
+/* Datum a cena v barevném pásu — dva údaje, kvůli kterým sem
+   návštěvník přišel. Barva se bere z kategorie přes :has() výš. */
+:is(#primary, body) .tribe-events-single .tribe-events-schedule {
+  background-color: var(--bm-kat);
+  color: var(--bm-kat-text);
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  box-shadow: var(--bm-stin);
+  padding: 15px 22px;
+  margin: 18px 0 26px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-schedule h2 {
+  margin: 0;
+  font-size: clamp(17px, 2.2vw, 22px);
+  font-weight: 800;
+  color: inherit;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-schedule .tribe-events-cost {
+  margin: 0;
+  padding: 4px 14px;
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  background-color: var(--global-palette9);
+  color: var(--global-palette3);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* Podrobnosti a místo konání jako ohraničený blok. */
+:is(#primary, body) .tribe-events-single .tribe-events-event-meta {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background-color: var(--global-palette9);
+  box-shadow: var(--bm-stin);
+  padding: 22px 24px;
+  margin: 26px 0;
+}
+/* Plugin kreslí nad blokem i nad každou skupinou v něm vodorovnou
+   linku přes ::before. Je širší než blok a trčí z rámečku ven. */
+:is(#primary, body) .tribe-events-single .tribe-events-event-meta::before,
+:is(#primary, body) .tribe-events-single .tribe-events-event-meta::after,
+:is(#primary, body) .tribe-events-single .tribe-events-meta-group::before,
+:is(#primary, body) .tribe-events-single .tribe-events-meta-group::after {
+  display: none;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-single-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--global-palette5);
+  margin: 0 0 12px;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-meta-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--global-palette5);
+}
+:is(#primary, body) .tribe-events-single .tribe-events-meta-value {
+  font-weight: 700;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-venue-map iframe {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+}
+
+/* Rubriky akce — jediné místo, kde plugin vypíše i žánr. Proto tu
+   nejsou odkazy v řádku, ale štítky, na které se dá mířit prstem. */
+:is(#primary, body) .tribe-events-single .tribe-events-event-categories {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  vertical-align: middle;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-event-categories a {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  background-color: var(--global-palette7);
+  color: var(--global-palette3);
+  text-decoration: none;
+}
+:is(#primary, body) .tribe-events-single .tribe-events-event-categories a:hover,
+:is(#primary, body) .tribe-events-single .tribe-events-event-categories a:focus {
+  background-color: var(--global-palette15);
+}
+
+/* Rezervace (Event Tickets) jako žlutá výzva k akci. */
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-wrapper {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background-color: var(--global-palette15);
+  box-shadow: var(--bm-stin);
+  padding: 6px;
+  margin: 26px 0;
+  width: 100%;
+  max-width: none;
+}
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp {
+  border: none;
+  background-color: transparent;
+}
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-title {
+  font-weight: 800;
+}
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-actions-button-going,
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-actions-button-not-going {
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  background-color: var(--global-palette9);
+  color: var(--global-palette3);
+  font-weight: 800;
+  /* Pilulka se nesmí zlomit na dva řádky — „Zúčastním se" je dlouhé. */
+  white-space: nowrap;
+  padding: 10px 24px;
+  width: auto;
+  max-width: none;
+}
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-actions-button-going:hover,
+:is(#primary, body) .tribe-events-single .tribe-tickets__rsvp-actions-button-going:focus {
+  background-color: var(--global-palette3);
+  color: var(--global-palette9);
+}
+
+/* Odběr kalendáře pod detailem. */
+:is(#primary, body) .tribe-events-single .tribe-events-c-subscribe-dropdown .tribe-common-c-btn-border {
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  color: var(--global-palette3);
+  font-weight: 700;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   6 — MOBIL
+   Většina návštěvníků festivalu je na telefonu. Pozor: plugin
+   přepíná vlastní rozvržení podle šířky KONTEJNERU (třídy
+   tribe-common--breakpoint-*), ne podle šířky okna. Níž se proto
+   mění jen to, co si plugin neřídí sám.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* Kartička se skládá pod sebe: razítko jako proužek nahoře,
+     pak plakát, pak text. Vedle sebe by na 375 px nezbylo nic. */
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row {
+    flex-wrap: wrap;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag {
+    flex: 0 0 100%;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 7px 16px;
+    border-right: none;
+    border-bottom: var(--bm-ramecek);
+  }
+  /* Plugin razítko skládá pod sebe (flex-direction: column);
+     na proužku přes celou šířku patří vedle sebe. */
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-datetime {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-daynum {
+    font-size: 24px;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-date-tag-weekday {
+    margin-bottom: 0;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event {
+    flex-wrap: wrap;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-featured-image-wrapper {
+    flex: 0 0 100%;
+    width: 100%;
+    border-left: none;
+    border-bottom: var(--bm-ramecek);
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-featured-image {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    min-height: 0;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-details {
+    padding: 15px 16px;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-title {
+    font-size: 21px;
+  }
+
+  /* Den: plakát pod text, ne vedle. */
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event {
+    flex-wrap: wrap;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event-featured-image-wrapper {
+    flex: 0 0 100%;
+    width: 100%;
+    border-left: none;
+    border-top: var(--bm-ramecek);
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event-featured-image {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    min-height: 0;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event-content {
+    padding: 14px 16px;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event-title {
+    font-size: 20px;
+  }
+
+  /* Lišta filtrů a předěly ať nezaberou půl obrazovky. */
+  :is(#primary, body) .tribe-events .tribe-events-header .tribe-events-header__events-bar.tribe-events-c-events-bar,
+  :is(#primary, body) .tribe-events .tribe-events-c-events-bar {
+    padding: 6px 8px;
+    margin-bottom: 18px;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__month-separator {
+    margin: 28px 0 14px;
+  }
+
+  /* Detail: menší odsazení, ať zbyde místo na text. */
+  :is(#primary, body) .tribe-events-single .tribe-events-schedule {
+    padding: 14px 16px;
+  }
+  /* Tři sloupce podrobností se na telefonu skládají pod sebe.
+     Plugin je drží ve flexu, kde zbývá prázdné místo po mapě. */
+  :is(#primary, body) .tribe-events-single .tribe-events-event-meta {
+    padding: 18px 16px;
+    display: block;
+  }
+  :is(#primary, body) .tribe-events-single .tribe-events-meta-group {
+    width: 100%;
+    margin-bottom: 18px;
+  }
+  :is(#primary, body) .tribe-events-single .tribe-events-meta-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Posun i stín jsou dekorace. Kdo má v systému zapnuté „omezit
+   pohyb", dostane kartičku bez poskočení. */
+@media (prefers-reduced-motion: reduce) {
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row,
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event {
+    transition: none;
+  }
+  :is(#primary, body) .tribe-events .tribe-events-calendar-list__event-row:hover,
+  :is(#primary, body) .tribe-events .tribe-events-calendar-day__event:hover {
+    transform: none;
+    box-shadow: var(--bm-stin-hover);
+  }
+}

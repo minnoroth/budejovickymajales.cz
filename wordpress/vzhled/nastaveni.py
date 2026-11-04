@@ -158,10 +158,21 @@ NASTAVENI = {
 }
 
 
+# Doplňkové CSS vzniká spojením těchto souborů v tomto pořadí.
+# bm-akce.css navazuje na proměnné z bm.css, takže musí jít za ním.
+CSS_SOUBORY = ("bm.css", "bm-akce.css")
+
+
+def nacti_css():
+    """Spojí zdrojové CSS soubory do jednoho bloku pro Customizer."""
+    slozka = os.path.dirname(os.path.abspath(__file__))
+    casti = [open(os.path.join(slozka, jmeno), encoding="utf-8").read()
+             for jmeno in CSS_SOUBORY]
+    return "\n\n".join(casti)
+
+
 if __name__ == "__main__":
-    css = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bm.css"),
-               encoding="utf-8").read()
-    NASTAVENI["custom_css[kadence]"] = css
+    NASTAVENI["custom_css[kadence]"] = nacti_css()
     kod, odpoved = customizer(NASTAVENI)
     platnost = (odpoved.get("data") or {}).get("setting_validities", {}) if isinstance(odpoved, dict) else {}
     spatne = [k for k, v in platnost.items() if v is not True]
