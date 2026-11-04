@@ -44,3 +44,25 @@ vyměnil, zkratka funguje dál.
 **Kde se používá.** Dvakrát na úvodní stránce — nadlinka nad nadpisem a běžící pás.
 
 **Jak ověřit, že žije.** Změň termín v Akce → Ročníky a načti úvodní stránku.
+
+## bm-program/ — program a lineup
+
+**Problém.** Zkratka `[tribe_events]` je jen v placené verzi The Events Calendar a nativní
+pohledy neumí časovou osu patnácti scén vedle sebe. Program je přitom celoročně
+nejnavštěvovanější stránka webu, takže na ni nestačí odkaz do kalendáře.
+
+**Řešení.** Zkratka `[bm_program]` vykreslí program ročníku. Jako jediný doplněk má vlastní
+složku, protože vedle PHP potřebuje ještě dva skripty a styl. Celá logika je v JavaScriptu
+a čte veřejné REST endpointy; PHP jen zaregistruje zkratku, zařadí soubory a vypíše
+záchranný blok s odkazy do kalendáře.
+
+**Proč je vedle složky ještě `bm-program-nacti.php`.** WordPress načítá z `mu-plugins/` jen
+soubory `.php` ležící přímo v ní — do podsložek se nedívá. Zavaděč má podmínku
+`file_exists`, aby smazání složky neshodilo celý web.
+
+**Proč to nerozbije aktualizace.** Nevolá jedinou PHP funkci The Events Calendar, nesahá na
+šablony pluginu a nezapisuje do databáze. Jediný styk s kalendářem jsou veřejné REST
+endpointy.
+
+**Jak ověřit, že žije.** Načti `/program/` — nesmí být vidět záchranný blok s odkazy do
+kalendáře. Podrobnosti a pasti REST API jsou v [bm-program/README.md](bm-program/README.md).
