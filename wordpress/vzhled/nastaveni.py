@@ -136,6 +136,9 @@ NASTAVENI = {
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
     "page_title_background": {"desktop": {"color": "palette1"}},
     "page_title_font": pismo(48, 40, 34, 1.08, barva="palette9"),
+    # Bez "above" Kadence pás nevykreslí a bílý titulek skončí na bílém pozadí.
+    "post_title_layout": "above",
+    "post_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "post_title_elements": ["categories", "title", "meta"],
     "post_title_background": {"desktop": {"color": "palette1"}},
     "post_title_font": pismo(44, 36, 32, 1.1, barva="palette9"),
