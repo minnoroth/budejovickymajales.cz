@@ -12,9 +12,6 @@
    ────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Čtvrtá barva ročníku 2024. V paletě Kadence jsou sloty 1–10
-     obsazené a 11–14 patří systémovým stavům, proto levandulová bydlí zde. */
-  --bm-levandulova: #B6B4DA;
   --bm-ramecek: 3px solid var(--global-palette3);
   --bm-radius: 18px;
 }
@@ -31,7 +28,7 @@
 
 .bm-pas-hlavni  { background: var(--global-palette1); color: var(--global-palette9); }
 .bm-pas-koral   { background: var(--global-palette10); color: var(--global-palette3); }
-.bm-pas-levand  { background: var(--bm-levandulova); color: var(--global-palette3); }
+.bm-pas-levand  { background: var(--global-palette14); color: var(--global-palette3); }
 .bm-pas-zluta   { background: var(--global-palette15); color: var(--global-palette3); }
 
 .bm-pas-hlavni h1, .bm-pas-hlavni h2, .bm-pas-hlavni h3, .bm-pas-hlavni p {

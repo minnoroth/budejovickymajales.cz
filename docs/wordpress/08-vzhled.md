@@ -19,7 +19,8 @@ přepisování stylů. Když přijde nová grafika na konci roku 2026, tohle je 
 | 3–6 | šedé | text od nejsilnějšího po linky |
 | 7–9 | světlé | pozadí a bílá |
 | 10 | `#EE7270` korálová | druhý barevný pás (Volba krále) |
-| 11–14 | — | systémové stavy (úspěch, chyba…), vzhled se jich netýká |
+| 11–13 | — | systémové stavy (úspěch, informace, chyba), vzhled se jich netýká |
+| 14 | `#B6B4DA` levandulová | třetí barevný pás a kategorie Divadlo |
 | 15 | `#F8E862` žlutá | akcent — tlačítka, běžící pás, aktivní položka menu |
 
 Levandulová `#B6B4DA` se do palety nevešla a bydlí jako proměnná `--bm-levandulova`
