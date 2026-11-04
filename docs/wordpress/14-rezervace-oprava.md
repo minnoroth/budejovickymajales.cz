@@ -10,11 +10,18 @@ Doplněk [`wordpress/mu-plugins/bm-rezervace.php`](../../wordpress/mu-plugins/bm
 je psaný už proti nové větvi. Tenhle dokument vysvětluje, co se tím v analýze mění
 a co platí dál.
 
-> **Co je a není ověřené.** Všechno níž je z četby zdrojového kódu Event Tickets 5.30.2
-> a z jednoho čtecího dotazu na REST API webu. **Nic z toho není ověřené během.**
-> Doplněk se zatím nikam nenasazoval (blokuje ho etapa 0 — SMTP a DNS), takže tvrzení
-> o tom, co `Order::modify_status()` udělá, je přečtené, ne naměřené. Co je potřeba
-> projít po nasazení, je v tabulce testovacích scénářů v
+> **Co je a není ověřené.** Doplněk se zatím nikam nenasazoval — blokuje ho etapa 0
+> (SMTP a DNS) — takže **nic z toho neběželo**. Rozlišuj prosím dvě úrovně:
+>
+> **Změřeno:** že web jede na RSVP v2. Jeden čtecí dotaz na veřejné REST API webu,
+> doložený níž. Na webu se při tom nic neměnilo.
+>
+> **Přečteno ve zdrojovém kódu Event Tickets 5.30.2, ale nevyzkoušeno:** že
+> `Order::modify_status( $id, 'refunded' )` opravdu vrátí místo do kapacity a uklidí
+> účastníky; že e-mail odejde, protože generování účastníků projde přes
+> `Attendee::create()`; že výmaz osobních údajů nástrojem WordPressu sáhne i na nové
+> účastníky; že zrušená objednávka nerozešle žádný e-mail o vrácení peněz. Tohle všechno
+> je potřeba po nasazení projít ručně — scénáře jsou v tabulce v
 > [mu-plugins/README.md](../../wordpress/mu-plugins/README.md).
 
 ---
@@ -186,6 +193,52 @@ bez jména a bez e-mailu. U akce zdarma to zní jako nesmysl, ale žádné pení
 nevracejí — plugin tím stavem jen říká „tahle objednávka už neplatí a místo je zpátky
 volné". **Patří to do návodu pro tým** ([06-navod-pro-tym.md](06-navod-pro-tym.md)),
 až se doplněk nasadí.
+
+### Existuje i cesta, která končí stavem „Cancelled". Nepoužil jsem ji
+
+Pro úplnost, protože se nabízí a někoho napadne ji dosadit: kdyby doplněk místo převodu
+objednávky **mazal účastníky jednoho po druhém**, vyšlo by to líp na pohled. Event Tickets
+při každém smazaném účastníkovi vrátí jedno místo a po smazání posledního převede
+objednávku sám na `voided`, tedy na „Cancelled". Žádné „vrácení peněz" v administraci.
+
+Nepoužil jsem ji ze tří důvodů:
+
+1. **Chybí jí pojistka proti přetečení kapacity.** Převod na `refunded` počítá nový stav
+   jako `min( původní + počet, kapacita )` — nikdy nevyrobí víc volných míst, než kolik
+   jich akce má. Mazání po jednom přičítá bez tohohle stropu.
+2. **Je to tři vedlejší účinky místo jednoho volání.** Převod stavu je jedna metoda,
+   která si uvnitř drží zámek a transakci. Mazání po jednom spoléhá na řetěz tří hooků
+   spuštěných mimo situaci, pro kterou je plugin psal (obrazovka v administraci).
+3. Převod na `refunded` je jedna ze dvou cest, které sám plugin ze stavu „Completed"
+   nabízí. Mazání po jednom je obchvat.
+
+Shrnuto: hezčí slovo v administraci za slabší pojistku. Nestojí to za to — a ta věta
+v návodu pro tým je levnější než vysvětlování, proč má akce najednou o tři volná místa víc.
+
+### Známé omezení: pořadatel smaže část míst a návštěvník pak zruší zbytek
+
+V nové větvi **mazání účastníka v administraci místo vrací** (přes
+`Ticket::update_stock_after_attendee_deletion()`). To je dobře a znamená to, že dnešní
+postup — doplněk smazat a rezervace ruší pořadatel — funguje i tady.
+
+Má to ale jeden následek. Když pořadatel z třímístné rezervace smaže ručně jedno místo
+(vrátí se jedno) a návštěvník pak klikne na odhlašovací odkaz, převod objednávky vrátí
+**všechna tři** — tedy o jedno víc, než kolik jich v tu chvíli bylo obsazených. Akce
+může skončit s jedním volným místem navíc.
+
+Tři poznámky k tomu:
+
+- **Není to chyba doplňku, je to chování Event Tickets.** Převod na `refunded` počítá
+  s původním počtem míst v objednávce, ne s tím, kolik jich zbylo. Totéž by se stalo,
+  kdyby objednávku takhle převedl sám pořadatel.
+- **Je to shora omezené.** Volných míst nikdy nebude víc, než je kapacita akce.
+- **Hlídat to v doplňku by stálo víc, než co by to ušetřilo.** Znamenalo by to porovnávat
+  počet živých účastníků s objednávkou a při neshodě návštěvníkovi říct „napiš nám" —
+  tedy vyrobit odmítnutí pro situaci, která u desítek rezervací ročně nastane sotva kdy.
+
+Správné řešení je organizační a patří do návodu pro tým: **pořadatel ať z rezervace
+nemaže jednotlivá místa, ať ji smaže celou.** Jednomístných rezervací je drtivá většina
+a u nich tenhle případ vůbec nevzniká.
 
 ### Nesouměrnost, na kterou si dát pozor
 

@@ -206,6 +206,13 @@ Projít všechny, včetně těch zlých. Nic z toho se bez nasazení ověřit ne
 | 12 | Stránka na mobilu | Čitelná, tlačítko jde zmáčknout, barvy sedí se zbytkem webu |
 | 13 | Aktualizovat Event Tickets na novější verzi a projít scénáře 1–3 znovu | Beze změny; jinak viz tabulka výš |
 | 14 | Kdyby web někdy začal prodávat placené lístky: zkusit odkaz na placenou objednávku | „Tenhle odkaz tu nic nezruší" |
+| 15 | Po zrušení zkontrolovat schránku | Od pluginu **nepřijde** žádný e-mail o vrácení peněz |
+| 16 | Nástroje → Smazat osobní údaje, zadat e-mail z testovací rezervace | Rezervace se najde a smaže |
+| 17 | Třímístná rezervace, pořadatel ručně smaže jedno místo, pak návštěvník klikne na odkaz | Rezervace se zruší, ale **volných míst přibude o jedno víc, než má** — známé omezení, viz [14-rezervace-oprava.md](../../docs/wordpress/14-rezervace-oprava.md) |
 
 Scénář 13 je ten, na kterém se pozná tiché selhání. Patří do checklistu po každé velké
 aktualizaci Event Tickets, protože se nijak neohlásí — odkazy prostě přestanou chodit.
+
+Scénář 17 není chyba doplňku, ale chování Event Tickets, a dopadne stejně, i když
+objednávku zruší sám pořadatel. Řeší se větou v návodu pro tým: **z rezervace se nemažou
+jednotlivá místa, maže se celá.**
