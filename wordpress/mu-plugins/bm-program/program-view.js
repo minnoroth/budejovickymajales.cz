@@ -521,7 +521,11 @@
   }
   function vratFokus(stopa) {
     if (!stopa) return;
-    var p = koren.querySelector(stopa);
+    /* Když je otevřený detail, hledá se nejdřív v něm. Stejná hvězdička
+       je i na kartě v seznamu a ta je v dokumentu dřív — fokus by
+       vyskočil z dialogu ven. */
+    var kde = el.detail.open ? el.detail : koren;
+    var p = kde.querySelector(stopa) || koren.querySelector(stopa);
     if (p) p.focus({ preventScroll: true });
   }
 
@@ -874,8 +878,13 @@
         var hid = +t.getAttribute('data-hvezda');
         if (stav.moje.has(hid)) stav.moje.delete(hid); else stav.moje.add(hid);
         ulozMoje();
+        /* Stopu fokusu je potřeba sebrat teď: otevriDetail() přepíše
+           obsah dialogu a zmáčknutá hvězdička tím zmizí dřív, než se
+           na ni stihne kdokoli zeptat. */
+        var stopa = stopaFokusu();
         if (el.detail.open) otevriDetail(hid);
         vykresli();
+        vratFokus(stopa);
         return;
       }
       if (t.hasAttribute('data-filtr-misto')) {

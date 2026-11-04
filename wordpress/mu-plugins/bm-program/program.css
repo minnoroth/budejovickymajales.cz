@@ -203,6 +203,9 @@
 
 :is(#primary, body) .bmp .bmp-ovladani {
   position: sticky;
+  /* Kdyby tým někdy zapnul lepivou hlavičku Kadence, pruh by pod ni
+     zalezl. Odsazení se pak nastaví na jednom místě tady, ne po celém
+     souboru: --bmp-lep-shora: 70px na .bmp. */
   top: var(--bmp-lep-shora, 0px);
   z-index: 60;
   background: var(--bmp-bila);
