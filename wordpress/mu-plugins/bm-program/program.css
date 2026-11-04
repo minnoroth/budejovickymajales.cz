@@ -1,0 +1,698 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Budějovický Majáles — Program a lineup
+
+   Vzhled zkratky [bm_program]. Návrh, ze kterého to vzniklo, i s obrázky
+   a zdůvodněním každého rozhodnutí je v
+   docs/wordpress/11-lineup-navrh/README.md.
+
+   ČTYŘI PRAVIDLA, KTERÁ TU PLATÍ
+
+   1. Barvy nikdy natvrdo. Všechno jde přes var(--global-paletteN, #záloha)
+      z globální palety Kadence. Rebranding na nový ročník je proto
+      přepsání patnácti polí v Customizeru, ne zásah sem. Záložní hexy
+      jsou hodnoty palety ročníku 2024 — použijí se, jen když paleta
+      chybí (jiné téma, výpadek).
+
+   2. Každé pravidlo začíná :is(#primary, body). Není to kvůli výběru
+      (body projde vždycky), ale kvůli váze: Kadence píše barvy obsahu
+      selektory s ID, třeba „#primary .entry-content a { color: … }",
+      a ID přebije libovolný počet tříd. :is() si bere váhu nejsilnější
+      položky, tedy #primary, a tím se váha dorovná. Stejný trik a stejné
+      zdůvodnění je ve wordpress/vzhled/bm-akce.css. Když budeš přidávat
+      pravidlo, zachovej prefix.
+
+   3. Prefix tříd je bmp-, ne bm-. Třídy bm-karta a bm-stitek už existují
+      v bm.css pro úvodní stránku a kolidovaly by.
+
+   4. Nic globálního. Žádné pravidlo nesahá na html, body, button ani na
+      :root — všechno visí pod .bmp, což je kořen zkratky. Mimo program
+      tenhle soubor nesmí být poznat.
+
+   Písmo se tu vůbec neřeší: Archivo je na webu hostované lokálně kvůli
+   GDPR (viz docs/wordpress/08-vzhled.md) a program ho dědí po tématu.
+   Žádný požadavek na fonts.googleapis.com odsud nevede.
+   ══════════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   0 — Tokeny
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp {
+  /* ── Paleta ───────────────────────────────────────────────────────── */
+  --bmp-hlavni:       var(--global-palette1,  #1EA198);  /* zelenomodrá  */
+  --bmp-hlavni-tmav:  var(--global-palette2,  #0C6F69);
+  --bmp-cerna:        var(--global-palette3,  #121212);
+  --bmp-text:         var(--global-palette4,  #2A2A2A);
+  --bmp-seda:         var(--global-palette5,  #4A4A4A);
+  --bmp-linka:        var(--global-palette6,  #8E8E8E);
+  --bmp-svetla:       var(--global-palette7,  #F2F2F0);
+  --bmp-nejsvetlejsi: var(--global-palette8,  #FAFAF9);
+  --bmp-bila:         var(--global-palette9,  #FFFFFF);
+  --bmp-koral:        var(--global-palette10, #EE7270);
+  --bmp-levandulova:  var(--global-palette14, #B6B4DA);
+  --bmp-zluta:        var(--global-palette15, #F8E862);
+
+  /* ── Tvarosloví ───────────────────────────────────────────────────── */
+  /* Rámeček a zaoblení si bere z bm.css, ať má program stejné tvarosloví
+     jako zbytek webu. Záloha je tu pro případ, že by se program vložil
+     na stránku bez doplňkového CSS. */
+  --bmp-ramecek: var(--bm-ramecek, 3px solid var(--global-palette3, #121212));
+  --bmp-radius:   var(--bm-radius, 18px);
+  --bmp-radius-s: 10px;
+  --bmp-stin:   5px 5px 0 var(--bmp-cerna);   /* plakátový stín, bez rozostření */
+  --bmp-stin-s: 3px 3px 0 var(--bmp-cerna);
+
+  /* ── Barvy kategorií ──────────────────────────────────────────────── */
+  /* Zdroj barvy je kaskáda: pole „Barva" u kategorie akce (SCF color
+     picker, skript ho dosadí jako inline styl) → tahle tabulka → šedá.
+     Tabulka je tedy jen záchrana pro kategorii s prázdným polem.
+
+     Přiřazení sedí na to, co dnes v polích „Barva" doopravdy je:
+     Hudba #1EA198 = slot 1, Divadlo #EE7270 = slot 10, Filmy #B6B4DA
+     = slot 14, Venkovní scéna #F8E862 = slot 15. Pozor, bm-akce.css
+     (výpis akcí) má Divadlo a Filmy prohozené — je to starší volba,
+     která se s poli „Barva" rozešla. Když se to bude sjednocovat, patří
+     oprava do polí a do obou souborů naráz.
+
+     Vnitřní scéna a Volba krále žádný slot v paletě nemají; jsou to
+     světlé odstíny slotů 1 a 10, takže rebranding palety je protáhne
+     s sebou. Text na kategorii je vždycky černý, proto tu nesmí přistát
+     tmavý slot (2 ani 3). */
+  --bmp-kat-hudba:          var(--bmp-hlavni);
+  --bmp-kat-divadlo:        var(--bmp-koral);
+  --bmp-kat-filmy:          var(--bmp-levandulova);
+  --bmp-kat-venkovni-scena: var(--bmp-zluta);
+  --bmp-kat-vnitrni-scena:  var(--bmp-hlavni);
+  --bmp-kat-volba-krale:    var(--bmp-koral);
+  --bmp-kat-vychozi:        var(--bmp-svetla);
+
+  /* Světlé pozadí karty ve „Mém programu" a vlasová linka. */
+  --bmp-moje-pozadi: var(--bmp-nejsvetlejsi);
+  --bmp-vlasova:     var(--bmp-linka);
+
+  /* ── Rozměry časové osy ───────────────────────────────────────────── */
+  --bmp-osa-px-za-minutu: 1.4;
+  --bmp-osa-sirka-sloupce: 152px;
+  --bmp-osa-sirka-casu: 58px;
+  --bmp-osa-vyska-hlavicky: 62px;
+}
+
+/* Světlé odstíny a průsvity. Jsou ve vlastním @supports, protože
+   color-mix() neumí Safari starší než 16.2 — tam zůstanou plné barvy
+   z bloku výš, což je horší, ale funkční. Kdyby se to psalo jen jednou
+   s color-mix(), starý prohlížeč by proměnnou zahodil a bloky by
+   vyšly průhledné. */
+@supports (color: color-mix(in srgb, red, blue)) {
+  :is(#primary, body) .bmp {
+    --bmp-kat-vnitrni-scena: color-mix(in srgb, var(--bmp-hlavni) 50%, var(--bmp-bila));
+    --bmp-kat-volba-krale:   color-mix(in srgb, var(--bmp-koral) 60%, var(--bmp-bila));
+    --bmp-kat-vychozi:       color-mix(in srgb, var(--bmp-svetla) 80%, var(--bmp-linka));
+    --bmp-moje-pozadi:       color-mix(in srgb, var(--bmp-zluta) 12%, var(--bmp-bila));
+    --bmp-vlasova:           color-mix(in srgb, var(--bmp-linka) 45%, var(--bmp-bila));
+  }
+}
+
+/* Barvu kategorie nese jediná proměnná --kat. Nastaví ji buď tahle
+   tabulka podle slugu, nebo skript inline podle pole „Barva". */
+:is(#primary, body) .bmp [data-kat="hudba"]          { --kat: var(--bmp-kat-hudba); }
+:is(#primary, body) .bmp [data-kat="divadlo"]        { --kat: var(--bmp-kat-divadlo); }
+:is(#primary, body) .bmp [data-kat="filmy"]          { --kat: var(--bmp-kat-filmy); }
+:is(#primary, body) .bmp [data-kat="venkovni-scena"] { --kat: var(--bmp-kat-venkovni-scena); }
+:is(#primary, body) .bmp [data-kat="vnitrni-scena"]  { --kat: var(--bmp-kat-vnitrni-scena); }
+:is(#primary, body) .bmp [data-kat="volba-krale"]    { --kat: var(--bmp-kat-volba-krale); }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   1 — Základ
+
+   Všechno je schválně zarovnané pod .bmp. Kadence a The Events Calendar
+   stylují holé button, h2–h4, a i input[type=search] — proto ten reset.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp,
+:is(#primary, body) .bmp *,
+:is(#primary, body) .bmp *::before,
+:is(#primary, body) .bmp *::after { box-sizing: border-box; }
+
+:is(#primary, body) .bmp {
+  color: var(--bmp-cerna);
+  font-size: 16px;
+  line-height: 1.45;
+  /* Kadence dědí do obsahu word-break: break-word, což láme slova
+     uprostřed, jakmile se nevejdou o půl pixelu. V úzkých sloupcích osy
+     se tím „15:00" rozpadlo na dva řádky. Dlouhé názvy kapel se mají
+     zalomit, jen ne uvnitř slova, dokud to jde. */
+  word-break: normal;
+  overflow-wrap: break-word;
+  /* Osa se vylamuje z okrajů stránky podle skutečné šířky výřezu, kterou
+     dodá skript. 100vw je jen záloha — liší se o šířku svislého
+     posuvníku, což by na úzkém okně v počítači udělalo vodorovný posuv. */
+  --bmp-vyrez: 100vw;
+}
+
+:is(#primary, body) .bmp :is(h2, h3, h4) {
+  margin: 0;
+  line-height: 1.12;
+  font-weight: 800;
+  color: inherit;
+}
+:is(#primary, body) .bmp p { margin: 0; }
+:is(#primary, body) .bmp a { color: var(--bmp-hlavni-tmav); }
+
+:is(#primary, body) .bmp button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: inherit;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 0;
+  min-width: 0;
+}
+
+:is(#primary, body) .bmp :focus-visible {
+  outline: 3px solid var(--bmp-cerna);
+  outline-offset: 2px;
+}
+
+/* Jen pro čtečky obrazovky. */
+:is(#primary, body) .bmp .bmp-skryte {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   2 — Ovládání: dny, zobrazení, filtry
+
+   Vodorovné odsazení tu schválně není žádné. Zkratka sedí uvnitř skupiny
+   stránky, která okraje obsahu už drží; kdyby si je program přidával
+   znovu, odsadil by se dvakrát.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-ovladani {
+  position: sticky;
+  top: var(--bmp-lep-shora, 0px);
+  z-index: 60;
+  background: var(--bmp-bila);
+  border-bottom: var(--bmp-ramecek);
+}
+
+/* Dny: vodorovný pás, na mobilu se posouvá prstem. */
+:is(#primary, body) .bmp .bmp-dny {
+  display: flex; gap: 8px; overflow-x: auto; padding: 12px 0;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+:is(#primary, body) .bmp .bmp-dny::-webkit-scrollbar { display: none; }
+
+:is(#primary, body) .bmp .bmp-den {
+  flex: 0 0 auto; cursor: pointer;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius-s);
+  background: var(--bmp-bila); padding: 7px 14px;
+  line-height: 1.15;
+}
+:is(#primary, body) .bmp .bmp-den__zkratka {
+  display: block; font-weight: 800; font-size: 15px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+:is(#primary, body) .bmp .bmp-den__datum {
+  display: block; font-size: 12px; font-weight: 600; color: var(--bmp-seda);
+}
+:is(#primary, body) .bmp .bmp-den[aria-pressed="true"] {
+  background: var(--bmp-zluta); box-shadow: var(--bmp-stin-s);
+  transform: translate(-1px, -1px);
+}
+:is(#primary, body) .bmp .bmp-den[aria-pressed="true"] .bmp-den__datum { color: var(--bmp-cerna); }
+:is(#primary, body) .bmp .bmp-den--dnes .bmp-den__zkratka::after {
+  content: "•"; color: var(--bmp-koral); margin-left: 5px; font-size: 20px; line-height: 0;
+}
+
+:is(#primary, body) .bmp .bmp-radek {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 0 0 12px;
+}
+:is(#primary, body) .bmp .bmp-radek--filtry {
+  border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
+}
+
+/* Přepínač zobrazení */
+:is(#primary, body) .bmp .bmp-prepinac {
+  display: flex; border: var(--bmp-ramecek); border-radius: 999px; overflow: hidden;
+}
+:is(#primary, body) .bmp .bmp-prepinac button {
+  cursor: pointer; background: var(--bmp-bila);
+  padding: 9px 18px; font-weight: 800; font-size: 14px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+:is(#primary, body) .bmp .bmp-prepinac button + button { border-left: 3px solid var(--bmp-cerna); }
+:is(#primary, body) .bmp .bmp-prepinac button[aria-pressed="true"] {
+  background: var(--bmp-cerna); color: var(--bmp-bila);
+}
+
+:is(#primary, body) .bmp .bmp-btn {
+  cursor: pointer; border: var(--bmp-ramecek); border-radius: 999px;
+  background: var(--bmp-bila); padding: 9px 16px; font-weight: 700; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 7px;
+  text-decoration: none; color: var(--bmp-cerna);
+}
+:is(#primary, body) .bmp .bmp-btn:hover { background: var(--bmp-svetla); }
+:is(#primary, body) .bmp .bmp-btn[aria-pressed="true"],
+:is(#primary, body) .bmp .bmp-btn--zvyrazneny { background: var(--bmp-zluta); }
+:is(#primary, body) .bmp .bmp-btn--moje[aria-pressed="true"] { box-shadow: var(--bmp-stin-s); }
+
+:is(#primary, body) .bmp .bmp-pocet {
+  background: var(--bmp-cerna); color: var(--bmp-bila); border-radius: 999px;
+  font-size: 12px; font-weight: 800; padding: 1px 7px; min-width: 20px; text-align: center;
+}
+
+:is(#primary, body) .bmp .bmp-hledani {
+  width: 100%; max-width: 420px; display: block;
+  border: var(--bmp-ramecek); border-radius: 999px;
+  padding: 9px 16px; font-size: 14px; font-weight: 600;
+  font-family: inherit; line-height: 1.45;
+  background: var(--bmp-bila); color: var(--bmp-cerna);
+  appearance: none; -webkit-appearance: none;
+}
+:is(#primary, body) .bmp .bmp-hledani::placeholder { color: var(--bmp-seda); font-weight: 600; }
+
+/* Panel filtrů */
+:is(#primary, body) .bmp .bmp-filtry {
+  padding: 0 0 14px; border-top: 1px dashed var(--bmp-vlasova);
+}
+:is(#primary, body) .bmp .bmp-filtry[hidden] { display: none; }
+:is(#primary, body) .bmp .bmp-filtry__skupina { padding-top: 12px; }
+:is(#primary, body) .bmp .bmp-filtry__nazev {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--bmp-seda); margin-bottom: 8px;
+}
+:is(#primary, body) .bmp .bmp-chipy { display: flex; flex-wrap: wrap; gap: 7px; }
+:is(#primary, body) .bmp .bmp-chip {
+  cursor: pointer; border: 2px solid var(--bmp-cerna); border-radius: 999px;
+  background: var(--bmp-bila); padding: 5px 12px; font-size: 13px; font-weight: 700;
+}
+:is(#primary, body) .bmp .bmp-chip[aria-pressed="true"] {
+  background: var(--bmp-cerna); color: var(--bmp-bila);
+}
+:is(#primary, body) .bmp .bmp-chip--kat[aria-pressed="true"] {
+  background: var(--kat, var(--bmp-kat-vychozi)); color: var(--bmp-cerna);
+}
+:is(#primary, body) .bmp .bmp-chip__tecka {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--kat, var(--bmp-kat-vychozi)); border: 1.5px solid var(--bmp-cerna);
+  margin-right: 6px; vertical-align: -1px;
+}
+:is(#primary, body) .bmp .bmp-chip__pocet { font-weight: 600; opacity: .65; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   3 — Shrnutí dne, hlášky, prázdné stavy
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-shrnuti {
+  padding: 16px 0; display: flex; flex-wrap: wrap; gap: 8px 18px;
+  align-items: baseline; font-size: 14px; font-weight: 600; color: var(--bmp-seda);
+}
+:is(#primary, body) .bmp .bmp-shrnuti strong {
+  color: var(--bmp-cerna); font-size: 20px; font-weight: 800;
+}
+:is(#primary, body) .bmp .bmp-shrnuti__popis { margin-left: auto; }
+
+:is(#primary, body) .bmp .bmp-stav {
+  margin: 0 0 16px; padding: 12px 16px;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius-s);
+  background: var(--bmp-zluta); font-weight: 700; font-size: 14px;
+}
+:is(#primary, body) .bmp .bmp-prazdno {
+  margin: 36px 0; padding: 28px; text-align: center;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius);
+  background: var(--bmp-svetla);
+}
+:is(#primary, body) .bmp .bmp-prazdno h3 { font-size: 22px; margin-bottom: 8px; }
+:is(#primary, body) .bmp .bmp-prazdno p + p { margin-top: 16px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   4 — Celodenní pás (výstavy, instalace)
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-celoden { margin: 0 0 14px; }
+:is(#primary, body) .bmp .bmp-celoden__nazev {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--bmp-seda); margin-bottom: 7px;
+}
+:is(#primary, body) .bmp .bmp-celoden__pasy { display: flex; flex-wrap: wrap; gap: 8px; }
+:is(#primary, body) .bmp .bmp-celoden__pas {
+  cursor: pointer;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius-s);
+  background: var(--kat, var(--bmp-kat-vychozi));
+  padding: 8px 14px; font-weight: 800; font-size: 14px;
+}
+:is(#primary, body) .bmp .bmp-celoden__pas small { display: block; font-weight: 600; font-size: 12px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   5 — ZOBRAZENÍ „LINEUP": časová osa s paralelními scénami
+
+   Osa je vlastní posuvná plocha: vodorovně jedou scény, svisle čas.
+   Hlavička se scénami drží nahoře, sloupec s časy vlevo. Nejde to řešit
+   posouváním celé stránky — jakmile je na kontejneru overflow-x,
+   prohlížeč zapne i overflow-y a „sticky" vůči stránce přestane platit.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-osa {
+  margin: 0 0 28px;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius);
+  overflow: auto; background: var(--bmp-bila);
+  max-height: min(74vh, 900px);
+  position: relative;
+}
+:is(#primary, body) .bmp .bmp-osa__vnitrek {
+  display: grid;
+  grid-template-columns: var(--bmp-osa-sirka-casu) repeat(var(--sloupcu), var(--bmp-osa-sirka-sloupce));
+  width: max-content; min-width: 100%;
+}
+:is(#primary, body) .bmp .bmp-osa__roh {
+  position: sticky; top: 0; left: 0; z-index: 30;
+  background: var(--bmp-bila);
+  border-right: var(--bmp-ramecek); border-bottom: var(--bmp-ramecek);
+  height: var(--bmp-osa-vyska-hlavicky);
+}
+:is(#primary, body) .bmp .bmp-osa__misto {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bmp-svetla);
+  border-bottom: var(--bmp-ramecek); border-right: 1px solid var(--bmp-vlasova);
+  height: var(--bmp-osa-vyska-hlavicky);
+  padding: 7px 9px;
+  font-size: 13px; font-weight: 800; line-height: 1.15;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  hyphens: auto; overflow: hidden;
+}
+:is(#primary, body) .bmp .bmp-osa__misto span {
+  font-weight: 700; font-size: 11px; color: var(--bmp-seda);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+:is(#primary, body) .bmp .bmp-osa__misto b { font-weight: 800; display: block; }
+
+:is(#primary, body) .bmp .bmp-osa__casy {
+  position: sticky; left: 0; z-index: 15;
+  background: var(--bmp-bila); border-right: var(--bmp-ramecek);
+  height: var(--vyska);
+}
+:is(#primary, body) .bmp .bmp-osa__cas {
+  position: absolute; left: 0; right: 0;
+  font-size: 11.5px; font-weight: 700; color: var(--bmp-seda);
+  /* Stejný odstup zleva i zprava, ať se čas nelepí na dělicí čáru.
+     Zalomit se nesmí nikdy — „20:00" na dvou řádcích je nečitelné. */
+  padding: 0 7px; text-align: center; transform: translateY(-50%);
+  white-space: nowrap;
+}
+:is(#primary, body) .bmp .bmp-osa__sloupec {
+  position: relative; height: var(--vyska);
+  border-right: 1px solid var(--bmp-vlasova);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--bmp-svetla) 0, var(--bmp-svetla) 1px,
+    transparent 1px, transparent var(--hodina)
+  );
+}
+:is(#primary, body) .bmp .bmp-osa__blok {
+  position: absolute; left: 3px; right: 3px; cursor: pointer;
+  border: 2px solid var(--bmp-cerna); border-radius: 8px;
+  background: var(--kat, var(--bmp-kat-vychozi));
+  padding: 5px 7px; overflow: hidden;
+  font-size: 12.5px; font-weight: 800; line-height: 1.16;
+  display: flex; flex-direction: column; gap: 2px;
+}
+:is(#primary, body) .bmp .bmp-osa__blok:hover { box-shadow: var(--bmp-stin-s); z-index: 12; }
+:is(#primary, body) .bmp .bmp-osa__blok small { font-weight: 600; font-size: 11px; opacity: .78; }
+:is(#primary, body) .bmp .bmp-osa__blok--mimo { opacity: .22; filter: grayscale(1); }
+:is(#primary, body) .bmp .bmp-osa__blok--moje { box-shadow: inset 0 0 0 3px var(--bmp-cerna); }
+/* „Top představení" = zaškrtnutý Feature Event u akce. */
+:is(#primary, body) .bmp .bmp-osa__blok--top { border-width: 4px; }
+:is(#primary, body) .bmp .bmp-osa__blok--kratky { padding: 2px 6px; font-size: 11px; }
+:is(#primary, body) .bmp .bmp-osa__blok--kratky small { display: none; }
+
+/* Čára „teď" */
+:is(#primary, body) .bmp .bmp-osa__ted {
+  position: absolute; left: 0; right: 0; height: 0; z-index: 14;
+  border-top: 2px solid var(--bmp-koral); pointer-events: none;
+}
+/* Popisek jen u prvního sloupce, čára jde přes všechny. */
+:is(#primary, body) .bmp .bmp-osa__ted--popisek::before {
+  content: "TEĎ"; position: absolute; left: 0; top: -9px;
+  background: var(--bmp-koral); color: var(--bmp-bila);
+  font-size: 11px; font-weight: 800; padding: 1px 5px; border-radius: 3px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   6 — ZOBRAZENÍ „SEZNAM"
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-seznam { padding: 0 0 40px; }
+:is(#primary, body) .bmp .bmp-slot { margin-bottom: 22px; }
+:is(#primary, body) .bmp .bmp-slot__cas {
+  position: sticky; top: var(--bmp-lep, 120px); z-index: 25;
+  background: var(--bmp-bila);
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 6px 0 8px; margin-bottom: 10px;
+  border-bottom: var(--bmp-ramecek);
+}
+:is(#primary, body) .bmp .bmp-slot__cas b { font-size: 26px; letter-spacing: -.02em; }
+:is(#primary, body) .bmp .bmp-slot__cas span { font-size: 13px; font-weight: 600; color: var(--bmp-seda); }
+:is(#primary, body) .bmp .bmp-slot__den {
+  background: var(--bmp-cerna); color: var(--bmp-bila);
+  padding: 8px 14px; border-radius: var(--bmp-radius-s);
+  font-size: 15px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .05em; margin: 26px 0 14px;
+}
+:is(#primary, body) .bmp .bmp-karty { display: grid; gap: 12px; grid-template-columns: 1fr; }
+
+:is(#primary, body) .bmp .bmp-karta {
+  position: relative; display: flex; gap: 0;
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius-s);
+  background: var(--bmp-bila); overflow: hidden; cursor: pointer;
+}
+:is(#primary, body) .bmp .bmp-karta:hover { box-shadow: var(--bmp-stin-s); }
+:is(#primary, body) .bmp .bmp-karta__pruh { flex: 0 0 12px; background: var(--kat, var(--bmp-kat-vychozi)); }
+:is(#primary, body) .bmp .bmp-karta__telo { flex: 1; padding: 11px 44px 11px 13px; min-width: 0; }
+:is(#primary, body) .bmp .bmp-karta__meta {
+  font-size: 12.5px; font-weight: 700; color: var(--bmp-seda);
+  display: flex; flex-wrap: wrap; gap: 4px 9px; margin-bottom: 4px;
+  align-items: center;
+}
+:is(#primary, body) .bmp .bmp-karta__nazev { font-size: 18px; letter-spacing: -.01em; }
+:is(#primary, body) .bmp .bmp-karta__nazev button { cursor: pointer; }
+:is(#primary, body) .bmp .bmp-karta__stitky { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+:is(#primary, body) .bmp .bmp-karta--moje { background: var(--bmp-moje-pozadi); }
+:is(#primary, body) .bmp .bmp-karta--ted { border-color: var(--bmp-koral); box-shadow: var(--bmp-stin-s); }
+
+:is(#primary, body) .bmp .bmp-stitek {
+  font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 999px;
+  border: 1.5px solid var(--bmp-cerna); background: var(--bmp-bila);
+  text-transform: uppercase; letter-spacing: .03em; color: var(--bmp-cerna);
+}
+:is(#primary, body) .bmp .bmp-stitek--kat   { background: var(--kat, var(--bmp-kat-vychozi)); }
+:is(#primary, body) .bmp .bmp-stitek--rez   { background: var(--bmp-zluta); }
+:is(#primary, body) .bmp .bmp-stitek--ted   { background: var(--bmp-koral); color: var(--bmp-bila); border-color: var(--bmp-koral); }
+:is(#primary, body) .bmp .bmp-stitek--kolize { background: var(--bmp-koral); color: var(--bmp-bila); }
+:is(#primary, body) .bmp .bmp-stitek--top   { background: var(--bmp-cerna); color: var(--bmp-zluta); }
+:is(#primary, body) .bmp .bmp-stitek--misto { cursor: pointer; background: var(--bmp-svetla); }
+:is(#primary, body) .bmp .bmp-stitek--misto:hover { background: var(--bmp-zluta); }
+:is(#primary, body) .bmp .bmp-bez-barier {
+  font-size: 11px; font-weight: 700; color: var(--bmp-seda);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+:is(#primary, body) .bmp .bmp-hvezda {
+  position: absolute; top: 7px; right: 7px;
+  cursor: pointer; border: 2px solid var(--bmp-cerna); border-radius: 50%;
+  background: var(--bmp-bila); width: 30px; height: 30px; padding: 0;
+  font-size: 14px; line-height: 1; display: grid; place-items: center;
+}
+:is(#primary, body) .bmp .bmp-hvezda[aria-pressed="true"] { background: var(--bmp-zluta); }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   7 — Detail akce
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp .bmp-detail {
+  border: var(--bmp-ramecek); border-radius: var(--bmp-radius);
+  padding: 0; max-width: 620px; width: calc(100% - 32px);
+  background: var(--bmp-bila); color: var(--bmp-cerna);
+  max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
+}
+/* Průsvitné zatemnění. Opacity místo rgba(), aby se barva dala vzít
+   z palety a nemusel se sem psát hex. */
+:is(#primary, body) .bmp .bmp-detail::backdrop {
+  background: var(--global-palette3, #121212);
+  opacity: .66;
+}
+:is(#primary, body) .bmp .bmp-detail__obraz {
+  display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
+  border-bottom: var(--bmp-ramecek);
+}
+:is(#primary, body) .bmp .bmp-detail__telo { padding: 20px 22px 24px; }
+:is(#primary, body) .bmp .bmp-detail__meta {
+  font-size: 13px; font-weight: 700; color: var(--bmp-seda); margin-bottom: 6px;
+}
+:is(#primary, body) .bmp .bmp-detail h2 {
+  font-size: clamp(24px, 5vw, 32px); letter-spacing: -.02em;
+  margin-bottom: 10px; padding-right: 42px;
+}
+:is(#primary, body) .bmp .bmp-detail__popis {
+  font-size: 14.5px; margin: 14px 0; color: var(--bmp-text);
+}
+:is(#primary, body) .bmp .bmp-detail__zaroven {
+  margin-top: 16px; border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
+}
+:is(#primary, body) .bmp .bmp-detail__zaroven h3 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--bmp-seda); margin-bottom: 8px;
+}
+:is(#primary, body) .bmp .bmp-detail__zaroven ul { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+:is(#primary, body) .bmp .bmp-detail__zaroven li { padding: 3px 0; }
+:is(#primary, body) .bmp .bmp-detail__zaroven li b { display: inline-block; min-width: 46px; font-weight: 700; }
+:is(#primary, body) .bmp .bmp-detail__zaroven li span { color: var(--bmp-seda); }
+:is(#primary, body) .bmp .bmp-detail__akce { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+:is(#primary, body) .bmp .bmp-detail__akce .bmp-btn--hlavni {
+  background: var(--bmp-zluta); font-weight: 800; box-shadow: var(--bmp-stin-s);
+}
+:is(#primary, body) .bmp .bmp-zavrit {
+  position: sticky; float: right; top: 10px; right: 10px; margin: 10px 10px -46px auto;
+  border: var(--bmp-ramecek); border-radius: 50%; background: var(--bmp-bila);
+  width: 36px; height: 36px; cursor: pointer;
+  font-size: 17px; font-weight: 800; line-height: 1; text-align: center;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   8 — Záchranný blok
+
+   Je v HTML pořád a skript ho odstraní, až když se program opravdu
+   vykreslí. Kryje tím tři selhání naráz: vypnutý JavaScript, chybu ve
+   skriptu i nedostupné REST API. Schválně nestojí pod .bmp — tahle
+   třída se na kořen přidává skriptem, takže v případě, kdy je blok
+   potřeba nejvíc, tam být nemusí.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:is(#primary, body) .bmp-nouze {
+  margin: 28px 0; padding: 22px;
+  border: var(--bm-ramecek, 3px solid var(--global-palette3, #121212));
+  border-radius: var(--bm-radius, 18px);
+  background: var(--global-palette7, #F2F2F0);
+}
+:is(#primary, body) .bmp-nouze h2 { font-size: 22px; margin: 0 0 8px; }
+:is(#primary, body) .bmp-nouze ul { margin: 12px 0 0; padding-left: 20px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   9 — Větší obrazovky
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 700px) {
+  :is(#primary, body) .bmp .bmp-karty { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1040px) {
+  :is(#primary, body) .bmp .bmp-karty { grid-template-columns: repeat(3, 1fr); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   10 — Mobil (do 699 px)
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 699px) {
+  :is(#primary, body) .bmp {
+    --bmp-osa-px-za-minutu: 1.15;
+    --bmp-osa-sirka-sloupce: 108px;
+    --bmp-osa-sirka-casu: 42px;
+  }
+
+  /* ── Osa jde na mobilu od kraje ke kraji ───────────────────────────
+     Jediné místo v celém návrhu, které porušuje postranní okraje
+     stránky. Osa je vodorovně posuvná plocha a na 375 px je každý pixel
+     znát: s okraji se do záběru vejdou 2,2 scény, bez nich 3,1. Okraje
+     si nechává všechno ostatní — ovládání, hlášky i zobrazení Seznam.
+
+     Jak to funguje: záporné okraje do stran roztáhnou prvek přes celou
+     šířku výřezu bez ohledu na to, kolik odsazení má kolem sebe skupina
+     stránky. Šířku výřezu dodá skript v --bmp-vyrez, protože 100vw
+     počítá i svislý posuvník a na úzkém okně v počítači by z toho
+     vznikl vodorovný posuv celé stránky.
+
+     Místo nuly se na okraje dosazuje bezpečná zóna telefonu: na výšku je
+     nulová, na šířku odsadí osu od výřezu a zaoblených rohů. */
+  :is(#primary, body) .bmp .bmp-osa {
+    margin-left: calc(50% - var(--bmp-vyrez) / 2 + env(safe-area-inset-left, 0px));
+    margin-right: calc(50% - var(--bmp-vyrez) / 2 + env(safe-area-inset-right, 0px));
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    max-height: 70vh;
+  }
+
+  /* Lepivý pruh s ovládáním musí mít pozadí taky přes celou šířku —
+     jinak by pod ním při posouvání prosvítaly okraje osy, která je
+     širší než on. Pozadí nese pseudoprvek, obsah pruhu zůstává
+     v okrajích stránky. */
+  :is(#primary, body) .bmp .bmp-ovladani { border-bottom: 0; }
+  :is(#primary, body) .bmp .bmp-ovladani::before {
+    content: ""; position: absolute; z-index: -1;
+    top: 0; bottom: 0;
+    left: calc(50% - var(--bmp-vyrez) / 2);
+    width: var(--bmp-vyrez);
+    background: var(--bmp-bila);
+    border-bottom: var(--bmp-ramecek);
+  }
+
+  /* Na užší sloupce se musí zmenšit i písmo, jinak zbyde na název
+     kapely pět znaků na řádek. Pod 11 px se nejde — menší text už
+     v šeru a v pohybu nikdo nepřečte. */
+  :is(#primary, body) .bmp .bmp-osa__misto { font-size: 11.5px; padding: 6px 7px; }
+  :is(#primary, body) .bmp .bmp-osa__blok { font-size: 12px; padding: 4px 6px; }
+  :is(#primary, body) .bmp .bmp-osa__blok small { font-size: 11px; }
+  /* 42px sloupce minus rámeček nechá na „20:00" přesně 31 px — proto
+     jsou odstupy po čtyřech. Užší sloupec už se udělat nedá. */
+  :is(#primary, body) .bmp .bmp-osa__cas { font-size: 11px; padding: 0 4px; }
+
+  /* Ovládání musí zůstat na dvou řádcích — třetí řádek lepivého pruhu
+     by sežral čtvrtinu displeje. Druhý řádek (přepínač + Filtry + ★)
+     potřebuje 298 px, takže se vejde i na 360px Android, když má
+     stránka kolem obsahu jen svoje běžné okraje. Když ho zkratka
+     dostane do skupiny s dalším odsazením, zalomí se na tři řádky —
+     ošklivé, ale funkční. */
+  :is(#primary, body) .bmp .bmp-sirsi { display: none; }
+  :is(#primary, body) .bmp .bmp-prepinac button { padding: 9px 9px; font-size: 13px; }
+  :is(#primary, body) .bmp .bmp-radek { gap: 6px; }
+  :is(#primary, body) .bmp .bmp-btn { padding: 9px 10px; font-size: 13px; }
+
+  /* Detail jede odspodu jako „bottom sheet" — palec na něj dosáhne. */
+  :is(#primary, body) .bmp .bmp-detail {
+    width: 100%; max-width: none; margin: 0; position: fixed;
+    bottom: 0; left: 0; top: auto; max-height: 88vh;
+    border-radius: var(--bmp-radius) var(--bmp-radius) 0 0;
+    border-bottom: 0;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   11 — Omezený pohyb
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#primary, body) .bmp,
+  :is(#primary, body) .bmp * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
