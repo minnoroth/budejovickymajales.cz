@@ -347,7 +347,10 @@ function bm_rezervace_obsluha_odkazu() {
 
 	if ( ! bm_rezervace_zrusit( $id_objednavky, $ucastnici, $id_akce ) ) {
 		// Buď to mezi načtením stránky a kliknutím stihl někdo jiný,
-		// nebo je na webu zádrhel. Rozliší to stav objednávky.
+		// nebo je na webu zádrhel. Rozliší to stav objednávky — načtený znovu,
+		// protože ten z začátku požadavku může být z mezipaměti.
+		clean_post_cache( $id_objednavky );
+
 		if ( BM_REZERVACE_STAV_PLATI !== get_post_status( $id_objednavky ) ) {
 			bm_rezervace_stranka(
 				'Tahle rezervace je už zrušená',

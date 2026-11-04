@@ -156,6 +156,10 @@ jestli na webu byly staré rezervace — a tady žádné nebyly, takže nasadil 
 Doplněk je proto psaný proti nové větvi. Zbytek analýzy (doporučení, GDPR, e-maily,
 rozhodovací brána před čekací frontou) platí beze změny.
 
+Celé to rozebírá [14-rezervace-oprava.md](../../docs/wordpress/14-rezervace-oprava.md):
+co z analýzy padá, co platí dál, proč je zrušená rezervace v administraci vidět jako
+„Refunded" a proč se doplněk musí testovat po každé aktualizaci Event Tickets.
+
 ### Co se stane s osobními údaji
 
 Jméno a e-mail se při zrušení **smažou**, ne jen označí. Záznamy účastníků zmizí úplně
