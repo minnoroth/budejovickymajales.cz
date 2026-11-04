@@ -113,8 +113,26 @@ dnů, které se posouvají prstem, a pod nimi přepínač zobrazení, Filtry a �
 bydlí uvnitř panelu filtrů — třetí řádek lepivého ovládání by sežral čtvrtinu
 displeje.
 
-Osa na mobilu ukáže dvě scény a kus třetí, posouvá se do stran, sloupec s časy
-a hlavička scén jsou přilepené:
+Osa je **jediné místo v návrhu, které na mobilu porušuje postranní okraje
+stránky a jde od kraje ke kraji** — je to vodorovně posuvná plocha, takže každý
+ušetřený pixel se přímo promítne do toho, kolik scén návštěvník vidí naráz,
+a dvacet pixelů okraje na každé straně je tu dražší než kdekoli jinde. Okraje
+si nechává všechno ostatní: nadpisy, ovládání, hlášky i zobrazení Seznam.
+
+Spolu s užším sloupcem času (36 px místo 58) a užšími sloupci scén (108 px
+místo 128) to dělá tenhle rozdíl:
+
+| Šířka displeje | Scén v záběru dřív | Scén v záběru teď |
+|---|---:|---:|
+| 375 px (iPhone SE/13 mini) | 2,21 | **3,14** |
+| 360 px (běžný Android) | 2,09 | **3,00** |
+
+Čas se vypisuje jen u celých hodin, takže užší sloupec nic neztratí. Vodorovný
+posuv celé stránky z toho vzniknout nemůže — osa má `overflow: auto` a obsah si
+ořízne sama; ověřeno, že `scrollWidth` stránky zůstává roven šířce okna. Místo
+nuly se na okraje dosazuje bezpečná zóna telefonu (`env(safe-area-inset-left`
+/`-right)`), která je na výšku nulová a na šířku odsadí osu od výřezu
+a zaoblených rohů. Sloupec s časy i hlavička scén zůstávají přilepené.
 
 ![Lineup na mobilu](obrazky/04-mobil-lineup.png)
 
@@ -395,9 +413,12 @@ se mezitím změnilo zadání:
 | Fáze 3 celá | 6 |
 | **Fáze 1 osekaná** | **~25 h** |
 
-Doporučuju **fázi 1 celou (32,5 h) a fázi 2 až po prvním ročníku**, kdy bude
-vidět, jestli lidi osu vůbec používají. Fáze 3 je nejlevnější a nejvíc viditelná
-— dá se přidat kdykoli.
+Doporučoval jsem fázi 1 celou a fázi 2 až po prvním ročníku, kdy bude vidět,
+jestli lidi osu vůbec používají.
+
+> **Rozhodnuto 4. 11. 2026:** zadavatel chce do ročníku 2027 **fázi 1 i fázi 2**,
+> tedy Seznam i Lineup — dohromady 45 hodin. **Fáze 3 (Můj program) se zatím
+> neschvaluje**; zůstává v dokumentu jako položka k doobjednání.
 
 ---
 
