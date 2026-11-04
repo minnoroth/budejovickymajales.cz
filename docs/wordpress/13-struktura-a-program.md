@@ -125,12 +125,20 @@ tiše. Tohle rozhodnutí by nemělo padnout mimochodem při řešení vzhledu.
 
 ---
 
-## Na co se čeká
+## Rozhodnuto 4. 11. 2026 večer, nad výsledky tří týmů
 
-1. **Tým CSS** ukáže, kolik z ošklivosti výpisu byl jen styl. To je nejlevnější odpověď
-   na otázku „je Events pekelný".
-2. **Tým lineupu** dostal sjednocení do zadání a dořeší výchozí den.
-3. **Tým rezervací** dostal do zadání i variantu bez The Events Calendar a řekne, co
-   která cesta stojí.
+- **Stránka programu: fáze 1 i fáze 2 (Seznam i Lineup) do ročníku 2027.** Zadavatel si
+  prototyp prošel a schválil obojí. Fáze 3 („Můj program" s kolizemi) se zatím neschvaluje.
+- **Čekací fronta se odkládá** za rozhodovací bránu — nejdřív se v ročníku 2027 změří,
+  kolik lidí rezervaci opravdu zruší. Zadavatel: *„uvidíme, jak dlouho bude trvat celkově
+  problémy s rezervací."*
+- **Mobilní lineup půjde od kraje ke kraji.** Postranní okraje stránky ukrajují posuvné ose
+  příliš mnoho šířky; osa jako jediný prvek stránky okraje poruší.
 
-Teprve nad těmi třemi výsledky má smysl rozhodnout o architektuře.
+### Co ještě čeká na rozhodnutí
+
+- Nasazení CSS výpisu akcí (hotové, stačí spustit `nastaveni.py`).
+- Zapnutí funkce **Category Colors** v The Events Calendar — vypíše název rubriky
+  na kartičku bez jediného řádku kódu. Opravuje dřívější tvrzení, že na to je potřeba
+  override šablony.
+- **SMTP a DNS** — nezávisí na ničem ostatním a opravuje současný stav, ne budoucí.
