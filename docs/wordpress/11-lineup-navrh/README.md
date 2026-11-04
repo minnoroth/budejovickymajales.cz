@@ -119,13 +119,17 @@ ušetřený pixel se přímo promítne do toho, kolik scén návštěvník vidí
 a dvacet pixelů okraje na každé straně je tu dražší než kdekoli jinde. Okraje
 si nechává všechno ostatní: nadpisy, ovládání, hlášky i zobrazení Seznam.
 
-Spolu s užším sloupcem času (36 px místo 58) a užšími sloupci scén (108 px
+Spolu s užším sloupcem času (42 px místo 58) a užšími sloupci scén (108 px
 místo 128) to dělá tenhle rozdíl:
 
 | Šířka displeje | Scén v záběru dřív | Scén v záběru teď |
 |---|---:|---:|
-| 375 px (iPhone SE/13 mini) | 2,21 | **3,14** |
-| 360 px (běžný Android) | 2,09 | **3,00** |
+| 375 px (iPhone SE/13 mini) | 2,21 | **3,08** |
+| 360 px (běžný Android) | 2,09 | **2,94** |
+
+Čas má v obou rozvrženích **stejný odstup zleva i zprava** a je ve sloupci
+vystředěný. Na mobilu se kvůli tomu sloupec nedá stáhnout pod 42 px — pod tím
+se „20:00" s odstupy nevejde a zalomí se.
 
 Čas se vypisuje jen u celých hodin, takže užší sloupec nic neztratí. Vodorovný
 posuv celé stránky z toho vzniknout nemůže — osa má `overflow: auto` a obsah si

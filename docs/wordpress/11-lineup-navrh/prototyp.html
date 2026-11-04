@@ -291,7 +291,8 @@ a { color: var(--bm-hlavni-tmav); }
 .bm-osa__cas {
   position: absolute; left: 0; right: 0;
   font-size: 11px; font-weight: 700; color: var(--bm-seda);
-  padding-left: 7px; transform: translateY(-50%);
+  /* Stejný odstup zleva i zprava, ať se čas nelepí na dělicí čáru. */
+  padding: 0 7px; text-align: center; transform: translateY(-50%);
 }
 .bm-osa__sloupec {
   position: relative; height: var(--vyska);
@@ -460,7 +461,7 @@ a { color: var(--bm-hlavni-tmav); }
   :root {
     --osa-px-za-minutu: 1.15;
     --osa-sirka-sloupce: 108px;
-    --osa-sirka-casu: 36px;
+    --osa-sirka-casu: 42px;
   }
   .bm-hlava { padding: 22px 0 20px; }
 
@@ -487,7 +488,7 @@ a { color: var(--bm-hlavni-tmav); }
   .bm-osa__misto { font-size: 11.5px; padding: 6px 7px; }
   .bm-osa__blok { font-size: 12px; padding: 4px 6px; }
   .bm-osa__blok small { font-size: 10px; }
-  .bm-osa__cas { font-size: 10.5px; padding-left: 5px; }
+  .bm-osa__cas { font-size: 10.5px; padding: 0 5px; }
   /* Ovládání musí zůstat na jedné řádce — lepivý pruh přes čtvrtinu
      displeje je horší než kratší popisky. */
   .bm-sirsi { display: none; }
