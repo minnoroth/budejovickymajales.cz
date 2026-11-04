@@ -106,9 +106,46 @@ Všechno níž je vykrvácené proti živému API, ne převzaté z dokumentace.
 - **`image` může být `false`**, ne objekt. A pole `_bm_rezervace`, které si vymyslel
   prototyp, ve skutečných datech není — free verze Event Tickets rozdíl mezi dobrovolnou
   a povinnou rezervací neposílá.
-- **Výběr ročníku se dělá přes termín, ne přes taxonomii.** `wp/v2/tribe_events` filtruje
-  na nadcházející akce, takže na archiv vrátí prázdno, a `count` u termínu počítá i jiné
-  typy obsahu. Jediné spolehlivé je zeptat se kalendáře na rozsah `datum_od`–`datum_do`.
+## Rozhodnutí: který ročník stránka ukazuje
+
+Pravidlo z návrhu zní „nejnovější termín, který má aspoň jednu akci". Dá se číst dvěma
+způsoby a **platí ten první**:
+
+> Rozhoduje **datum akce**, ne zaškrtnutý ročník. Ročník se vybere tak, že se kalendáře
+> zeptáme na rozsah `datum_od`–`datum_do` každého termínu, od nejnovějšího. Vyhraje první,
+> který něco vrátí; když nevrátí nic žádný, ukáže se nejnovější termín a stav „Program
+> se připravuje".
+
+**Proč ne přes taxonomii `rocnik`.** Nejde to. `wp/v2/tribe_events` filtruje The Events
+Calendar na nadcházející akce, takže archiv se přes ni vypsat nedá, kalendářní endpoint
+`tribe/events/v1/events` filtr na vlastní taxonomii neumí a `count` u termínu počítá i jiné
+typy obsahu (krále, aktuality). Druhý zdroj pravdy vedle termínu by navíc nikdo neudržel.
+
+**Kdy se ty dva výklady vůbec liší.** Jen u akce, která leží mimo svůj vlastní ročník —
+a to je chyba v datech, ne stav, na který se má kód chystat. Takový případ dnes na webu
+je: LOUD DISCO má datum 30. 5. 2027, kdežto ročník 2027 má termín 9.–14. 5. 2027 (termín
+se změnil až po založení akce). Vyhrává termín, takže se ta akce v programu neukáže, dokud
+nebude mít datum uvnitř svého ročníku.
+
+**Proč to tak chceme.** Kdyby o výběru rozhodovalo zaškrtnutí, založení ročníku 2028
+s jedinou akcí mimo jeho termín by smazalo ze stránky archiv 2027 a nahradilo ho hláškou
+„Program se připravuje". Právě proti tomu to pravidlo v návrhu je.
+
+## Co je potřeba opravit v návodu pro tým
+
+[docs/wordpress/06-navod-pro-tym.md](../../../docs/wordpress/06-navod-pro-tym.md), sekce
+**2.5 Žánr a kategorie**, poslední odstavec slibuje:
+
+> „Ještě níž je box **Ročníky**. Zaškrtni ten letošní (třeba **2027**). Bez toho se akce
+> nemusí ukázat v programu aktuálního ročníku."
+
+**To s touhle datovou vrstvou neplatí.** O zobrazení v programu rozhoduje datum akce, ne
+zaškrtnutý ročník. Akce bez zaškrtnutého ročníku se v programu ukáže, pokud má datum
+v termínu ročníku — a naopak akce se zaškrtnutým ročníkem se neukáže, pokud má datum mimo.
+
+Návod tím ale neztrácí smysl: zaškrtnutý ročník pořád něco znamená pro krále a aktuality.
+Jak tu větu přeformulovat, **je rozhodnutí pro zadavatele**, ne pro toho, kdo opravuje
+program. Proto je tady poznámka a ne oprava.
 
 ## Jak to ověřit, když je na webu málo dat
 
