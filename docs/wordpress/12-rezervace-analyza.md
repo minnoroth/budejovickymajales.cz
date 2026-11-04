@@ -13,6 +13,10 @@ Rozsah provozu: v ročníku 2026 mělo rezervaci 17 ze 102 vystoupení, kapacity
 > a na třech místech je opravuje — ceník výrobce, existenci fronty v placené verzi a odhad
 > hodin na vlastní kód. Kde se rozcházejí, platí tenhle dokument.
 
+> **Opraveno později:** web běží na RSVP v2 nad Tickets Commerce, takže hooky a datový model
+> z [nálezu 4](#4-hooky-na-kterých-by-vlastní-kód-visel-jsou-stabilní) pro něj neplatí —
+> viz [14-rezervace-oprava.md](14-rezervace-oprava.md).
+
 ---
 
 ## Doporučení
