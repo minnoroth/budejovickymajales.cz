@@ -175,7 +175,7 @@ Dvě věci navíc, které to posouvají z „seznam oblíbených" na něco užit
 
 ![Můj program s kolizemi](obrazky/06-mobil-moje-kolize.png)
 
-Výběr se dá **poslat odkazem** (`/program/?moje=684,707,713`). Kdo na něj klikne,
+Výběr se dá **poslat odkazem** (`/program/?moje=684,743,713`). Kdo na něj klikne,
 uvidí rovnou cizí výběr a akce se mu **přidají** k jeho vlastním — ne přepíšou.
 Přijít o svůj program kliknutím na cizí odkaz by bylo horší než ho mít navíc.
 Stránka to napíše: „Ze sdíleného odkazu přibylo 7 vystoupení."
@@ -536,7 +536,7 @@ Adresa nese stav, takže se dá leccos nasimulovat:
 | `?ted=2026-06-03T20:10` | Jako by právě byla středa 20:10 — čára „teď", štítky TEĎ HRAJE |
 | `?den=2026-06-04&zobrazeni=lineup` | Čtvrteční osa s patnácti scénami |
 | `?den=vse` | Celý týden v jednom seznamu |
-| `?moje=684,707,713,736` | Cizí výběr, rovnou v režimu „Moje", s kolizemi |
+| `?moje=684,743,713` | Cizí výběr, rovnou v režimu „Moje", s kolizemi |
 | `?akce=757` | Otevřený detail jedné akce |
 
 Prototyp **není** implementace: nemá napojení na REST API, nemá PHP a data v něm
