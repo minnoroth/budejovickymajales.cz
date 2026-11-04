@@ -16,7 +16,8 @@ ber to druhé. Platí to i pro dokumentaci v tomhle repu.
 Prakticky to znamená:
 
 - **Žádný vlastní kód nad rámec nutného.** Současný web je ukázka toho, co se stane,
-  když se tohle deset let porušuje.
+  když se tohle deset let porušuje. Jediná výjimka je
+  [wordpress/mu-plugins/](wordpress/mu-plugins/) — a je tam vysvětlené proč.
 - **Žádné úpravy šablon pluginů** — rozbijí se při první aktualizaci.
 - **Barvy nikdy natvrdo.** Vždy přes `var(--global-paletteN)` z palety Kadence.
 - Když něco jde naklikat v Customizeru, patří to tam, ne do CSS.
