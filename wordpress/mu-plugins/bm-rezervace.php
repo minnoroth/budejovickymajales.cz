@@ -480,8 +480,11 @@ function bm_rezervace_je_rsvp( $id_ucastnika ) {
 /**
  * Kolik míst z objednávky je ještě obsazených.
  *
- * Účastník, který rovnou odpověděl „Nepřijdu", místo nikdy nezabral
- * a nemá se tedy co uvolňovat.
+ * Účastník, který rovnou odpověděl „Nepřijdu", místo nikdy nezabral.
+ * Tohle není kosmetika, ale pojistka: Event Tickets při odpočtu kapacity
+ * odpověď „Nepřijdu" přeskakuje, ale při jejím vracení už ne. Kdyby se takováhle
+ * objednávka zrušila, přibylo by na akci volné místo, které nikdo neměl.
+ * Proto se u nulového počtu nic neruší.
  *
  * @param int[] $ucastnici ID účastníků.
  * @return int
@@ -522,7 +525,10 @@ function bm_rezervace_zrusit( $id_objednavky, array $ucastnici, $id_akce ) {
 	// Tohle je celé zrušení: plugin sám vrátí místo do kapacity a účastníky
 	// odloží do koše. Metoda nekontroluje oprávnění, takže ji smí zavolat
 	// i nepřihlášený návštěvník.
-	if ( ! $objednavky->modify_status( $id_objednavky, BM_REZERVACE_ZRUSIT_NA ) ) {
+	//
+	// Porovnává se přísně proti true: starší i novější verze pluginu umí vrátit
+	// i WP_Error, a ten by v běžné podmínce prošel jako úspěch.
+	if ( true !== $objednavky->modify_status( $id_objednavky, BM_REZERVACE_ZRUSIT_NA ) ) {
 		return false;
 	}
 
