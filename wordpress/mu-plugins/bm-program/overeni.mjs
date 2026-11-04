@@ -74,7 +74,7 @@ function odpoved(telo, stav = 200) {
 	};
 }
 
-function faleshneApi(data, nastaveni = {}) {
+function falesneApi(data, nastaveni = {}) {
 	const zapis = [];
 	const rocniky = nastaveni.rocniky || [
 		{ id: 1, name: '2026', slug: '2026', acf: { datum_od: '20260531', datum_do: '20260606' } }
@@ -192,7 +192,7 @@ async function nadZmrazenymi(bmProgram) {
 	const data = zmrazenaData();
 
 	console.log('\n1. Celý ročník 2026 ze zmrazených dat');
-	let api = faleshneApi(data);
+	let api = falesneApi(data);
 	globalThis.fetch = api.fetchStub;
 	const vysledek = await bmProgram.nactiData('https://test.local/wp-json/');
 
@@ -276,14 +276,14 @@ async function nadZmrazenymi(bmProgram) {
 			featured: false, hide_from_listings: false, categories: [], tags: [], venue: null, ticketed: []
 		}
 	]);
-	api = faleshneApi(data, { akce: sPodvrzenymi });
+	api = falesneApi(data, { akce: sPodvrzenymi });
 	globalThis.fetch = api.fetchStub;
 	const sPodvrhem = await bmProgram.nactiData('https://test.local/wp-json/');
 	overit('akce z dne po festivalu vypadla', !sPodvrhem.akce.some((a) => a.id === 9001));
 	overit('akce z brzkého rána prvního dne zůstala', sPodvrhem.akce.some((a) => a.id === 9002));
 
 	console.log('\n5. Výběr ročníku');
-	api = faleshneApi(data, {
+	api = falesneApi(data, {
 		rocniky: [
 			{ id: 1, name: '2026', slug: '2026', acf: { datum_od: '2026-05-31', datum_do: '2026-06-06' } },
 			{ id: 2, name: '2027', slug: '2027', acf: { datum_od: '20270509', datum_do: '20270514' } }
@@ -296,7 +296,7 @@ async function nadZmrazenymi(bmProgram) {
 
 	// Druhá větev pravidla: jakmile do novějšího termínu přibude první akce,
 	// archiv ustoupí. Jedna akce stačí.
-	api = faleshneApi(data, {
+	api = falesneApi(data, {
 		akce: data.events.slice(0, 1).map((e) => Object.assign({}, e, {
 			id: 9100,
 			start_date: '2027-05-10 19:00:00',
@@ -314,7 +314,7 @@ async function nadZmrazenymi(bmProgram) {
 	rovno('první akce v novějším termínu archiv přebije', prvniAkce2027.rocnik.name, '2027');
 	rovno('a ukáže se jen ona', prvniAkce2027.akce.length, 1);
 
-	api = faleshneApi(data, {
+	api = falesneApi(data, {
 		akce: [],
 		rocniky: [{ id: 2, name: '2027', slug: '2027', acf: { datum_od: '20270509', datum_do: '20270514' } }]
 	});
@@ -324,14 +324,14 @@ async function nadZmrazenymi(bmProgram) {
 	rovno('a akce jsou prázdné, ne chyba', bezProgramu.akce.length, 0);
 
 	console.log('\n6. Co se smí a co se nesmí pokazit');
-	api = faleshneApi(data, { rozbitKategorie: true, rozbitMista: true });
+	api = falesneApi(data, { rozbitKategorie: true, rozbitMista: true });
 	globalThis.fetch = api.fetchStub;
 	const bezDoplnku = await bmProgram.nactiData('https://test.local/wp-json/');
 	rovno('výpadek barev program nepoloží', bezDoplnku.akce.length, 102);
 	rovno('kategorie jsou prázdné', bezDoplnku.kategorie.length, 0);
 	rovno('místa jsou prázdná', bezDoplnku.mista.length, 0);
 
-	api = faleshneApi(data, { rozbitAkce: true });
+	api = falesneApi(data, { rozbitAkce: true });
 	globalThis.fetch = api.fetchStub;
 	let vyhozeno = null;
 	try {
@@ -354,10 +354,14 @@ async function nadZivym(bmProgram) {
 	overit('odpověď nese total i total_pages',
 		typeof kalendar.total !== 'undefined' && typeof kalendar.total_pages !== 'undefined');
 
-	const prvni = await (await fetch(ZIVY_ZAKLAD + 'wp/v2/tribe_venue?per_page=10&page=1&_fields=id,slug,link,title,acf')).json();
-	const treti = await (await fetch(ZIVY_ZAKLAD + 'wp/v2/tribe_venue?per_page=10&page=3&_fields=id,slug,link,title,acf')).json();
+	const odpovedMista = await fetch(ZIVY_ZAKLAD + 'wp/v2/tribe_venue?per_page=10&page=1&_fields=id,slug,link,title,acf');
+	const prvni = await odpovedMista.json();
+	const mistCelkem = +odpovedMista.headers.get('x-wp-total');
+	const posledniStrana = Math.ceil(mistCelkem / 10);
+	const posledni = await (await fetch(ZIVY_ZAKLAD + 'wp/v2/tribe_venue?per_page=10&page=' + posledniStrana + '&_fields=id,slug,link,title,acf')).json();
 	rovno('wp/v2 vrátí plnou první stránku', prvni.length, 10);
-	overit('a poslední je kratší, čímž se pozná konec', treti.length > 0 && treti.length < 10, treti.length);
+	overit('a poslední je kratší, čímž se pozná konec',
+		posledni.length > 0 && posledni.length < 10, mistCelkem + ' míst, poslední stránka ' + posledni.length);
 	overit('_fields projde i přes pole acf', prvni[0] && prvni[0].acf !== undefined);
 
 	// Kolik dotazů na akce to stálo — stránkování se tím ověří i naživo.
