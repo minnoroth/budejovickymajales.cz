@@ -1,54 +1,23 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-
-# Next.js
-frontend/.next/
-frontend/out/
-
-# Production
-build/
-dist/
-
-# Misc
+# macOS
 .DS_Store
-*.pem
 
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env
-.env*.local
-.env.production
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Strapi
-backend/.cache/
-backend/.tmp/
-backend/build/
-backend/dist/
-backend/.strapi/
-backend/public/uploads/
-backend/exports/
-backend/.strapi-updater.json
-
-# IDE
+# Editory
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
+# Claude Code worktrees
+.claude/worktrees/
+
+# Přihlašovací údaje sem nepatří — repozitář je veřejný
+.env
+.env*.local
+*.pem
+
+# Fonty s nejasnou licencí sem nepatří (repo je veřejné)
+*.otf
+*.ttf
+*.woff
+*.woff2

@@ -1,0 +1,192 @@
+/* ──────────────────────────────────────────────────────────────
+   Budějovický Majáles — doplňkové CSS
+
+   Barvy NIKDY nepiš natvrdo. Vždy přes proměnné palety:
+   var(--global-palette1) … var(--global-palette15)
+   Paletu změníš v Customizeru → Barvy → Globální paleta,
+   a překreslí se tím celý web. To je způsob, jak se bude
+   dělat rebranding na nový ročník.
+
+   Velikosti písma, barvu hlavičky, patičky a logo nehledej tady —
+   ta nastavení jsou v Customizeru, aby na ně tým dosáhl bez kódu.
+   ────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Čtvrtá barva ročníku 2024. V paletě Kadence jsou sloty 1–10
+     obsazené a 11–14 patří systémovým stavům, proto levandulová bydlí zde. */
+  --bm-levandulova: #B6B4DA;
+  --bm-ramecek: 3px solid var(--global-palette3);
+  --bm-radius: 18px;
+}
+
+/* ── Barevné pásy sekcí ───────────────────────────────────────── */
+/* Pás jde přes celé okno, obsah uvnitř drží čitelnou šířku. Šířku nese
+   tahle skupina, ne jednotlivé bloky — jinak každý blok počítá vlastní
+   vystředění a nadpis skončí na jiné svislici než odstavec pod ním. */
+.wp-block-group.bm-obsah {
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bm-pas-hlavni  { background: var(--global-palette1); color: var(--global-palette9); }
+.bm-pas-koral   { background: var(--global-palette10); color: var(--global-palette3); }
+.bm-pas-levand  { background: var(--bm-levandulova); color: var(--global-palette3); }
+.bm-pas-zluta   { background: var(--global-palette15); color: var(--global-palette3); }
+
+.bm-pas-hlavni h1, .bm-pas-hlavni h2, .bm-pas-hlavni h3, .bm-pas-hlavni p {
+  color: var(--global-palette9);
+}
+
+/* Odsazení nadpisu od textu uvnitř pásu. */
+.bm-pas-hlavni h1, .bm-pas-koral h2, .bm-pas-levand h2 { margin-bottom: 16px; }
+/* Odstavce se zužují kvůli délce řádku. WordPress je centruje přes
+   !important, takže se k levé svislici musí ukotvit stejnou zbraní. */
+/* Kadence obaluje obsah skupiny ještě jedním divem, proto dvě varianty. */
+.bm-obsah > p,
+.bm-obsah > .wp-block-group__inner-container > p {
+  max-width: 660px;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+/* Datum nad nadpisem v hero sekci. */
+.bm-nadlinka {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* ── Běžící pás ───────────────────────────────────────────────── */
+.bm-bezici { background: var(--global-palette15); border-top: var(--bm-ramecek); border-bottom: var(--bm-ramecek); overflow: hidden; padding: 14px 0; }
+.bm-bezici__draha { display: flex; width: max-content; animation: bm-beh 40s linear infinite; }
+.bm-bezici__text { flex: 0 0 auto; white-space: nowrap; font-weight: 800; font-size: clamp(17px, 2vw, 24px); color: var(--global-palette3); }
+@keyframes bm-beh {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+/* Respektuje nastavení „omezit pohyb“ v systému návštěvníka. */
+@media (prefers-reduced-motion: reduce) {
+  .bm-bezici__draha { animation: none; }
+}
+
+/* ── Kartičky programu ────────────────────────────────────────── */
+.bm-karta {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  overflow: hidden;
+  background: var(--global-palette9);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.bm-karta__pruh { height: 8px; }
+.bm-karta__obraz { aspect-ratio: 16 / 10; }
+.bm-karta__telo { padding: 20px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+.bm-karta__meta { font-size: 14px; font-weight: 600; color: var(--global-palette5); margin: 0; }
+.bm-karta__nazev { font-size: 21px; font-weight: 800; line-height: 1.18; margin: 0; }
+
+/* Štítek kategorie a rezervace */
+.bm-stitek {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--global-palette3);
+  color: var(--global-palette9);
+}
+.bm-stitek--rezervace {
+  background: var(--global-palette15);
+  color: var(--global-palette3);
+  border: 2px solid var(--global-palette3);
+}
+
+/* ── Dlaždice kategorií ───────────────────────────────────────── */
+.bm-dlazdice {
+  border: var(--bm-ramecek);
+  border-radius: 16px;
+  padding: 24px 20px;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1.12;
+}
+.bm-dlazdice:hover { transform: translateY(-2px); }
+
+/* ── Tlačítka ─────────────────────────────────────────────────── */
+.bm-tlacitko {
+  display: inline-block;
+  background: var(--global-palette15);
+  color: var(--global-palette3);
+  font-weight: 800;
+  font-size: 18px;
+  padding: 16px 32px;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 2px solid var(--global-palette3);
+}
+.bm-tlacitko:hover { background: var(--global-palette9); color: var(--global-palette3); }
+
+/* ── Aktuality (blok Nejnovější příspěvky) ────────────────────── */
+.wp-block-latest-posts.is-grid { gap: 24px; }
+.wp-block-latest-posts.is-grid li {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  overflow: hidden;
+  padding: 0 0 18px;
+  background: var(--global-palette9);
+}
+.wp-block-latest-posts__featured-image img { width: 100%; height: auto; display: block; }
+.wp-block-latest-posts.is-grid li > a {
+  display: block;
+  padding: 16px 18px 0;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+}
+.wp-block-latest-posts__post-date { padding: 0 18px; font-size: 14px; font-weight: 600; color: var(--global-palette5); }
+
+/* ── Hlavička ─────────────────────────────────────────────────── */
+/* Aktivní položka menu dostane žluté podtržení místo barvy textu. */
+.site-header .primary-menu-container .menu-item.current-menu-item > a {
+  box-shadow: inset 0 -3px 0 0 var(--global-palette15);
+}
+
+/* ── Kalendář akcí (The Events Calendar) ─────────────────────── */
+/* Kadence napojuje na paletu jen základní barvy pluginu, odstíny
+   pro přejetí myší zůstávají modré z výchozího vzhledu. */
+:root, .tribe-common, .tribe-events {
+  --tec-color-accent-primary-hover: var(--global-palette2);
+  --tec-color-accent-primary-active: var(--global-palette2);
+  --tec-color-link-accent-hover: var(--global-palette2);
+  --tec-color-accent-primary-background: var(--global-palette7);
+  --tec-color-background-primary-multiday-hover: var(--global-palette7);
+  --tec-color-accent-primary-week-event: var(--global-palette7);
+  --tec-color-accent-primary-week-event-hover: var(--global-palette7);
+}
+.tribe-common .tribe-common-c-btn,
+.tribe-events .tribe-events-c-search__button { border-radius: 999px; font-weight: 800; }
+
+/* ── Úvodní stránka ───────────────────────────────────────────── */
+/* Úvod začíná barevným pásem hned pod hlavičkou, proto se ruší
+   bílá mezera, kterou Kadence dává obsahu každé stránky. */
+body.home .content-area { margin-top: 0; margin-bottom: 0; }
+
+/* ── Patička ──────────────────────────────────────────────────── */
+.site-footer .site-container { padding-top: 40px; padding-bottom: 40px; }
+
+/* ── Mobil ────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .bm-karta__nazev { font-size: 19px; }
+  .bm-dlazdice { font-size: 18px; min-height: 96px; padding: 18px 16px; }
+  .bm-tlacitko { display: block; text-align: center; }
+  .bm-nadlinka { font-size: 13px; }
+}

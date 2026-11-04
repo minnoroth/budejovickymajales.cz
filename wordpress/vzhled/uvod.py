@@ -1,0 +1,110 @@
+from pripojeni import rest
+
+
+def sekce(cls, inner, pad="72px"):
+    """Pás přes celou šířku okna, obsah uvnitř zarovnaný na čitelnou šířku."""
+    vnitrek = (f'<!-- wp:group {{"layout":{{"type":"constrained","contentSize":"1160px"}}}} -->\n'
+               f'<div class="wp-block-group bm-obsah">{inner}</div>\n<!-- /wp:group -->\n')
+    return (f'<!-- wp:group {{"align":"full","className":"{cls}","style":{{"spacing":{{"padding":'
+            f'{{"top":"{pad}","bottom":"{pad}","left":"24px","right":"24px"}}}}}},'
+            f'"layout":{{"type":"constrained"}}}} -->\n'
+            f'<div class="wp-block-group alignfull {cls}" style="padding:{pad} 24px">{vnitrek}</div>\n'
+            f'<!-- /wp:group -->\n')
+
+
+def nadpis(text, level=2, extra=""):
+    return (f'<!-- wp:heading {{"level":{level}{extra}}} -->\n'
+            f'<h{level} class="wp-block-heading">{text}</h{level}>\n<!-- /wp:heading -->\n')
+
+
+def odstavec(text, trida=""):
+    attrs = f'{{"className":"{trida}"}}' if trida else "{}"
+    cls = f' class="{trida}"' if trida else ""
+    return f'<!-- wp:paragraph {attrs} -->\n<p{cls}>{text}</p>\n<!-- /wp:paragraph -->\n'
+
+
+def karta(barva, kategorie, cas, misto, nazev, stitek=None):
+    s = f'<p class="bm-karta__meta">{cas} · {misto}</p><h3 class="bm-karta__nazev">{nazev}</h3>'
+    stitky = f'<span class="bm-stitek">{kategorie}</span>'
+    if stitek:
+        stitky += f' <span class="bm-stitek bm-stitek--rezervace">{stitek}</span>'
+    return (f'<!-- wp:html -->\n<article class="bm-karta">'
+            f'<div class="bm-karta__pruh" style="background:{barva}"></div>'
+            f'<div class="bm-karta__obraz" style="background:{barva}"></div>'
+            f'<div class="bm-karta__telo">{s}<div style="margin-top:auto;padding-top:8px">{stitky}</div></div>'
+            f'</article>\n<!-- /wp:html -->\n')
+
+
+def sloupce(items):
+    inner = "".join(
+        f'<!-- wp:column -->\n<div class="wp-block-column">{i}</div>\n<!-- /wp:column -->\n'
+        for i in items)
+    return f'<!-- wp:columns -->\n<div class="wp-block-columns">{inner}</div>\n<!-- /wp:columns -->\n'
+
+
+T, K, Z, L = "var(--global-palette1)", "var(--global-palette10)", "var(--global-palette15)", "var(--bm-levandulova)"
+B3, B9 = "var(--global-palette3)", "var(--global-palette9)"
+
+obsah = ""
+
+# hero
+obsah += sekce("bm-pas-hlavni",
+    odstavec("30. 5. – 5. 6. 2027", "bm-nadlinka")
+    + nadpis("Studentský festival, který dělá věci jinak.", 1)
+    + odstavec("Sedm dní programu po celých Budějovicích. Divadlo, hudba, filmy, přednášky i volba krále. Vstup na všechno zdarma.")
+    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/program/">Prohlédnout program</a></p>\n<!-- /wp:html -->\n')
+
+# běžící pás
+slogan = "30. 5. – 5. 6. 2027 · VSTUP ZDARMA · SEDM DNÍ · 100+ AKCÍ · ČESKÉ BUDĚJOVICE · "
+kopie = ('<span class="bm-bezici__text">' + slogan * 4 + '</span>'
+         '<span class="bm-bezici__text" aria-hidden="true">' + slogan * 4 + '</span>')
+obsah += ('<!-- wp:html -->\n<div class="bm-bezici alignfull">'
+          '<div class="bm-bezici__draha">' + kopie + '</div></div>\n<!-- /wp:html -->\n')
+
+# nepřehlédni
+obsah += sekce("bm-sekce",
+    nadpis("Nepřehlédni")
+    + sloupce([
+        karta(Z, "Volba krále", "neděle 18:00", "Piaristické náměstí", "Zahájení a představení králů"),
+        karta(K, "Venkovní scéna", "neděle 11:00", "Široko", "Výstava ŠIROKO HLUBOKO"),
+        karta(L, "Hudba", "neděle 20:00", "Piaristické náměstí", "LOUD DISCO", "Nutná rezervace"),
+    ]))
+
+# kategorie
+dlazdice = "".join(
+    f'<a class="bm-dlazdice" href="/program/" style="background:{b};color:{tx}">'
+    f'<span>{n}</span><span style="font-size:15px;font-weight:600">{p}</span></a>'
+    for n, p, b, tx in [
+        ("Hudba", "43 akcí", T, B9), ("Venkovní scéna", "22 akcí", K, B3),
+        ("Divadlo", "14 akcí", L, B3), ("Volba krále", "7 akcí", Z, B3),
+    ])
+obsah += sekce("bm-sekce",
+    nadpis("Co tě zajímá?")
+    + odstavec("Sedm dní, desítky míst po celém městě. Vyber si, co tě baví.")
+    + '<!-- wp:html -->\n<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">'
+    + dlazdice + '</div>\n<!-- /wp:html -->\n')
+
+# králové
+obsah += sekce("bm-pas-koral",
+    nadpis("Volba krále")
+    + odstavec("Každá střední škola vysílá svého kandidáta. Body se sbírají na studentských jamech, v královské hře a za plnění výzev.")
+    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/kralove/">Průběžné pořadí</a></p>\n<!-- /wp:html -->\n')
+
+# aktuality
+obsah += sekce("bm-sekce",
+    nadpis("Aktuality")
+    + odstavec("Co je nového kolem festivalu.")
+    + '<!-- wp:latest-posts {"postsToShow":3,"displayPostDate":true,"displayFeaturedImage":true,"columns":3,"postLayout":"grid"} /-->\n')
+
+# partneři
+obsah += sekce("bm-pas-levand",
+    nadpis("Festival vzniká díky nim")
+    + odstavec("Hlavní partneři ročníku")
+    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/partneri/">Všichni partneři</a></p>\n<!-- /wp:html -->\n')
+
+if __name__ == "__main__":
+    front = rest("settings")
+    print("  název webu:", front.get("title"))
+    r = rest("pages/82", "POST", {"content": obsah, "title": "Úvod"})
+    print("  stránka:", r.get("id"), "|", (r.get("title") or {}).get("rendered"), "|", r.get("status"))
+    print("  délka obsahu:", len((r.get("content") or {}).get("rendered", "")), "znaků")
