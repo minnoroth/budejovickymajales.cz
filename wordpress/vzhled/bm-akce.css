@@ -2,7 +2,7 @@
    Budějovický Majáles — výpis akcí (The Events Calendar)
 
    Navazuje na bm.css a vkládá se ZA něj. Bere odtamtud
-   --bm-levandulova, --bm-ramecek a --bm-radius; samostatně
+   --bm-ramecek a --bm-radius; samostatně
    tenhle soubor nefunguje. Nahrává ho nastaveni.py společně
    s bm.css do Customizeru → Doplňkové CSS.
 
@@ -87,7 +87,7 @@
 }
 :is(#primary, body) .tribe-events .tribe_events_cat-divadlo,
 :is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-divadlo)) {
-  --bm-kat: var(--bm-levandulova);
+  --bm-kat: var(--global-palette14);
   --bm-kat-text: var(--global-palette3);
 }
 :is(#primary, body) .tribe-events .tribe_events_cat-filmy,

@@ -29,7 +29,7 @@ PALETA = [
     ("#13612e", "Úspěch"),
     ("#1159af", "Informace"),
     ("#b82105", "Chyba"),
-    ("#f7630c", "Upozornění"),
+    ("#B6B4DA", "Levandulová – doplňková"),
     ("#F8E862", "Žlutá – akcent"),
 ]
 
