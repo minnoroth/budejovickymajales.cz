@@ -730,12 +730,25 @@
     zac.setMinutes(0, 0, 0);
     var top = Math.round((TED - zac) / 60000 * pxZaMinutu());
     if (top < 0) return;
-    osa.querySelectorAll('.bmp-osa__sloupec').forEach(function (s, i) {
+    osa.querySelectorAll('.bmp-osa__sloupec').forEach(function (s) {
       var c = document.createElement('div');
-      c.className = 'bmp-osa__ted' + (i === 0 ? ' bmp-osa__ted--popisek' : '');
+      c.className = 'bmp-osa__ted';
       c.style.top = top + 'px';
       s.appendChild(c);
     });
+
+    /* Popisek patří na časovou osu, ne do prvního sloupce s akcemi. Tam
+       seděl přes název a čas akce, která zrovna hrála — tedy přes jedinou
+       informaci, kvůli které se člověk během festivalu na program dívá.
+       Na ose je navíc vidět i po odrolování do strany, protože osa je lepivá. */
+    var casy = osa.querySelector('.bmp-osa__casy');
+    if (casy) {
+      var popisek = document.createElement('div');
+      popisek.className = 'bmp-osa__ted-popisek';
+      popisek.textContent = 'TEĎ';
+      popisek.style.top = top + 'px';
+      casy.appendChild(popisek);
+    }
     osa.scrollTop = Math.max(0, top - 140);
   }
 
