@@ -50,10 +50,23 @@ add_shortcode( 'bm_carousel', 'bm_carousel_zkratka' );
  * @return void
  */
 function bm_carousel_zarad() {
-	$soubor = plugin_dir_path( __FILE__ ) . 'carousel.css';
-	$verze  = file_exists( $soubor ) ? (string) filemtime( $soubor ) : '1.0.0';
+	$slozka = plugin_dir_path( __FILE__ );
+	$verze  = static function ( $soubor ) use ( $slozka ) {
+		// Verze = čas změny souboru. Na Wedosu není nic, čím jinak shodit cache.
+		return file_exists( $slozka . $soubor ) ? (string) filemtime( $slozka . $soubor ) : '1.0.0';
+	};
 
-	wp_enqueue_style( 'bm-carousel', plugins_url( 'carousel.css', __FILE__ ), array(), $verze );
+	wp_enqueue_style( 'bm-carousel', plugins_url( 'carousel.css', __FILE__ ), array(), $verze( 'carousel.css' ) );
+
+	// Skript jen dokresluje tečky pod pruhem. Bez něj zůstane pruh posuvný
+	// prstem i kolečkem, takže se odkládá do patičky a nic nezdržuje.
+	wp_enqueue_script(
+		'bm-carousel',
+		plugins_url( 'carousel.js', __FILE__ ),
+		array(),
+		$verze( 'carousel.js' ),
+		array( 'in_footer' => true, 'strategy' => 'defer' )
+	);
 }
 
 /**

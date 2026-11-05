@@ -143,9 +143,20 @@ představení**, seřazených podle data, nejvýš osm.
 > čtyři dlaždice vedly stejně na `/program/`. Zkratku jsem tím pádem odstranil;
 > kdyby se počty někdy hodily jinde, jsou v historii gitu.
 
+**Jak se přepíná.** Na širokém okně jsou vidět tři kartičky vedle sebe, zbytek se
+přepíná **tečkami** pod pruhem. Na telefonu jedna a švihá se prstem. Najetí myší dělá
+stejný plakátový stín jako kartičky v Lineupu a Seznamu.
+
 **Proč PHP, a ne JavaScript jako program.** Carousel je první věc pod hlavičkou. Kdyby
 se dokresloval z REST API, byla by nejdůležitější část úvodu při načtení prázdná
 a vyhledávač by v ní neviděl nic.
+
+**Co přesto dělá JavaScript.** Jen ty tečky (`carousel.js`, ~90 řádků). Přepínání
+stránek je interakce a ta se bez kódu v prohlížeči neudělá. Je to ale **vylepšení,
+ne podmínka**: bez JavaScriptu zůstane pruh posuvný prstem i kolečkem, tak jak ho
+vykreslí PHP — jen zmizí tečky. Kolik kartiček je na stránce se počítá ze skutečné
+šířky, ne z čísla v kódu; ví to jedině prohlížeč, protože to mění šířka okna
+i velikost písma, kterou si návštěvník může zvětšit.
 
 Cena: kartička akce existuje dvakrát — jednou v PHP tady, jednou v JavaScriptu
 v `bm-program`. Je to vědomá duplicita. Značkování je proto schválně stejné

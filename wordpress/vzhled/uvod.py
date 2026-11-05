@@ -1,8 +1,12 @@
 from pripojeni import rest
 
 
-def sekce(cls, inner, pad="72px"):
-    """Pás přes celou šířku okna, obsah uvnitř zarovnaný na čitelnou šířku."""
+def sekce(cls, inner, pad="40px"):
+    """Pás přes celou šířku okna, obsah uvnitř zarovnaný na čitelnou šířku.
+
+    Odsazení 40 px nahoře i dole. Dřív bylo 72 a mezi dvěma sekcemi tím
+    vznikalo skoro sto padesát pixelů prázdna.
+    """
     vnitrek = (f'<!-- wp:group {{"layout":{{"type":"constrained","contentSize":"1160px"}}}} -->\n'
                f'<div class="wp-block-group bm-obsah">{inner}</div>\n<!-- /wp:group -->\n')
     return (f'<!-- wp:group {{"align":"full","className":"{cls}","style":{{"spacing":{{"padding":'
@@ -64,7 +68,8 @@ obsah += hero(
     + odstavec("Sedm dní programu po celých Budějovicích. Divadlo, hudba, filmy, přednášky i volba krále. Vstup na všechno zdarma.")
     + '<!-- wp:html -->\n<p class="bm-tlacitka">'
       '<a class="bm-tlacitko" href="/program/">Program</a>'
-      '<a class="bm-tlacitko bm-tlacitko--podpor" href="/podpor-nas/">Podpoř nás</a>'
+      '<a class="bm-tlacitko bm-tlacitko--podpor" href="/podpor-nas/">Podpořit'
+      '<span class="bm-sipka" aria-hidden="true">\u2192</span></a>'
       '</p>\n<!-- /wp:html -->\n')
 
 # Běžící pás. Lepí se rovnou pod fotku a odděluje úvodní sekci od obsahu —
