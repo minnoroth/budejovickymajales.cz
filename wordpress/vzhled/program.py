@@ -35,5 +35,12 @@ vypis = (
 
 obsah = pas + vypis
 
-r = rest("pages/83", "POST", {"content": obsah, "title": "Program"})
+# Záhlaví Kadence s názvem stránky se skrývá, pás níž má vlastní nadpis.
+# Na webu to bylo naklikané ručně, takže by to tenhle skript na čisté
+# instalaci neobnovil a Program by měl nadpis dvakrát.
+r = rest("pages/83", "POST", {
+    "content": obsah,
+    "title": "Program",
+    "meta": {"_kad_post_title": "hide"},
+})
 print("stránka:", r.get("id"), (r.get("title") or {}).get("rendered"), r.get("status"))

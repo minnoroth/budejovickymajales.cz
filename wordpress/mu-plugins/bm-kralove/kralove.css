@@ -1,0 +1,299 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Budějovický Majáles — průběžné pořadí králů
+
+   Vzhled zkratky [bm_kralove]. Platí tu stejná čtyři pravidla jako
+   v bm-program/program.css, jen s vlastním prefixem:
+
+   1. Barvy nikdy natvrdo — všechno přes var(--global-paletteN, #záloha).
+      Rebranding na nový ročník je přepsání patnácti polí v Customizeru.
+      Záložní hexy jsou paleta ročníku 2024 a použijí se, jen když paleta
+      chybí (jiné téma, výpadek).
+   2. Každé pravidlo začíná :is(#primary, body) kvůli váze — Kadence píše
+      barvy obsahu selektory s ID a ID přebije libovolný počet tříd.
+   3. Prefix tříd je bmk-, protože bm- patří bm.css a bmp- programu.
+   4. Nic globálního. Všechno visí pod .bmk, což je kořen zkratky.
+   ══════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Tokeny ──────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk {
+  --bmk-hlavni:  var(--global-palette1,  #1EA198);
+  --bmk-cerna:   var(--global-palette3,  #121212);
+  --bmk-seda:    var(--global-palette5,  #4A4A4A);
+  --bmk-svetla:  var(--global-palette7,  #F2F2F0);
+  --bmk-bila:    var(--global-palette9,  #FFFFFF);
+  --bmk-koral:   var(--global-palette10, #EE7270);
+  --bmk-levand:  var(--global-palette14, #B6B4DA);
+  --bmk-zluta:   var(--global-palette15, #F8E862);
+
+  --bmk-ramecek: var(--bm-ramecek, 3px solid var(--global-palette3, #121212));
+  --bmk-radius:  var(--bm-radius, 18px);
+  --bmk-stin:    4px 4px 0 var(--bmk-cerna);
+
+  /* Výška fotky. Drží ji proměnná, protože na ní visí i výška pruhu
+     a odsazení textu — na mobilu se mění jedním řádkem. */
+  --bmk-foto: 92px;
+}
+
+
+/* ── Hlavička výpisu ─────────────────────────────────────────────────── */
+
+/* Ročník se vypisuje vždycky. Žebříček totiž ukazuje nejnovější ročník,
+   který má kandidáty — na podzim to může být loňský, a bez roku by to
+   vypadalo, že se letos nikdo nepřihlásil. */
+:is(#primary, body) .bmk__rocnik {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bmk-seda);
+  margin: 0 0 20px;
+}
+
+
+/* ── Barvy disciplín ─────────────────────────────────────────────────── */
+
+/* Jediné místo, kde je napsané, jaká disciplína má jakou barvu. PHP posílá
+   jen data-segment, takže se barvy mění tady — a protože všechny vedou
+   do palety, překlopí je rebranding sám.
+
+   Žlutá tu schválně není: vedoucí kandidát má žlutou kartu a dílek by se
+   na ní ztratil. „Ostatní" je proto šedá, což se k zbytkové kategorii hodí. */
+:is(#primary, body) .bmk [data-segment="studentske_jamy"] { --bmk-barva: var(--bmk-hlavni); }
+:is(#primary, body) .bmk [data-segment="kralovska_hra"]   { --bmk-barva: var(--bmk-koral); }
+:is(#primary, body) .bmk [data-segment="plneni_vyzev"]    { --bmk-barva: var(--bmk-levand); }
+:is(#primary, body) .bmk [data-segment="ostatni"]         { --bmk-barva: var(--bmk-seda); }
+
+
+/* ── Legenda ─────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk__legenda {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+:is(#primary, body) .bmk__legenda-polozka {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bmk-seda);
+}
+
+:is(#primary, body) .bmk__tecka {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--bmk-cerna);
+  background: var(--bmk-barva, var(--bmk-hlavni));
+  flex: 0 0 auto;
+}
+
+
+/* ── Text jen pro čtečku ─────────────────────────────────────────────── */
+
+/* Rozpis bodů po disciplínách. V pruhu je jen jako titulek, na který myš
+   na mobilu nedosáhne a čtečka ho nepřečte. */
+:is(#primary, body) .bmk-jen-pro-ctecku {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ── Seznam ──────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk__seznam {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+:is(#primary, body) .bmk-kral {
+  display: grid;
+  grid-template-columns: auto var(--bmk-foto) 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 20px 14px 14px;
+  background: var(--bmk-bila);
+  border: var(--bmk-ramecek);
+  border-radius: var(--bmk-radius);
+  /* Kotva míří doprostřed řádku, ne pod lepivou hlavičku tématu. */
+  scroll-margin-top: 96px;
+}
+
+/* Vedoucí kandidát. Žlutá je v paletě barva zvýraznění (tlačítka, běžící
+   pás), takže se tím nezavádí žádná nová barva. */
+:is(#primary, body) .bmk-kral:first-child {
+  background: var(--bmk-zluta);
+  box-shadow: var(--bmk-stin);
+}
+
+
+/* ── Pořadí ──────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk-kral__poradi {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--bmk-cerna);
+  min-width: 34px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ── Fotka ───────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk-kral__foto {
+  display: block;
+  width: var(--bmk-foto);
+  height: var(--bmk-foto);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--bmk-cerna);
+  background: var(--bmk-svetla);
+}
+
+:is(#primary, body) .bmk-kral__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Zástupné písmeno, když fotka chybí. Prázdné kolečko by vypadalo jako
+   chyba načítání; písmeno je vidět, že tam nic není a proč. */
+:is(#primary, body) .bmk-kral__bezfotky {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--bmk-seda);
+}
+
+
+/* ── Jméno, škola, graf ──────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk-kral__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+:is(#primary, body) .bmk-kral__jmeno {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.18;
+  color: var(--bmk-cerna);
+}
+
+:is(#primary, body) .bmk-kral__skola {
+  font-size: 15px;
+  color: var(--bmk-seda);
+}
+
+:is(#primary, body) .bmk-kral__skola strong { font-weight: 700; }
+:is(#primary, body) .bmk-kral__skola em { font-style: italic; }
+
+:is(#primary, body) .bmk-kral__graf {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Dráha pruhu. Šířku vlastního pruhu počítá PHP jako podíl k vedoucímu
+   kandidátovi, ne k součtu všech bodů — tak to dělal i starý web. */
+:is(#primary, body) .bmk-kral__pruh {
+  display: flex;
+  height: 14px;
+  min-width: 2px;
+  max-width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  /* Podklad se ukáže jen u kandidáta bez jediného bodu — ten nemá dílky. */
+  background: var(--bmk-svetla);
+  border: 2px solid var(--bmk-cerna);
+  box-sizing: border-box;
+}
+
+/* Jeden dílek = jedna disciplína. Šířku počítá PHP jako podíl z bodů
+   kandidáta, takže dílky dohromady vždycky dají přesně sto procent pruhu. */
+:is(#primary, body) .bmk-kral__dil {
+  display: block;
+  height: 100%;
+  background: var(--bmk-barva, var(--bmk-hlavni));
+}
+
+/* Předěl mezi dílky. Bez něj splyne korálová s levandulovou. */
+:is(#primary, body) .bmk-kral__dil + .bmk-kral__dil {
+  border-left: 2px solid var(--bmk-cerna);
+}
+
+:is(#primary, body) .bmk-kral__body {
+  flex: 0 0 auto;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bmk-cerna);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+
+/* ── Prázdný stav ────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk--prazdno p {
+  margin: 0;
+  padding: 24px;
+  border: var(--bmk-ramecek);
+  border-radius: var(--bmk-radius);
+  background: var(--bmk-svetla);
+  font-weight: 600;
+}
+
+
+/* ── Mobil ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  /* Rozložení zůstává stejné jako na šířce — pořadí, fotka, text vedle sebe.
+     Stačí zmenšit fotku a písmo. Zkoušel jsem text zalomit pod fotku, ale
+     sloupec s pořadím se pak roztáhl přes zbylé místo a karta vypadala
+     rozsypaně; tři sloupce drží pruhy pod sebou, a jen tak se dají
+     porovnat. Na 375 px zbývá na pruh přes 170 px, což bohatě stačí. */
+  :is(#primary, body) .bmk { --bmk-foto: 56px; }
+
+  :is(#primary, body) .bmk-kral {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  :is(#primary, body) .bmk-kral__poradi { font-size: 21px; min-width: 22px; }
+  :is(#primary, body) .bmk-kral__jmeno { font-size: 17px; }
+  :is(#primary, body) .bmk-kral__skola { font-size: 13px; }
+  :is(#primary, body) .bmk-kral__graf { gap: 10px; margin-top: 4px; }
+  :is(#primary, body) .bmk-kral__body { font-size: 14px; }
+  :is(#primary, body) .bmk-kral__bezfotky { font-size: 24px; }
+  :is(#primary, body) .bmk__legenda { gap: 6px 14px; }
+  :is(#primary, body) .bmk__legenda-polozka { font-size: 13px; }
+}

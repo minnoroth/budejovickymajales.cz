@@ -10,7 +10,7 @@ Běžící web žije na hostingu, ne tady.
 |---|---|
 | Rozestavěný web | <https://novy.budejovickymajales.cz> |
 | Starý web | <https://budejovickymajales.cz> |
-| Pracovní větev | `docs/wordpress-migration` |
+| Hlavní větev | `main` — práce jde přes pull requesty |
 
 ## Proč WordPress
 
@@ -33,6 +33,9 @@ v [docs/wordpress/00-analyza.md](docs/wordpress/00-analyza.md).
 | [docs/wordpress/10-vypis-akci-navrh.md](docs/wordpress/10-vypis-akci-navrh.md) | Vzhled výpisu akcí a kde je strop čistého CSS |
 | [docs/wordpress/09-schuzka-marketing.md](docs/wordpress/09-schuzka-marketing.md) | Příprava na schůzku se zadavatelem |
 | [docs/wordpress/11-lineup-navrh/](docs/wordpress/11-lineup-navrh/) | **Návrh stránky Program a lineup** s klikatelným prototypem. Čeká na schválení, nic z toho není postavené |
+| [docs/wordpress/12-rezervace-analyza.md](docs/wordpress/12-rezervace-analyza.md) | Analýza rezervačního systému: rušení rezervace a čekací fronta |
+| [docs/wordpress/13-struktura-a-program.md](docs/wordpress/13-struktura-a-program.md) | Struktura menu a sjednocení Programu s Lineupem. Otevřená rozhodnutí |
+| [docs/wordpress/15-carousel-a-kralove.md](docs/wordpress/15-carousel-a-kralove.md) | **Analýza carouselu na úvodu a výpisu králů.** Oba mají hotový model a chybějící výstup |
 
 Dokumenty `01`–`04` jsou podkladová analýza z první fáze: otázky na zadavatele, detailní návrh
 modulů, ověřená fakta o pluginech a test ovládání WordPressu přes MCP. Jsou referenční —
