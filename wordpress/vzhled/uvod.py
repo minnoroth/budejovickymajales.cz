@@ -45,8 +45,15 @@ def odstavec(text, trida=""):
     return f'<!-- wp:paragraph {attrs} -->\n<p{cls}>{text}</p>\n<!-- /wp:paragraph -->\n'
 
 
-T, K, Z, L = "var(--global-palette1)", "var(--global-palette10)", "var(--global-palette15)", "var(--global-palette14)"
-B3, B9 = "var(--global-palette3)", "var(--global-palette9)"
+# Co na úvodu SCHVÁLNĚ není (rozhodnuto 5. 11. 2026):
+#
+# - „Co tě zajímá?" — čtyři dlaždice kategorií vedly všechny na /program/,
+#   takže to byl jen barevný mezikrok k témuž odkazu.
+# - „Volba krále" — vlastní pás s tlačítkem na /kralove/, které je v menu.
+# - „Festival vzniká díky nim" — partneři mají odkaz v patičce.
+#
+# Úvod je tím: fotka, běžící pás, zvýrazněné akce, aktuality. Nic, co jen
+# odkazuje jinam.
 
 obsah = ""
 
@@ -55,9 +62,15 @@ obsah += hero(
     odstavec("[bm_termin]", "bm-nadlinka")
     + nadpis("Studentský festival, který dělá věci jinak.", 1)
     + odstavec("Sedm dní programu po celých Budějovicích. Divadlo, hudba, filmy, přednášky i volba krále. Vstup na všechno zdarma.")
-    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/program/">Prohlédnout program</a></p>\n<!-- /wp:html -->\n')
+    + '<!-- wp:html -->\n<p class="bm-tlacitka">'
+      '<a class="bm-tlacitko" href="/program/">Program</a>'
+      '<a class="bm-tlacitko bm-tlacitko--podpor" href="/podpor-nas/">Podpoř nás</a>'
+      '</p>\n<!-- /wp:html -->\n')
 
-# běžící pás
+# Běžící pás. Lepí se rovnou pod fotku a odděluje úvodní sekci od obsahu —
+# proto nesmí mít nad sebou mezeru, kterou blokový editor dává mezi bloky.
+# Mezera se ruší v bm.css u .bm-bezici, ne tady: inline styl by přebil
+# i responzivní pravidla.
 slogan = "[bm_termin] · VSTUP ZDARMA · SEDM DNÍ · 100+ AKCÍ · ČESKÉ BUDĚJOVICE · "
 kopie = ('<span class="bm-bezici__text">' + slogan * 4 + '</span>'
          '<span class="bm-bezici__text" aria-hidden="true">' + slogan * 4 + '</span>')
@@ -75,42 +88,11 @@ obsah += ('<!-- wp:html -->\n<div class="bm-bezici alignfull">'
 obsah += sekce("bm-sekce",
     '<!-- wp:shortcode -->\n[bm_carousel]\n<!-- /wp:shortcode -->\n')
 
-# kategorie
-dlazdice = "".join(
-    f'<a class="bm-dlazdice" href="/program/" style="background:{b};color:{tx}">'
-    f'<span>{n}</span><span style="font-size:15px;font-weight:600">{p}</span></a>'
-    # Počty byly natvrdo 43 / 22 / 14 / 7, zatímco skutečnost byla
-    # 42 / 18 / 7 / 7. Úvodní stránka lhala ve čtyřech číslech a poznat se
-    # to dalo jen ručním přepočítáním programu. Teď je počítá doplněk.
-    for n, p, b, tx in [
-        ("Hudba", "[bm_pocet_akci kategorie=hudba]", T, B9),
-        ("Venkovní scéna", "[bm_pocet_akci kategorie=venkovni-scena]", K, B3),
-        ("Divadlo", "[bm_pocet_akci kategorie=divadlo]", L, B3),
-        ("Volba krále", "[bm_pocet_akci kategorie=volba-krale]", Z, B3),
-    ])
-obsah += sekce("bm-sekce",
-    nadpis("Co tě zajímá?")
-    + odstavec("Sedm dní, desítky míst po celém městě. Vyber si, co tě baví.")
-    + '<!-- wp:html -->\n<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">'
-    + dlazdice + '</div>\n<!-- /wp:html -->\n')
-
-# králové
-obsah += sekce("bm-pas-koral",
-    nadpis("Volba krále")
-    + odstavec("Každá střední škola vysílá svého kandidáta. Body se sbírají na studentských jamech, v královské hře a za plnění výzev.")
-    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/kralove/">Průběžné pořadí</a></p>\n<!-- /wp:html -->\n')
-
 # aktuality
 obsah += sekce("bm-sekce",
     nadpis("Aktuality")
     + odstavec("Co je nového kolem festivalu.")
     + '<!-- wp:latest-posts {"postsToShow":3,"displayPostDate":true,"displayFeaturedImage":true,"columns":3,"postLayout":"grid"} /-->\n')
-
-# partneři
-obsah += sekce("bm-pas-levand",
-    nadpis("Festival vzniká díky nim")
-    + odstavec("Hlavní partneři ročníku")
-    + '<!-- wp:html -->\n<p><a class="bm-tlacitko" href="/partneri/">Všichni partneři</a></p>\n<!-- /wp:html -->\n')
 
 if __name__ == "__main__":
     front = rest("settings")

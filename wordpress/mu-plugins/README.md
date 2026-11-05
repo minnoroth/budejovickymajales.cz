@@ -132,12 +132,16 @@ docker run --rm -v "$PWD":/t -w /t php:8.2-cli php overeni.php
 **Problém.** Sekce „Nepřehlédni" na úvodní stránce byly tři **natvrdo napsané
 kartičky** v `wordpress/vzhled/uvod.py`. Nebyla to data — byl to text, který někdo
 přepsal rukou z programu. Když se akce zrušila nebo přesunula, úvodní stránka o tom
-nevěděla. Totéž u dlaždic „Co tě zajímá?": počty akcí byly napsané `43 / 22 / 14 / 7`,
-zatímco skutečnost byla `42 / 18 / 7 / 7`.
+nevěděla.
 
 **Řešení.** Zkratka `[bm_carousel]` složí pruh kartiček z akcí označených **Top
-představení**, seřazených podle data, nejvýš osm. Zkratka
-`[bm_pocet_akci kategorie=hudba]` vypíše skutečný počet akcí v kategorii.
+představení**, seřazených podle data, nejvýš osm.
+
+> Doplněk měl i zkratku `[bm_pocet_akci]`, která vypisovala skutečný počet akcí
+> v kategorii — dlaždice „Co tě zajímá?" na úvodu totiž měly počty napsané natvrdo
+> a lhaly ve čtyřech číslech. Celá sekce z úvodu 5. 11. 2026 zmizela, protože všechny
+> čtyři dlaždice vedly stejně na `/program/`. Zkratku jsem tím pádem odstranil;
+> kdyby se počty někdy hodily jinde, jsou v historii gitu.
 
 **Proč PHP, a ne JavaScript jako program.** Carousel je první věc pod hlavičkou. Kdyby
 se dokresloval z REST API, byla by nejdůležitější část úvodu při načtení prázdná

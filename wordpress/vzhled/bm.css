@@ -90,7 +90,14 @@ body.home .bm-pas-hlavni {
 }
 
 /* ── Běžící pás ───────────────────────────────────────────────── */
-.bm-bezici { background: var(--global-palette15); border-top: var(--bm-ramecek); border-bottom: var(--bm-ramecek); overflow: hidden; padding: 14px 0; }
+/* Lepí se rovnou pod fotku a odděluje úvodní sekci od obsahu pod ní.
+   Blokový editor dává mezi bloky mezeru; ta se tu ruší, jinak by pás
+   plaval v bílém prostoru a vypadal jako samostatný prvek, ne jako šev. */
+.bm-bezici { background: var(--global-palette15); border-top: var(--bm-ramecek); border-bottom: var(--bm-ramecek); overflow: hidden; padding: 14px 0; margin-top: 0; }
+/* Mezeru dělá spodní okraj pásu s fotkou, ne horní okraj běžícího pásu —
+   proto se ruší tam. Selektor je přes rodiče: samotná třída má menší váhu
+   než pravidlo Kadence, které mezery mezi bloky rozdává. */
+.entry-content > .bm-pas-uvod { margin-bottom: 0; }
 .bm-bezici__draha { display: flex; width: max-content; animation: bm-beh 40s linear infinite; }
 .bm-bezici__text { flex: 0 0 auto; white-space: nowrap; font-weight: 800; font-size: clamp(17px, 2vw, 24px); color: var(--global-palette3); }
 @keyframes bm-beh {
@@ -191,6 +198,16 @@ body.home .bm-pas-hlavni {
   border: 2px solid var(--global-palette3);
 }
 .bm-tlacitko:hover { background: var(--global-palette9); color: var(--global-palette3); }
+
+/* Druhé tlačítko v heru. Korálová je v paletě barva, která volá po akci
+   (má ji i pruh vedoucího krále), takže se od žluté „Program" odliší,
+   aniž by se zaváděla nová barva mimo paletu. */
+.bm-tlacitko--podpor { background: var(--global-palette10); }
+.bm-tlacitko--podpor:hover { background: var(--global-palette9); }
+
+/* Tlačítka vedle sebe. Na úzkém displeji pod sebou a přes celou šířku —
+   palec se trefí snadněji než do dvou tlačítek namačkaných vedle sebe. */
+.bm-tlacitka { display: flex; flex-wrap: wrap; gap: 12px; }
 
 /* ── Aktuality (blok Nejnovější příspěvky) ────────────────────── */
 .wp-block-latest-posts.is-grid { gap: 24px; }
@@ -335,5 +352,7 @@ body.home .content-area { margin-top: 0; margin-bottom: 0; }
   .bm-karta__nazev { font-size: 19px; }
   .bm-dlazdice { font-size: 18px; min-height: 96px; padding: 18px 16px; }
   .bm-tlacitko { display: block; text-align: center; }
+  .bm-tlacitka { flex-direction: column; }
+  .bm-tlacitka .bm-tlacitko { width: 100%; }
   .bm-nadlinka { font-size: 13px; }
 }
