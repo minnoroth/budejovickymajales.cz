@@ -125,6 +125,25 @@ a za ním [`bm-akce.css`](../../wordpress/vzhled/bm-akce.css) s kalendářem.
 Když je někdo upraví přímo v administraci, nezapomeňte změnu vrátit i sem —
 jinak příští běh `nastaveni.py` úpravu přepíše.
 
+## Past třetí: Customizer umí „uložit" a nic neuložit
+
+Zjištěno 5. 11. 2026. `nastaveni.py` posílalo doplňkové CSS spolu se šedesáti dalšími
+nastaveními v jednom požadavku. Customizer vrátil HTTP 200 a u všech nastavení hlásil
+platnost — a přesto zůstalo na webu **předchozí** CSS. Poznalo se to jen tím, že jedno
+nové pravidlo nefungovalo.
+
+Změřeno: samotné CSS projde i v šedesáti kilobajtech, spolu s ostatními nastaveními
+neprojde vůbec. Není to tedy strop velikosti. Příčina na straně hostingu známá není.
+
+**Co s tím:**
+
+1. CSS se posílá **vlastním požadavkem**, až po zbytku nastavení.
+2. Po uložení si skript stáhne úvodní stránku a porovná délku CSS, které na ní
+   skutečně je. Když nesedí, napíše to.
+
+Druhý bod je tam proto, že první není záruka — je to obejití příčiny, kterou neznáme.
+Kdyby se to začalo dít znovu, musí to skript říct nahlas, ne mlčet.
+
 ## Dvě pasti, na které jsem narazil
 
 **Customizer chce plochou mapu.** `customize_save` očekává

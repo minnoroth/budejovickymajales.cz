@@ -12,6 +12,28 @@ def sekce(cls, inner, pad="72px"):
             f'<!-- /wp:group -->\n')
 
 
+def hero(inner):
+    """Úvodní pás. Na rozdíl od ostatních pásů **nemá odsazení v bloku**.
+
+    Hlavička je na úvodu průhledná a leží přes pás, takže si pás musí nahoře
+    udělat místo na výšku menu — a ta je na telefonu jiná než na monitoru.
+    Odsazení zapsané v bloku je inline styl, který se podle šířky okna měnit
+    nedá. **Svislé** odsazení je proto v bm.css u třídy .bm-pas-uvod.
+
+    **Vodorovné** odsazení naopak v bloku zůstat musí: Kadence u bloků přes
+    celou šířku vynuluje padding zleva i zprava selektorem, který obyčejná
+    třída nepřebije. Inline styl ano.
+    """
+    vnitrek = ('<!-- wp:group {"layout":{"type":"constrained","contentSize":"1160px"}} -->\n'
+               f'<div class="wp-block-group bm-obsah">{inner}</div>\n<!-- /wp:group -->\n')
+    return ('<!-- wp:group {"align":"full","className":"bm-pas-hlavni bm-pas-uvod",'
+            '"style":{"spacing":{"padding":{"left":"24px","right":"24px"}}},'
+            '"layout":{"type":"constrained"}} -->\n'
+            '<div class="wp-block-group alignfull bm-pas-hlavni bm-pas-uvod"'
+            f' style="padding-left:24px;padding-right:24px">{vnitrek}</div>\n'
+            '<!-- /wp:group -->\n')
+
+
 def nadpis(text, level=2, extra=""):
     return (f'<!-- wp:heading {{"level":{level}{extra}}} -->\n'
             f'<h{level} class="wp-block-heading">{text}</h{level}>\n<!-- /wp:heading -->\n')
@@ -29,7 +51,7 @@ B3, B9 = "var(--global-palette3)", "var(--global-palette9)"
 obsah = ""
 
 # hero
-obsah += sekce("bm-pas-hlavni",
+obsah += hero(
     odstavec("[bm_termin]", "bm-nadlinka")
     + nadpis("Studentský festival, který dělá věci jinak.", 1)
     + odstavec("Sedm dní programu po celých Budějovicích. Divadlo, hudba, filmy, přednášky i volba krále. Vstup na všechno zdarma.")
@@ -93,6 +115,13 @@ obsah += sekce("bm-pas-levand",
 if __name__ == "__main__":
     front = rest("settings")
     print("  název webu:", front.get("title"))
-    r = rest("pages/82", "POST", {"content": obsah, "title": "Úvod"})
+    # Průhledná hlavička je zapnutá jen tady: fotka na pozadí pásu má jít
+    # až nahoru, pod menu. Na ostatních stránkách je vypnutá v nastaveni.py,
+    # protože bílé menu na bílém obsahu by zmizelo.
+    r = rest("pages/82", "POST", {
+        "content": obsah,
+        "title": "Úvod",
+        "meta": {"_kad_post_transparent": "enable"},
+    })
     print("  stránka:", r.get("id"), "|", (r.get("title") or {}).get("rendered"), "|", r.get("status"))
     print("  délka obsahu:", len((r.get("content") or {}).get("rendered", "")), "znaků")

@@ -64,6 +64,21 @@ body.home .bm-pas-hlavni {
   text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
 }
 
+/* Odsazení úvodního pásu. Je tady, a ne v bloku jako u ostatních pásů:
+   hlavička je na úvodu průhledná a leží přes pás, takže si pás musí nahoře
+   udělat místo na výšku menu — a ta je na telefonu jiná než na monitoru.
+   Odsazení zapsané v bloku je inline styl, který by se podle šířky okna
+   měnit nedal. Viz funkce hero() ve vzhled/uvod.py.
+
+   Horní číslo = výška hlavičky (88 px na monitoru) plus vzduch. Kdyby se
+   měnila velikost loga nebo odsazení hlavičky, mění se i tohle. */
+   Vodorovné odsazení tady schválně není — to má blok v inline stylu, protože
+   Kadence u bloků přes celou šířku padding zleva i zprava nuluje a obyčejná
+   třída to nepřebije. */
+.bm-pas-uvod { padding-top: 150px; padding-bottom: 80px; }
+@media (max-width: 1024px) { .bm-pas-uvod { padding-top: 120px; padding-bottom: 64px; } }
+@media (max-width: 767px)  { .bm-pas-uvod { padding-top: 104px; padding-bottom: 56px; } }
+
 /* Datum nad nadpisem v hero sekci. */
 .bm-nadlinka {
   font-size: 15px;

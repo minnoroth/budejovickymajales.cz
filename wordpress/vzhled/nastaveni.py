@@ -10,8 +10,9 @@ v Customizeru, tenhle skript je tu pro případ, že se web staví znovu od nuly
 
 import json
 import os
+import time
 
-from pripojeni import customizer
+from pripojeni import customizer, WEB
 
 # Paleta ročníku. Rebranding = přepsat hexy tady nebo v Customizeru,
 # CSS se na ně odkazuje jen přes var(--global-paletteN).
@@ -128,6 +129,28 @@ NASTAVENI = {
     "mobile_button_color": {"color": "palette3", "hover": "palette3"},
     "mobile_button_radius": {"size": [999, 999, 999, 999], "unit": "px", "locked": True},
 
+    # ── Průhledná hlavička nad fotkou ────────────────────────────────────
+    # Fotka na úvodu má jít až nahoru, pod menu — jinak nad ní visí zelený
+    # pruh a vypadá to jako dvě nesouvisející věci nalepené na sebe.
+    #
+    # Zapnuto globálně, ale vypnuto na stránkách i článcích; jedinou
+    # výjimkou je Úvod, který to má povolené svým vlastním nastavením
+    # (meta _kad_post_transparent, nastavuje uvod.py). Jinde by průhledná
+    # hlavička splynula s bílým obsahem a menu by zmizelo.
+    "transparent_header_enable": True,
+    "transparent_header_page": True,
+    "transparent_header_post": True,
+    "transparent_header_archive": True,
+    # transparent_header_product se nenastavuje — je pro e-shop WooCommerce,
+    # který tu není, a Customizer ho odmítá.
+    # Menu a název webu zůstávají bílé jako na zelené hlavičce. Přes fotku
+    # je drží čitelné tmavý závoj, který dosazuje doplněk bm-pozadi.php.
+    "transparent_header_site_title_color": {"color": "palette9", "hover": "palette15"},
+    "transparent_header_navigation_color": {"color": "palette9", "hover": "palette15"},
+    "transparent_header_button_color": {"color": "palette3", "hover": "palette3"},
+    "transparent_header_background": {"desktop": {"color": "transparent"}},
+    "transparent_header_bottom_border": {"desktop": {"width": 0, "unit": "px", "style": "none"}},
+
     # ── Titulkový pás stránek a příspěvků ────────────────────────────
     # Úvod a Program ho mají vypnutý v nastavení konkrétní stránky,
     # protože si vlastní pás kreslí samy v obsahu.
@@ -174,10 +197,55 @@ def nacti_css():
     return "\n\n".join(casti)
 
 
+def overit_css(ocekavano):
+    """Zkontroluje, že se CSS opravdu propsalo na web.
+
+    Customizer umí vrátit HTTP 200 a „uloženo", a přitom zůstat u starší
+    verze CSS. Stalo se to 5. 11. 2026 a poznalo se to až tím, že na webu
+    chybělo jedno pravidlo — hlášení skriptu přitom tvrdilo, že je hotovo.
+    Od té doby se po uložení kontroluje, co web skutečně servíruje.
+    """
+    import html as _html
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(WEB + "/?nocache=" + str(int(time.time())), timeout=30) as o:
+            stranka = o.read().decode("utf-8", "replace")
+    except Exception as chyba:                      # noqa: BLE001 — kontrola nesmí shodit skript
+        print("CSS se nepodařilo ověřit:", chyba)
+        return
+
+    znacka = "Budějovický Majáles — doplňkové CSS"
+    i = stranka.find(znacka)
+    if i < 0:
+        print("POZOR: doplňkové CSS na webu vůbec není.")
+        return
+
+    j = stranka.find("</style>", i)
+    na_webu = _html.unescape(stranka[stranka.rfind(">", 0, i) + 1:j]).strip()
+
+    if len(na_webu) == len(ocekavano.strip()):
+        print("CSS ověřeno:", len(na_webu), "znaků na webu")
+        return
+
+    print("POZOR: CSS se neuložilo celé — posláno %d znaků, na webu je %d."
+          % (len(ocekavano.strip()), len(na_webu)))
+    print("       Spusť skript znovu a zkontroluj to; uložení občas tiše neprojde.")
+
+
 if __name__ == "__main__":
-    NASTAVENI["custom_css[kadence]"] = nacti_css()
     kod, odpoved = customizer(NASTAVENI)
     platnost = (odpoved.get("data") or {}).get("setting_validities", {}) if isinstance(odpoved, dict) else {}
     spatne = [k for k, v in platnost.items() if v is not True]
     print("HTTP", kod, "| uloženo", len(platnost), "nastavení")
     print("odmítnuto:", spatne or "nic")
+
+    # CSS se posílá zvlášť, ne spolu se zbytkem nastavení. Když jede
+    # v jednom požadavku s ostatními šedesáti, Customizer vrátí „uloženo"
+    # a tiše si nechá předchozí verzi — ověřeno 5. 11. 2026 měřením:
+    # samotné CSS projde i v šedesáti kilobajtech, dohromady s ostatními
+    # neprojde vůbec. Příčina na straně hostingu není známá; tohle ji obchází.
+    css = nacti_css()
+    kod, _ = customizer({"custom_css[kadence]": css})
+    print("CSS: HTTP", kod, "|", len(css), "znaků")
+    overit_css(css)
