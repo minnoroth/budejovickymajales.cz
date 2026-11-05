@@ -170,3 +170,22 @@ jen post meta přes jádro WordPressu: `_tribe_featured` (ověřeno ve zdrojáku
 **Jak ověřit, že žije.** Zaškrtni u akce v termínu ročníku **Top představení** a načti
 úvodní stránku — kartička se musí objevit. Když nemá žádná akce příznak, sekce
 „Nepřehlédni" na úvodu vůbec není, a je to tak správně.
+
+## bm-pozadi.php — fotka na pozadí úvodu
+
+**Problém.** Úvodní pás byl jednobarevně zelený. Zadavatel chtěl mít možnost dát za něj
+fotku přes celé pozadí (vzor: korzonarodni.cz), ale tak, aby ji šlo vyměnit bez sahání
+do kódu.
+
+**Řešení.** Náhledový obrázek stránky **Úvod** se použije jako pozadí pásu. Žádné nové
+políčko — je to stejné ovládání, jakým se dává fotka ke králi nebo k akci. Nahrát fotku
+znamená nastavit náhledový obrázek, zrušit ji znamená ho odebrat.
+
+**Proč přes tmavý přechod.** Text v pásu je bílý a dopředu se neví, jaká fotka tam bude.
+Přechod drží čitelnost u jakékoli fotky a horní část obrázku nechá skoro nedotčenou.
+
+**Proč zelená zůstává pod fotkou.** Než se obrázek stáhne — a když se nestáhne vůbec —
+musí být pás čitelný. Barva z palety je proto dál pozadím a fotka leží na ní.
+
+**Jak ověřit, že žije.** Nastav u stránky Úvod náhledový obrázek a načti úvodní stránku.
+Když ho odebereš, pás se vrátí k zelené.

@@ -12,6 +12,7 @@ Proč je co takhle a kde se to mění klikáním popisuje
 | `menu.py` | postaví hlavní menu (jde spustit opakovaně, menu vždy přestaví) |
 | `stranky.py` | srovná zanoření stránek, a tím jejich adresy |
 | `prakticke-info.py` | složí stránku Praktické info ze čtyř původních podstránek |
+| `bloky.py` | společné bloky stránek (nadpis podstránky, obal obsahu) |
 | `uvod.py` | obsah úvodní stránky |
 | `program.py` | obsah stránky Program |
 | `kralove.py` | obsah stránky Králové |

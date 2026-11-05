@@ -47,6 +47,23 @@
   margin-right: auto !important;
 }
 
+/* Úvodní text podstránky. Podstránky nemají barevný pás, jen nadpis
+   a tenhle odstavec — viz vzhled/bloky.py. */
+.bm-lead {
+  font-size: 18px;
+  color: var(--global-palette5);
+  max-width: 660px;
+}
+
+/* Pás s fotkou na pozadí. Fotku dosazuje doplněk bm-pozadi.php z náhledového
+   obrázku úvodní stránky; tady je jen to, co platí pro oba případy. */
+body.home .bm-pas-hlavni {
+  background-color: var(--global-palette1);
+  /* Při fotce na pozadí je bílý text na tmavém přechodu; bez fotky na zelené.
+     Stín drží čitelnost i tam, kde přechod nestačí (světlá obloha nahoře). */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
 /* Datum nad nadpisem v hero sekci. */
 .bm-nadlinka {
   font-size: 15px;

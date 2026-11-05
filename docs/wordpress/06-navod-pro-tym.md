@@ -836,7 +836,26 @@ Kolik to přesně je, si ověříš takhle:
 > Nezmenšené fotky nejsou jen technický problém. Stránka s nimi se na mobilu v davu
 > na festivalu načítá pomalu nebo vůbec — a to je přesně okamžik, kdy ji lidi potřebují.
 
-### 9.3 Nahrát do knihovny
+### 9.3 Fotka na úvodní stránce
+
+Velký pás nahoře na úvodu může mít místo zelené barvy fotku. Mění se jako kterákoli
+jiná fotka na webu:
+
+1. **Stránky → Úvod** (klikni na název).
+2. Vpravo v boxu **Náhledový obrázek** klikni na **Nastavit náhledový obrázek**.
+3. Vyber nebo nahraj fotku a ulož stránku tlačítkem **Aktualizovat**.
+
+Hotovo — fotka se objeví za nadpisem. Když ji odebereš, pás se vrátí k zelené.
+
+> **Fotku vybírej na šířku a spíš tmavší.** Text přes ni jde bílý. Přes fotku se sice
+> automaticky překládá tmavý závoj, aby byl text čitelný, ale na úplně bílé obloze to
+> stejně nebude ono. Ideální šířka je kolem 2000 px — větší jen zpomalí načítání
+> (viz [9.1](#91-nejdůležitější-věc-fotky-z-foťáku-jsou-moc-velké)).
+
+> **Důležité je, co je uprostřed.** Fotka se ořízne na výšku pásu a na mobilu je z ní
+> vidět užší výřez. Co je na kraji, nemusí být vidět.
+
+### 9.4 Nahrát do knihovny
 
 1. **Média (Media)** → **Přidat soubor (Add Media File)**.
 2. Přetáhni soubory do pole, nebo klikni na **Vybrat soubory (Select Files)**.
@@ -845,14 +864,14 @@ Kolik to přesně je, si ověříš takhle:
 Obrázky se dají nahrát i rovnou při psaní — z boxu **Náhledový obrázek (Featured image)**
 nebo z bloku **Obrázek (Image)**. Skončí ve stejné knihovně.
 
-### 9.4 Pojmenuj soubory rozumně
+### 9.5 Pojmenuj soubory rozumně
 
 `IMG_4821.jpg` nikomu nic neřekne. Za rok nikdo nepozná, co to je.
 
 Pojmenuj je radši `kral-jan-novak-2027.jpg` nebo `zlaty-most-vecer.jpg`.
 Bez diakritiky, bez mezer, malá písmena, slova spojená pomlčkou.
 
-### 9.5 Alternativní text
+### 9.6 Alternativní text
 
 Po nahrání klikni na obrázek v knihovně a vyplň vpravo **Alternativní text (Alt text)**.
 Jedna věta o tom, co je na obrázku.
@@ -860,7 +879,7 @@ Jedna věta o tom, co je na obrázku.
 Čtou to lidé, kteří na obrázek nevidí, a vyhledávače. U fotek z festivalu to zabere
 pět vteřin a je to součást toho, co slibuje stránka o přístupnosti.
 
-### 9.6 Co nemazat
+### 9.7 Co nemazat
 
 **Nemaž obrázky z knihovny jen proto, že se ti nezdají.** Mohou být použité na stránce,
 o které nevíš — pak tam zůstane prázdné místo. Když něco opravdu překáží, zeptej se
