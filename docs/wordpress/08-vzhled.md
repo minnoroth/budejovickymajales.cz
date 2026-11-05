@@ -64,9 +64,21 @@ scvrkne na polovinu výšky řádku. V médiích je proto **oříznutá varianta
 
 Ořez dělá [`wordpress/vzhled/oriznout-logo.py`](../../wordpress/vzhled/oriznout-logo.py).
 
-Znak nemá nápis, proto je v hlavičce vedle něj **název webu jako text** — odchylka
-od návrhu, kde byl plný logotyp. Až bude logotyp k dispozici, stačí ho nahrát
-jako logo a v Hlavička → Logo přepnout rozvržení na „jen logo".
+**V hlavičce je od 5. 11. 2026 jen logo, bez názvu webu.** Tým dodává logotyp na
+šířku i s nápisem, takže by název stál vedle něj podruhé. Dokud logotyp nedorazí,
+je v hlavičce jen znak — je to vědomý mezistav, ne opomenutí.
+
+Jméno webu tím nezmizelo: nese ho **alternativní text obrázku** (`alt`), takže ho
+přečte odečítač obrazovky i vyhledávač.
+
+**Logo se omezuje výškou, ne šířkou** (`.site-branding .custom-logo` v `bm.css`:
+52 / 44 / 38 px). U loga na šířku je výška to, co musí sednout na hlavičku, a šířka
+se dopočítá sama. Kdyby se omezovala šířka, vysoké logo by hlavičku roztáhlo.
+Nastavení `logo_width` v Customizeru zůstává jako strop pro případ, že by někdo
+nahrál nečekaně velký soubor.
+
+**Výměna logotypu:** nahrát v Vzhled → Přizpůsobit → Identita webu jako logo.
+Nic dalšího se přepínat nemusí.
 
 ## Co je hotové
 

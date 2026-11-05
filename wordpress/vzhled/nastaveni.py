@@ -75,18 +75,20 @@ NASTAVENI = {
     "header_main_background": {"desktop": {"color": "palette1"}},
     "header_main_height": {"size": {"mobile": "", "tablet": "", "desktop": 88},
                            "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
-    "logo_width": {"size": {"mobile": 36, "tablet": 42, "desktop": 46},
+    # Šířka loga. Tým dodává logo na šířku, takže se omezuje VÝŠKOU v bm.css
+    # (.site-branding .custom-logo) — u loga na šířku je výška to, co musí
+    # sedět na hlavičku, a šířka se dopočítá. Tenhle rozměr je jen strop,
+    # aby se ani nečekaně velký soubor nerozlezl.
+    "logo_width": {"size": {"mobile": 180, "tablet": 200, "desktop": 220},
                    "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
-    # Znak nemá nápis, proto vedle něj stojí název webu — a to i na tabletu,
-    # kde Kadence ve výchozím stavu nechává jen znak.
-    "logo_layout": {"include": {"mobile": "logo_title", "tablet": "logo_title",
-                                "desktop": "logo_title"},
+    # V hlavičce je jen logo, bez názvu webu. Logo si tým vždycky připraví
+    # na šířku i s nápisem, takže by název stál vedle něj podruhé.
+    # Jméno webu nemizí úplně: nese ho alternativní text obrázku, takže ho
+    # přečte odečítač obrazovky i vyhledávač.
+    "logo_layout": {"include": {"mobile": "logo", "tablet": "logo",
+                                "desktop": "logo"},
                     "layout": {"mobile": "standard", "tablet": "standard",
                                "desktop": "standard"}},
-    "brand_typography": {"size": {"desktop": 24, "tablet": 21, "mobile": 17},
-                         "sizeType": "px", "lineHeight": {"desktop": 1.2},
-                         "family": "inherit", "google": False, "weight": "700",
-                         "variant": "700", "color": "palette9"},
     "primary_navigation_color": {"color": "palette9", "hover": "palette15", "active": "palette15"},
     "primary_navigation_typography": {"size": {"desktop": 16}, "lineHeight": {"desktop": ""},
                                       "family": "inherit", "google": False,

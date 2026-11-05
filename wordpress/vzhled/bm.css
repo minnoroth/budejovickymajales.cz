@@ -289,6 +289,19 @@ body.home .bm-pas-hlavni {
 }
 
 /* ── Hlavička ─────────────────────────────────────────────────── */
+/* V hlavičce je jen logo, bez názvu webu. Tým dodává logo na šířku
+   i s nápisem, takže se omezuje výškou — u loga na šířku je výška to,
+   co musí sednout na hlavičku, a šířka se dopočítá sama. Kdyby se
+   omezovala šířka, vysoké logo by hlavičku roztáhlo. */
+.site-branding .custom-logo {
+  height: auto;
+  max-height: 52px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+@media (max-width: 1024px) { .site-branding .custom-logo { max-height: 44px; } }
+@media (max-width: 767px)  { .site-branding .custom-logo { max-height: 38px; } }
 /* Aktivní položka menu dostane žluté podtržení místo barvy textu. */
 .site-header .primary-menu-container .menu-item.current-menu-item > a {
   box-shadow: inset 0 -3px 0 0 var(--global-palette15);
