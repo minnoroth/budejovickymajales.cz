@@ -114,6 +114,22 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
 - **`className` v atributech bloku nestačí.** WordPress vykresluje uloženou HTML, ne atributy,
   takže třída musí být i v samotném `<p class="…">`.
 
+### Doplňky a vývoj
+
+- **mu-plugins se nenačítají z podsložek.** WordPress bere z `wp-content/mu-plugins/`
+  jen soubory `.php` ležící přímo v ní. Doplněk, který má vedle PHP i skripty a styly,
+  proto potřebuje v kořeni malý zavaděč — viz `bm-program-nacti.php`. Ten má navíc
+  `file_exists`, aby smazání složky neshodilo web na fatální chybu.
+- **PHP na stroji není, ale Docker ano.** Syntaxi ověříš ve stejné verzi, jaká běží
+  na serveru:
+  ```
+  docker run --rm -v "$PWD/wordpress/mu-plugins:/kod:ro" php:8.3-cli \
+    sh -c 'for f in $(find /kod -name "*.php"); do php -l "$f"; done'
+  ```
+  Dělej to vždycky před nahráním. Syntaktická chyba v mu-pluginu shodí i administraci.
+- **Každý dotaz na Wedos stojí přes vteřinu.** Ne kvůli objemu dat — je to režie
+  sdíleného hostingu. Při návrhu počítej s počtem koleček, ne s velikostí odpovědi.
+
 ### The Events Calendar a Event Tickets
 
 - **REST API ukládá taxonomie až po `save_post`.** Hook na `save_post` tedy při zadávání
@@ -125,6 +141,13 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   Boolean skončí na `rest_invalid_param`.
 - **Lístky nejsou v `wp/v2/tribe_rsvp_tickets`** (vrací prázdno). Čti je z
   `tribe/tickets/v1/tickets`.
+- **Kolekce `wp/v2/tribe_events` skrývá minulé akce.** Na archiv se stovkou vystoupení
+  vrátí prázdno a filtr `?rocnik=` na tom nic nezmění. Jednotlivé akce přes
+  `wp/v2/tribe_events/<id>` fungují normálně. Na výpis se musí `tribe/events/v1/events`,
+  kde je `per_page` zastropované na **50**.
+- **RSVP běží od Event Tickets 5.30 na Tickets Commerce**, ne na staré větvi. Lístek má
+  `provider: tc` a `type: tc-rsvp`, účastník je `tec_tc_attendee` pod objednávkou
+  `tec_tc_order`. Hooky staré větve (`event_tickets_rsvp_*`) se nespustí.
 - **Zkratka `[tribe_events]` je jen v placené verzi.** Stránka Program proto na kalendář
   jen odkazuje.
 - **Formulář akce předvyplní „Start sale" na zítřek.** Rezervace se pak dnes nikomu
