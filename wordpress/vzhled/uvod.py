@@ -23,25 +23,6 @@ def odstavec(text, trida=""):
     return f'<!-- wp:paragraph {attrs} -->\n<p{cls}>{text}</p>\n<!-- /wp:paragraph -->\n'
 
 
-def karta(barva, kategorie, cas, misto, nazev, stitek=None):
-    s = f'<p class="bm-karta__meta">{cas} · {misto}</p><h3 class="bm-karta__nazev">{nazev}</h3>'
-    stitky = f'<span class="bm-stitek">{kategorie}</span>'
-    if stitek:
-        stitky += f' <span class="bm-stitek bm-stitek--rezervace">{stitek}</span>'
-    return (f'<!-- wp:html -->\n<article class="bm-karta">'
-            f'<div class="bm-karta__pruh" style="background:{barva}"></div>'
-            f'<div class="bm-karta__obraz" style="background:{barva}"></div>'
-            f'<div class="bm-karta__telo">{s}<div style="margin-top:auto;padding-top:8px">{stitky}</div></div>'
-            f'</article>\n<!-- /wp:html -->\n')
-
-
-def sloupce(items):
-    inner = "".join(
-        f'<!-- wp:column -->\n<div class="wp-block-column">{i}</div>\n<!-- /wp:column -->\n'
-        for i in items)
-    return f'<!-- wp:columns -->\n<div class="wp-block-columns">{inner}</div>\n<!-- /wp:columns -->\n'
-
-
 T, K, Z, L = "var(--global-palette1)", "var(--global-palette10)", "var(--global-palette15)", "var(--global-palette14)"
 B3, B9 = "var(--global-palette3)", "var(--global-palette9)"
 
@@ -62,21 +43,28 @@ obsah += ('<!-- wp:html -->\n<div class="bm-bezici alignfull">'
           '<div class="bm-bezici__draha">' + kopie + '</div></div>\n<!-- /wp:html -->\n')
 
 # nepřehlédni
+# Kartičky byly napsané natvrdo — text, který někdo přepsal rukou z programu.
+# Když se akce zrušila nebo přesunula, úvodní stránka o tom nevěděla. Teď je
+# skládá doplněk bm-carousel z akcí označených „Top představení".
+#
+# Nadpis vypisuje zkratka, ne tahle stránka. Kdyby byl tady, zůstal by viset
+# nad prázdnem ve chvíli, kdy žádná akce označená není — třeba než
+# dramaturgie program zveřejní.
 obsah += sekce("bm-sekce",
-    nadpis("Nepřehlédni")
-    + sloupce([
-        karta(Z, "Volba krále", "neděle 18:00", "Piaristické náměstí", "Zahájení a představení králů"),
-        karta(K, "Venkovní scéna", "neděle 11:00", "Široko", "Výstava ŠIROKO HLUBOKO"),
-        karta(L, "Hudba", "neděle 20:00", "Piaristické náměstí", "LOUD DISCO", "Nutná rezervace"),
-    ]))
+    '<!-- wp:shortcode -->\n[bm_carousel]\n<!-- /wp:shortcode -->\n')
 
 # kategorie
 dlazdice = "".join(
     f'<a class="bm-dlazdice" href="/program/" style="background:{b};color:{tx}">'
     f'<span>{n}</span><span style="font-size:15px;font-weight:600">{p}</span></a>'
+    # Počty byly natvrdo 43 / 22 / 14 / 7, zatímco skutečnost byla
+    # 42 / 18 / 7 / 7. Úvodní stránka lhala ve čtyřech číslech a poznat se
+    # to dalo jen ručním přepočítáním programu. Teď je počítá doplněk.
     for n, p, b, tx in [
-        ("Hudba", "43 akcí", T, B9), ("Venkovní scéna", "22 akcí", K, B3),
-        ("Divadlo", "14 akcí", L, B3), ("Volba krále", "7 akcí", Z, B3),
+        ("Hudba", "[bm_pocet_akci kategorie=hudba]", T, B9),
+        ("Venkovní scéna", "[bm_pocet_akci kategorie=venkovni-scena]", K, B3),
+        ("Divadlo", "[bm_pocet_akci kategorie=divadlo]", L, B3),
+        ("Volba krále", "[bm_pocet_akci kategorie=volba-krale]", Z, B3),
     ])
 obsah += sekce("bm-sekce",
     nadpis("Co tě zajímá?")

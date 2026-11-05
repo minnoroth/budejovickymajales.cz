@@ -254,6 +254,24 @@ nemusí ukázat v programu aktuálního ročníku.
     Používej jen tu výjimku. Když je celá scéna bezbariérová, nastav to **jednou u místa**
     ([sekce 3](#3-přidat-místo-konání)), ne u každé akce zvlášť.
 
+### 2.6b Jak se akce dostane na úvodní stránku
+
+Sekce **Nepřehlédni** na úvodu se skládá sama z akcí, které mají zaškrtnuté
+**Top představení** (v boxu *Event Options* u akce). Nic se nikam nepřepisuje ručně.
+
+- Ukáže se **nejvýš osm** akcí, seřazených podle data. Když jich označíš víc, pozdější
+  se neukážou — proto označuj jen to, co má opravdu zaujmout.
+- Akce musí padnout do **termínu ročníku** (Akce → Ročníky). Mimo něj se neukáže.
+- **Bez fotky** se místo obrázku ukáže barevná plocha podle kategorie. Vypadá to
+  záměrně, ale fotka je lepší.
+- Když nemá *Top představení* **žádná** akce, sekce Nepřehlédni na úvodu prostě není.
+  Není to chyba.
+
+Totéž zaškrtávátko čte i stránka Program, kde akci označí štítkem **Top**.
+
+> **V boxu „Akce – nastavení webu" je ještě pole *V carouselu*.** To už nic nedělá
+> a bude smazáno. Používej *Top představení*.
+
 ### 2.7 Když se akce ruší nebo přesouvá
 
 V boxu **Events Status** se dá akci nastavit stav. Hodí se to během festivalu:

@@ -101,6 +101,34 @@
   border: 2px solid var(--global-palette3);
 }
 
+/* ── Barvy kategorií programu ─────────────────────────────────── */
+/* Jedna kategorie = jedna barva z palety. Prvek s atributem data-kat
+   dostane barvu do proměnné --bm-kat a použije si ji, jak potřebuje
+   (proužek kartičky, podklad obrázku).
+
+   POZOR: tatáž tabulka je zatím ještě ve dvou dalších souborech —
+   bm-program/program.css (prefix --bmp-kat-) a bm-akce.css. Když měníš
+   barvu kategorie, změň ji ve všech třech, jinak se program, kalendář
+   a úvodní stránka rozejdou. Cíl je, aby obě zbylé kopie jednou četly
+   odsud; tahle je ta, která má zůstat.
+
+   Barvy se nikdy nepíšou natvrdo, jedou přes paletu — rebranding na nový
+   ročník je pak přepsání patnácti polí v Customizeru, ne zásah sem. */
+[data-kat="hudba"]                { --bm-kat: var(--global-palette1); }
+[data-kat="divadlo"]              { --bm-kat: var(--global-palette14); }
+[data-kat="filmy"]                { --bm-kat: var(--global-palette15); }
+[data-kat="volba-krale"]          { --bm-kat: var(--global-palette10); }
+[data-kat="program-pro-nejmensi"] { --bm-kat: var(--global-palette2); }
+/* Dvě míchané barvy. Záloha je plná barva z palety pro Safari starší než
+   16.2, které color-mix() neumí; ve vlastním @supports, protože jinak by
+   starý prohlížeč zahodil celou deklaraci a plocha by zůstala bílá. */
+[data-kat="venkovni-scena"]       { --bm-kat: #A1CC78; }
+[data-kat="vnitrni-scena"]        { --bm-kat: #CF96AA; }
+@supports (color: color-mix(in srgb, red, blue)) {
+  [data-kat="venkovni-scena"] { --bm-kat: color-mix(in srgb, var(--global-palette1) 40%, var(--global-palette15)); }
+  [data-kat="vnitrni-scena"]  { --bm-kat: color-mix(in srgb, var(--global-palette14) 55%, var(--global-palette10)); }
+}
+
 /* ── Dlaždice kategorií ───────────────────────────────────────── */
 .bm-dlazdice {
   border: var(--bm-ramecek);

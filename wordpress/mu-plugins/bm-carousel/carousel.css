@@ -1,0 +1,151 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Budějovický Majáles — carousel zvýrazněných akcí
+
+   Vzhled zkratky [bm_carousel]. Platí tu stejná pravidla jako jinde:
+
+   1. Barvy nikdy natvrdo — všechno přes var(--global-paletteN, #záloha).
+   2. Každé pravidlo začíná :is(#primary, body) kvůli váze; Kadence píše
+      barvy obsahu selektory s ID a ID přebije libovolný počet tříd.
+   3. Prefix tříd je bmc-. Samotná kartička ale používá .bm-karta z bm.css,
+      protože je to tatáž kartička jako ruční kartičky na úvodu — tenhle
+      soubor jen řeší, jak jsou poskládané vedle sebe.
+   4. Nic globálního; všechno visí pod .bmc, což je kořen zkratky.
+
+   Barvu kategorie nese atribut data-kat a tabulka v bm.css. Tady schválně
+   není: byla by to třetí kopie téže tabulky (program.css, bm-akce.css).
+   ══════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Pruh ────────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmc {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Místo pro stín kartičky a pro obrys při procházení klávesnicí —
+     bez něj se obojí ořízne o hranu posuvné oblasti. */
+  padding: 4px 4px 16px;
+  margin: 0 -4px;
+  overscroll-behavior-x: contain;
+}
+
+/* Na širokém okně se pruh mění v mřížku po čtyřech — bez posuvníku a bez
+   snapu. Vodorovné posouvání na myši nikdo nenajde, protože u něj nejsou
+   šipky; při osmi akcích se proto zalomí do druhé řady místo aby se čtyři
+   schovaly za okrajem. */
+@media (min-width: 1100px) {
+  :is(#primary, body) .bmc {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, 1fr);
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+}
+
+:is(#primary, body) .bmc:focus-visible {
+  outline: 3px solid var(--global-palette3, #121212);
+  outline-offset: 2px;
+}
+
+:is(#primary, body) .bmc-karta {
+  scroll-snap-align: start;
+  /* Kartička je celá odkaz, takže musí být vidět, že na ni jde kliknout. */
+  transition: transform .12s ease;
+}
+
+/* Respektuje nastavení „omezit pohyb" v systému návštěvníka — stejně jako
+   běžící pás v bm.css. Carousel se nikdy neposouvá sám od sebe, hýbe se
+   jen na pokyn návštěvníka; tohle je jen o tom nadzvednutí při najetí. */
+@media (prefers-reduced-motion: reduce) {
+  :is(#primary, body) .bmc-karta { transition: none; }
+}
+
+:is(#primary, body) .bmc-karta:hover { transform: translateY(-2px); }
+
+
+/* ── Kartička jako odkaz ─────────────────────────────────────────────── */
+
+:is(#primary, body) .bmc-karta__odkaz {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+:is(#primary, body) .bmc-karta__odkaz:focus-visible {
+  outline: 3px solid var(--global-palette3, #121212);
+  outline-offset: -3px;
+}
+
+/* Proužek nahoře nese barvu kategorie z tabulky v bm.css. Když kategorie
+   barvu nemá, zůstane zelenomodrá z palety. */
+:is(#primary, body) .bmc-karta .bm-karta__pruh {
+  background: var(--bm-kat, var(--global-palette1, #1EA198));
+}
+
+
+/* ── Obrázek ─────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmc-karta__obraz {
+  overflow: hidden;
+  background: var(--bm-kat, var(--global-palette1, #1EA198));
+}
+
+/* Fotky přicházejí v jakémkoli tvaru — na šířku, na výšku i panoramatické.
+   Pevný poměr stran a cover je jediné, co udrží řádek kartiček zarovnaný;
+   bez toho by jedna fotka na výšku roztáhla celý pruh. */
+:is(#primary, body) .bmc-karta__obraz img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Akce bez fotky. Plocha v barvě kategorie vypadá záměrně, prázdné místo
+   jako chyba načítání. */
+:is(#primary, body) .bmc-karta__obraz--bez {
+  background: var(--bm-kat, var(--global-palette1, #1EA198));
+}
+
+
+/* ── Popisek nad názvem ──────────────────────────────────────────────── */
+
+/* Dva řádky napevno. Některá místa mají dlouhý název („Náměstí Přemysla
+   Otakara II.") a zalomí se na dva řádky, jiná ne — bez rezervy by názvy
+   akcí v řadě začínaly každý jinde.
+
+   Jen od šířky, kde jsou vedle sebe aspoň dvě kartičky. Na mobilu je vidět
+   jedna a rezerva by z ní udělala jen díru pod popiskem. */
+@media (min-width: 600px) {
+  :is(#primary, body) .bmc-karta .bm-karta__meta {
+    min-height: 2.8em;
+  }
+}
+
+
+/* ── Štítky ──────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmc-karta__stitky {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+
+/* ── Mobil ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  :is(#primary, body) .bmc {
+    /* Pevná šířka, ne minmax(0, …). Spodní mez 0 dovolí sloupcům smrsknout
+       se na šířku pruhu místo aby přetekly — čtyři kartičky se pak vejdou
+       vedle sebe po šedesáti pixelech a text se láme po písmenech.
+       Osmdesát dva procent navíc nechá kousek další kartičky koukat za okraj;
+       bez toho nikoho nenapadne, že se dá posouvat, protože posuvník se na
+       dotykovém displeji nezobrazuje. */
+    grid-auto-columns: 82%;
+    gap: 14px;
+  }
+}

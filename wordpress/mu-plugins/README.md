@@ -66,3 +66,46 @@ endpointy.
 
 **Jak ověřit, že žije.** Načti `/program/` — nesmí být vidět záchranný blok s odkazy do
 kalendáře. Podrobnosti a pasti REST API jsou v [bm-program/README.md](bm-program/README.md).
+
+## bm-carousel/ — zvýrazněné akce na úvodu
+
+**Problém.** Sekce „Nepřehlédni" na úvodní stránce byly tři **natvrdo napsané
+kartičky** v `wordpress/vzhled/uvod.py`. Nebyla to data — byl to text, který někdo
+přepsal rukou z programu. Když se akce zrušila nebo přesunula, úvodní stránka o tom
+nevěděla. Totéž u dlaždic „Co tě zajímá?": počty akcí byly napsané `43 / 22 / 14 / 7`,
+zatímco skutečnost byla `42 / 18 / 7 / 7`.
+
+**Řešení.** Zkratka `[bm_carousel]` složí pruh kartiček z akcí označených **Top
+představení**, seřazených podle data, nejvýš osm. Zkratka
+`[bm_pocet_akci kategorie=hudba]` vypíše skutečný počet akcí v kategorii.
+
+**Proč PHP, a ne JavaScript jako program.** Carousel je první věc pod hlavičkou. Kdyby
+se dokresloval z REST API, byla by nejdůležitější část úvodu při načtení prázdná
+a vyhledávač by v ní neviděl nic.
+
+Cena: kartička akce existuje dvakrát — jednou v PHP tady, jednou v JavaScriptu
+v `bm-program`. Je to vědomá duplicita. Značkování je proto schválně stejné
+(`.bm-karta` z `bm.css`), aby se vzhled nerozcházel na třech místech.
+
+**Proč nativní „Top představení", a ne vlastní pole.** Byly na to dva přepínače —
+nativní *Feature Event* z The Events Calendar, který čte program, a pole *V carouselu*,
+které nečetlo nic. Dvě zaškrtávátka se stejným významem, z nichž jedno je tiše mrtvé,
+je přesně ta věc, na které se někdo při předávání webu zasekne.
+
+> **Zbývá dokončit:** pole *V carouselu* je pořád v administraci. Musí se smazat v SCF
+> → Field Groups → *Akce – nastavení webu* a pak znovu vyexportovat `bm-scf-all.json`.
+> Dokud se to nestane, je v administraci mrtvé zaškrtávátko.
+
+**Nadpis je uvnitř zkratky**, ne ve stránce. Když není co ukázat, zmizí celá sekce —
+holý nadpis nad prázdnem vypadá jako rozbitá stránka.
+
+**Barvy kategorií** nese atribut `data-kat` a tabulka v `bm.css`. V tomhle doplňku
+schválně nejsou, byla by to třetí kopie téže tabulky.
+
+**Proč to nerozbije aktualizace.** Nevolá jedinou PHP funkci The Events Calendar. Čte
+jen post meta přes jádro WordPressu: `_tribe_featured` (ověřeno ve zdrojáku TEC,
+`src/Tribe/Featured_Events.php`), `_EventStartDate` a `_EventVenueID`.
+
+**Jak ověřit, že žije.** Zaškrtni u akce v termínu ročníku **Top představení** a načti
+úvodní stránku — kartička se musí objevit. Když nemá žádná akce příznak, sekce
+„Nepřehlédni" na úvodu vůbec není, a je to tak správně.
