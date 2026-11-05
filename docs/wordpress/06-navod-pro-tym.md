@@ -707,8 +707,9 @@ Chybnou novinku raději **oprav**, než smaž — někdo už na ni mohl poslat o
 
 **[jen Admin]** — role Dramaturgie na stránky nedosáhne.
 
-Stránky jsou pevné části webu: Program, Lineup, Králové, Partneři, Doprava, GDPR,
-Kontakt a další. Je jich jednadvacet a **strukturu nemáš měnit** — jen texty uvnitř.
+Stránky jsou pevné části webu: Program, Králové, Osvěžovny, Praktické info, Partneři,
+Kontakt a další. **Strukturu nemáš měnit** — jen texty uvnitř. Menu se podle stránek
+neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 
 ### 8.1 Otevřít stránku
 

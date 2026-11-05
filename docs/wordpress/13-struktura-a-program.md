@@ -5,7 +5,20 @@ na první verzi webu, moje námitky k ní a to, co z toho zbylo jako návrh.
 
 ---
 
-## A. Menu
+## A. Menu — HOTOVO 5. 11. 2026
+
+> Nasazeno. Výsledek: **Program · Osvěžovny · Králové · Praktické info · O festivalu ▾**
+> \+ tlačítko **Podpoř nás**. Jedno rozbalovátko místo šesti, pět položek místo
+> devatenácti. Skripty: `menu.py` (nově jde spustit opakovaně), `stranky.py`,
+> `prakticke-info.py`, `logo.py` (patička), `nastaveni.py` (tlačítko).
+>
+> Oproti původnímu návrhu níž **Lineup samostatnou položku nedostal** — je sloučený
+> do `/program/` přepínačem, takže už nemá kam vést.
+>
+> Partneři, Podpoř nás, Kontakt a GDPR jsou **v patičce**; GDPR na webu do dneška
+> nemělo jediný odkaz odnikud.
+
+### Původní zápis ze 4. 11.
 
 Dnešní menu zdědilo hierarchii starého webu: šest rozbalovátek, devatenáct položek.
 Zadavatel: *„V menu je momentálně hrozně akcí a je to nepřehledné. Na mobilu to bude
@@ -42,7 +55,10 @@ Pro média, Kontakt, Partneři.
 **Partneři nemůžou zmizet úplně.** Zadavatel chtěl celou sekci zrušit. Loga partnerů
 na webu ale bývají součástí smlouvy o partnerství — zrušením sekce se může porušit dohoda,
 o které nevíme. Návrh: stránka zůstane, jen vypadne z hlavního menu (patička + O festivalu).
-**Ověřit u vedení.**
+→ **Zadavatel 5. 11. zvolil tenhle kompromis. Hotovo.**
+
+→ **Vyřešeno 5. 11.: čtyři podstránky sloučené do jedné s kotvami, časté otázky
+rozbalovací. Hotovo.**
 
 **Praktické info nepatří pod O festivalu.** Zadavatel to tam chtěl přesunout. Je to ale
 stejná chyba jako Osvěžovny pod Partnery: *Praktické info* je pro návštěvníka (doprava,

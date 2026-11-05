@@ -9,7 +9,9 @@ Proč je co takhle a kde se to mění klikáním popisuje
 | `bm.css` | doplňkové CSS — **zdroj pravdy**, kopie žije v Customizeru |
 | `nastaveni.py` | paleta, písmo, hlavička, patička, titulkové pásy, nahraje `bm.css` |
 | `logo.py` | nahraje znaky do médií, nastaví logo hlavičky a text patičky |
-| `menu.py` | založí hlavní menu (spustit jen jednou) |
+| `menu.py` | postaví hlavní menu (jde spustit opakovaně, menu vždy přestaví) |
+| `stranky.py` | srovná zanoření stránek, a tím jejich adresy |
+| `prakticke-info.py` | složí stránku Praktické info ze čtyř původních podstránek |
 | `uvod.py` | obsah úvodní stránky |
 | `program.py` | obsah stránky Program |
 | `kralove.py` | obsah stránky Králové |
