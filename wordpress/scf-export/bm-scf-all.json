@@ -1,90 +1,413 @@
 [
     {
-        "key": "post_type_kral",
-        "title": "Králové",
-        "menu_order": 0,
-        "active": true,
-        "post_type": "kral",
-        "advanced_configuration": true,
-        "import_source": "",
-        "import_date": "",
-        "allow_ai_access": false,
-        "ai_description": "",
-        "labels": {
-            "name": "Králové",
-            "singular_name": "Král",
-            "menu_name": "Králové",
-            "all_items": "Všichni králové",
-            "add_new": "Přidat krále",
-            "add_new_item": "Přidat krále",
-            "edit_item": "Upravit krále",
-            "new_item": "Nový král",
-            "view_item": "Zobrazit krále",
-            "view_items": "Zobrazit krále",
-            "search_items": "Hledat krále",
-            "not_found": "Žádný král nenalezen",
-            "not_found_in_trash": "V koši není žádný král",
-            "parent_item_colon": "",
-            "archives": "Archiv králů",
-            "attributes": "Pořadí krále",
-            "featured_image": "Fotka kandidáta",
-            "set_featured_image": "Nastavit fotku kandidáta",
-            "remove_featured_image": "Odebrat fotku kandidáta",
-            "use_featured_image": "Použít jako fotku kandidáta",
-            "insert_into_item": "Vložit do krále",
-            "uploaded_to_this_item": "Nahráno k tomuto králi",
-            "filter_items_list": "Filtrovat seznam králů",
-            "filter_by_date": "Filtrovat podle data",
-            "items_list_navigation": "Navigace v seznamu králů",
-            "items_list": "Seznam králů",
-            "item_published": "Král publikován.",
-            "item_published_privately": "Král publikován soukromě.",
-            "item_reverted_to_draft": "Král vrácen do konceptů.",
-            "item_scheduled": "Král naplánován.",
-            "item_updated": "Král aktualizován.",
-            "item_link": "Odkaz na krále",
-            "item_link_description": "Odkaz na krále."
-        },
-        "description": "Kandidáti na krále Majálesu – jméno, škola, téma a nasbírané body.",
-        "public": true,
-        "hierarchical": false,
-        "exclude_from_search": false,
-        "publicly_queryable": true,
-        "show_ui": true,
-        "show_in_menu": true,
-        "admin_menu_parent": "",
-        "show_in_admin_bar": true,
-        "show_in_nav_menus": true,
-        "show_in_rest": true,
-        "rest_base": "",
-        "rest_namespace": "wp/v2",
-        "rest_controller_class": "WP_REST_Posts_Controller",
-        "menu_position": 26,
-        "menu_icon": "dashicons-awards",
-        "rename_capabilities": false,
-        "singular_capability_name": "post",
-        "plural_capability_name": "posts",
-        "supports": [
-            "title",
-            "thumbnail",
-            "page-attributes"
+        "key": "group_tribe_events",
+        "title": "Akce – nastavení webu",
+        "fields": [
+            {
+                "key": "field_tribe_events_v_carouselu",
+                "label": "V carouselu",
+                "name": "v_carouselu",
+                "aria-label": "",
+                "type": "true_false",
+                "instructions": "Zobrazit akci v carouselu na homepage. Nezávislé na označení „Doporučená akce“ (Top představení), které má The Events Calendar vlastní.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "message": "",
+                "default_value": 0,
+                "allow_in_bindings": 1,
+                "ui": 1,
+                "ui_on_text": "Ano",
+                "ui_off_text": "Ne"
+            },
+            {
+                "key": "field_tribe_events_bezbarierovost_vyjimka",
+                "label": "Bezbariérovost – výjimka",
+                "name": "bezbarierovost_vyjimka",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "Standardně se bezbariérovost přebírá z místa konání. Zde ji lze pro tuto jednu akci přebít.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "zdedit": "Zdědit z místa",
+                    "ano": "Ano – bezbariérová",
+                    "ne": "Ne – není bezbariérová"
+                },
+                "default_value": "zdedit",
+                "return_format": "value",
+                "multiple": 0,
+                "allow_null": 0,
+                "allow_in_bindings": 1,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "create_options": 0,
+                "save_options": 0
+            }
         ],
-        "taxonomies": [],
-        "has_archive": false,
-        "has_archive_slug": "",
-        "rewrite": {
-            "permalink_rewrite": "post_type_key",
-            "slug": "",
-            "feeds": false,
-            "pages": true,
-            "with_front": true
-        },
-        "query_var": "post_type_key",
-        "query_var_name": "",
-        "can_export": true,
-        "delete_with_user": false,
-        "register_meta_box_cb": "",
-        "enter_title_here": "Jméno kandidáta"
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "tribe_events"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Doplňková nastavení akce pro web Majálesu.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_tribe_events_cat",
+        "title": "Kategorie programu – barva",
+        "fields": [
+            {
+                "key": "field_tribe_events_cat_barva",
+                "label": "Barva",
+                "name": "barva",
+                "aria-label": "",
+                "type": "color_picker",
+                "instructions": "Barva kategorie programu. Žánry pod touto kategorií barvu dědí.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "enable_opacity": 0,
+                "return_format": "string",
+                "allow_in_bindings": 1,
+                "custom_palette_source": "",
+                "palette_colors": "",
+                "show_color_wheel": true
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "taxonomy",
+                    "operator": "==",
+                    "value": "tribe_events_cat"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Barevné rozlišení kategorií programu.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_kral",
+        "title": "Král – detail kandidáta",
+        "fields": [
+            {
+                "key": "field_kral_skola",
+                "label": "Škola",
+                "name": "skola",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Škola, kterou kandidát reprezentuje.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "50",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_kral_tema",
+                "label": "Téma",
+                "name": "tema",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Téma, se kterým kandidát soutěží.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "50",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_kral_body",
+                "label": "Body",
+                "name": "body",
+                "aria-label": "",
+                "type": "repeater",
+                "instructions": "Bodování po jednotlivých disciplínách. Přidejte řádek pro každý segment.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "layout": "table",
+                "pagination": 0,
+                "min": 0,
+                "max": 0,
+                "collapsed": "",
+                "button_label": "Přidat bodování",
+                "rows_per_page": 20,
+                "sub_fields": [
+                    {
+                        "key": "field_kral_body_segment",
+                        "label": "Segment",
+                        "name": "segment",
+                        "aria-label": "",
+                        "type": "select",
+                        "instructions": "",
+                        "required": 1,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "60",
+                            "class": "",
+                            "id": ""
+                        },
+                        "choices": {
+                            "studentske_jamy": "Studentské jamy",
+                            "kralovska_hra": "Královská hra",
+                            "plneni_vyzev": "Plnění výzev",
+                            "ostatni": "Ostatní"
+                        },
+                        "default_value": false,
+                        "return_format": "value",
+                        "multiple": 0,
+                        "allow_null": 0,
+                        "allow_in_bindings": 1,
+                        "ui": 0,
+                        "ajax": 0,
+                        "placeholder": "",
+                        "parent_repeater": "field_kral_body",
+                        "create_options": 0,
+                        "save_options": 0
+                    },
+                    {
+                        "key": "field_kral_body_pocet",
+                        "label": "Počet",
+                        "name": "pocet",
+                        "aria-label": "",
+                        "type": "number",
+                        "instructions": "",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "40",
+                            "class": "",
+                            "id": ""
+                        },
+                        "default_value": "",
+                        "min": 0,
+                        "max": "",
+                        "step": 1,
+                        "allow_in_bindings": 1,
+                        "placeholder": "",
+                        "prepend": "",
+                        "append": "b",
+                        "parent_repeater": "field_kral_body"
+                    }
+                ]
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "kral"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Údaje o kandidátovi na krále a jeho bodování.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_tribe_venue",
+        "title": "Místo – bezbariérovost",
+        "fields": [
+            {
+                "key": "field_tribe_venue_bezbarierovost",
+                "label": "Bezbariérové místo",
+                "name": "bezbarierovost",
+                "aria-label": "",
+                "type": "true_false",
+                "instructions": "Zapněte, pokud je místo bezbariérově přístupné. Akce konané na tomto místě bezbariérovost dědí.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "message": "",
+                "default_value": 0,
+                "allow_in_bindings": 1,
+                "ui": 1,
+                "ui_on_text": "Ano",
+                "ui_off_text": "Ne"
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "tribe_venue"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Bezbariérovost se vede u místa, ne u jednotlivých akcí.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
+    },
+    {
+        "key": "group_rocnik",
+        "title": "Ročník – termín festivalu",
+        "fields": [
+            {
+                "key": "field_rocnik_datum_od",
+                "label": "Datum od",
+                "name": "datum_od",
+                "aria-label": "",
+                "type": "date_picker",
+                "instructions": "První den festivalu.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "50",
+                    "class": "",
+                    "id": ""
+                },
+                "display_format": "d. m. Y",
+                "return_format": "Y-m-d",
+                "first_day": 1,
+                "allow_in_bindings": 1,
+                "default_to_current_date": 0
+            },
+            {
+                "key": "field_rocnik_datum_do",
+                "label": "Datum do",
+                "name": "datum_do",
+                "aria-label": "",
+                "type": "date_picker",
+                "instructions": "Poslední den festivalu.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "50",
+                    "class": "",
+                    "id": ""
+                },
+                "display_format": "d. m. Y",
+                "return_format": "Y-m-d",
+                "first_day": 1,
+                "allow_in_bindings": 1,
+                "default_to_current_date": 0
+            },
+            {
+                "key": "field_rocnik_text_na_homepage",
+                "label": "Text na homepage",
+                "name": "text_na_homepage",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Volný text s datem festivalu, který se vypisuje na homepage. Například: 30. 5. – 5. 6. 2027.",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "allow_in_bindings": 1
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "taxonomy",
+                    "operator": "==",
+                    "value": "rocnik"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "Termín festivalu pro daný ročník.",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": ""
     },
     {
         "key": "taxonomy_rocnik",
@@ -173,133 +496,90 @@
         "ai_description": ""
     },
     {
-        "key": "group_tribe_events",
-        "title": "Akce – nastavení webu",
-        "fields": [],
-        "location": [
-            [
-                {
-                    "param": "post_type",
-                    "operator": "==",
-                    "value": "tribe_events"
-                }
-            ]
-        ],
+        "key": "post_type_kral",
+        "title": "Králové",
         "menu_order": 0,
-        "position": "normal",
-        "style": "default",
-        "label_placement": "top",
-        "instruction_placement": "label",
-        "hide_on_screen": "",
         "active": true,
-        "description": "Doplňková nastavení akce pro web Majálesu.",
-        "show_in_rest": 1,
-        "display_title": "",
+        "post_type": "kral",
+        "advanced_configuration": true,
+        "import_source": "",
+        "import_date": "",
         "allow_ai_access": false,
-        "ai_description": ""
-    },
-    {
-        "key": "group_tribe_events_cat",
-        "title": "Kategorie programu – barva",
-        "fields": [],
-        "location": [
-            [
-                {
-                    "param": "taxonomy",
-                    "operator": "==",
-                    "value": "tribe_events_cat"
-                }
-            ]
+        "ai_description": "",
+        "labels": {
+            "name": "Králové",
+            "singular_name": "Král",
+            "menu_name": "Králové",
+            "all_items": "Všichni králové",
+            "add_new": "Přidat krále",
+            "add_new_item": "Přidat krále",
+            "edit_item": "Upravit krále",
+            "new_item": "Nový král",
+            "view_item": "Zobrazit krále",
+            "view_items": "Zobrazit krále",
+            "search_items": "Hledat krále",
+            "not_found": "Žádný král nenalezen",
+            "not_found_in_trash": "V koši není žádný král",
+            "parent_item_colon": "",
+            "archives": "Archiv králů",
+            "attributes": "Pořadí krále",
+            "featured_image": "Fotka kandidáta",
+            "set_featured_image": "Nastavit fotku kandidáta",
+            "remove_featured_image": "Odebrat fotku kandidáta",
+            "use_featured_image": "Použít jako fotku kandidáta",
+            "insert_into_item": "Vložit do krále",
+            "uploaded_to_this_item": "Nahráno k tomuto králi",
+            "filter_items_list": "Filtrovat seznam králů",
+            "filter_by_date": "Filtrovat podle data",
+            "items_list_navigation": "Navigace v seznamu králů",
+            "items_list": "Seznam králů",
+            "item_published": "Král publikován.",
+            "item_published_privately": "Král publikován soukromě.",
+            "item_reverted_to_draft": "Král vrácen do konceptů.",
+            "item_scheduled": "Král naplánován.",
+            "item_updated": "Král aktualizován.",
+            "item_link": "Odkaz na krále",
+            "item_link_description": "Odkaz na krále."
+        },
+        "description": "Kandidáti na krále Majálesu – jméno, škola, téma a nasbírané body.",
+        "public": true,
+        "hierarchical": false,
+        "exclude_from_search": false,
+        "publicly_queryable": true,
+        "show_ui": true,
+        "show_in_menu": true,
+        "admin_menu_parent": "",
+        "show_in_admin_bar": true,
+        "show_in_nav_menus": true,
+        "show_in_rest": true,
+        "rest_base": "",
+        "rest_namespace": "wp/v2",
+        "rest_controller_class": "WP_REST_Posts_Controller",
+        "menu_position": 26,
+        "menu_icon": "dashicons-awards",
+        "rename_capabilities": false,
+        "singular_capability_name": "post",
+        "plural_capability_name": "posts",
+        "supports": [
+            "title",
+            "thumbnail",
+            "page-attributes"
         ],
-        "menu_order": 0,
-        "position": "normal",
-        "style": "default",
-        "label_placement": "top",
-        "instruction_placement": "label",
-        "hide_on_screen": "",
-        "active": true,
-        "description": "Barevné rozlišení kategorií programu.",
-        "show_in_rest": 1,
-        "display_title": "",
-        "allow_ai_access": false,
-        "ai_description": ""
-    },
-    {
-        "key": "group_kral",
-        "title": "Král – detail kandidáta",
-        "fields": [],
-        "location": [
-            [
-                {
-                    "param": "post_type",
-                    "operator": "==",
-                    "value": "kral"
-                }
-            ]
-        ],
-        "menu_order": 0,
-        "position": "normal",
-        "style": "default",
-        "label_placement": "top",
-        "instruction_placement": "label",
-        "hide_on_screen": "",
-        "active": true,
-        "description": "Údaje o kandidátovi na krále a jeho bodování.",
-        "show_in_rest": 1,
-        "display_title": "",
-        "allow_ai_access": false,
-        "ai_description": ""
-    },
-    {
-        "key": "group_tribe_venue",
-        "title": "Místo – bezbariérovost",
-        "fields": [],
-        "location": [
-            [
-                {
-                    "param": "post_type",
-                    "operator": "==",
-                    "value": "tribe_venue"
-                }
-            ]
-        ],
-        "menu_order": 0,
-        "position": "normal",
-        "style": "default",
-        "label_placement": "top",
-        "instruction_placement": "label",
-        "hide_on_screen": "",
-        "active": true,
-        "description": "Bezbariérovost se vede u místa, ne u jednotlivých akcí.",
-        "show_in_rest": 1,
-        "display_title": "",
-        "allow_ai_access": false,
-        "ai_description": ""
-    },
-    {
-        "key": "group_rocnik",
-        "title": "Ročník – termín festivalu",
-        "fields": [],
-        "location": [
-            [
-                {
-                    "param": "taxonomy",
-                    "operator": "==",
-                    "value": "rocnik"
-                }
-            ]
-        ],
-        "menu_order": 0,
-        "position": "normal",
-        "style": "default",
-        "label_placement": "top",
-        "instruction_placement": "label",
-        "hide_on_screen": "",
-        "active": true,
-        "description": "Termín festivalu pro daný ročník.",
-        "show_in_rest": 1,
-        "display_title": "",
-        "allow_ai_access": false,
-        "ai_description": ""
+        "taxonomies": [],
+        "has_archive": false,
+        "has_archive_slug": "",
+        "rewrite": {
+            "permalink_rewrite": "post_type_key",
+            "slug": "",
+            "feeds": false,
+            "pages": true,
+            "with_front": true
+        },
+        "query_var": "post_type_key",
+        "query_var_name": "",
+        "can_export": true,
+        "delete_with_user": false,
+        "register_meta_box_cb": "",
+        "enter_title_here": "Jméno kandidáta"
     }
 ]
