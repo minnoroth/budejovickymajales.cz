@@ -159,5 +159,12 @@ $obsazene = array();
 tvrd( 'prázdná škola', 'kandidat', bm_kralove_kotva( '', $obsazene ) );
 tvrd( 'druhá prázdná škola', 'kandidat-2', bm_kralove_kotva( '', $obsazene ) );
 
+// 18. Kandidát bez jediného bodu musí uloženou kopii dostat taky — bez ní by
+// ho řazení sloupce ze seznamu vyhodilo, místo aby ho zařadilo naspod.
+$GLOBALS['typ'][201]  = 'kral';
+$GLOBALS['meta'][201] = array();
+bm_kralove_ulozit_soucet( 201 );
+tvrd( 'kandidát bez bodů dostane kopii s nulou', 0, $GLOBALS['meta'][201]['_bm_body_celkem'] ?? null );
+
 echo $chyb ? "\n$chyb selhalo\n" : "\nvše prošlo\n";
 exit( $chyb ? 1 : 0 );

@@ -15,7 +15,9 @@
  * (_bm_body_celkem) slouží jedinému účelu: řazení sloupce v administraci,
  * protože podle spočítané hodnoty WordPress řadit neumí. Kdyby se kopie
  * rozešla, pozná se to jen na pořadí řádků v administraci; vypsané číslo
- * i veřejný žebříček jsou vždy správně.
+ * i veřejný žebříček jsou vždy správně. Aby kopii měl opravdu každý kandidát
+ * (bez ní by ho řazení ze seznamu vyhodilo), zapisuje se i při uložení
+ * příspěvku, ne jen při změně bodů.
  *
  * Proč je kopie napojená na zápis meta, a ne na acf/save_post:
  * Secure Custom Fields pouští acf/save_post jen u uložení z formuláře nebo
@@ -39,6 +41,7 @@ const BM_KRALOVE_POLE_BODY = 'body';
 add_action( 'added_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'updated_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'deleted_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
+add_action( 'save_post_' . BM_KRALOVE_TYP, 'bm_kralove_ulozit_soucet', 20 );
 add_action( 'admin_init', 'bm_kralove_dopocitat_chybejici' );
 add_action( 'wp_enqueue_scripts', 'bm_kralove_zarad_predem' );
 add_shortcode( 'bm_kralove', 'bm_kralove_zkratka' );
@@ -79,6 +82,16 @@ function bm_kralove_body( $id ) {
 
 /**
  * Uloží kopii součtu pro řazení v administraci.
+ *
+ * Visí i na save_post, a to z jediného důvodu: řazení podle meta v WordPressu
+ * příspěvky bez té meta **vynechá**, ne jen přeřadí. Kandidát, kterému nikdo
+ * nesáhl na body (na začátku ročníku jich tak bude většina), by po kliknutí
+ * na „Body celkem" ze seznamu zmizel. save_post běží u každého uložení, takže
+ * kopii dostane každý kandidát hned při založení, i když má nulu.
+ *
+ * Při uložení přes REST běží save_post dřív, než Secure Custom Fields zapíše
+ * body — uloží se tedy ještě stará hodnota. Opraví ji háček na zápis meta,
+ * který přijde hned po tom.
  *
  * @param int $id ID kandidáta.
  * @return void
