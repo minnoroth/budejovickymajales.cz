@@ -20,13 +20,16 @@ pas = (
     '</div>\n<!-- /wp:group -->\n')
 
 vypis = (
-    # Vodorovné odsazení drží skupina, svislé taky — ale časová osa z něj na
-    # mobilu schválně vystupuje až k okrajům displeje. Dělá to program.css sám
-    # přes šířku okna, takže se tady nesmí sahat na layout: kdyby skupina byla
-    # „full", vystoupil by i seznam a nalepil by se na kraj.
-    '<!-- wp:group {"style":{"spacing":{"padding":{"top":"40px","bottom":"72px","left":"24px","right":"24px"}}},'
+    # Odsazení JEN SVISLÉ. Vodorovné má už obal stránky (.entry-content, 24 px)
+    # a kdyby ho skupina přidala podruhé, odsadí se obsah o 48 px — na mobilu
+    # je to 13 % displeje a navíc to nesedí na svislici nadpisu v pásu nad tím.
+    #
+    # Skupina zároveň nesmí být „full": časová osa si z odsazení na mobilu
+    # vystupuje sama přes šířku okna (program.css), kdežto seznam a filtry
+    # odsazení držet mají.
+    '<!-- wp:group {"style":{"spacing":{"padding":{"top":"40px","bottom":"72px","left":"0","right":"0"}}},'
     '"layout":{"type":"constrained","contentSize":"1160px"}} -->\n'
-    '<div class="wp-block-group" style="padding:40px 24px">'
+    '<div class="wp-block-group" style="padding:40px 0 72px">'
     '<!-- wp:shortcode -->\n[bm_program]\n<!-- /wp:shortcode -->\n'
     '</div>\n<!-- /wp:group -->\n')
 
