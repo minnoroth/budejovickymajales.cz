@@ -270,9 +270,6 @@ Sekce **Nepřehlédni** na úvodu se skládá sama z akcí, které mají zaškrt
 
 Totéž zaškrtávátko čte i stránka Program, kde akci označí štítkem **Top**.
 
-> **V boxu „Akce – nastavení webu" je ještě pole *V carouselu*.** To už nic nedělá
-> a bude smazáno. Používej *Top představení*.
-
 ### 2.7 Když se akce ruší nebo přesouvá
 
 V boxu **Events Status** se dá akci nastavit stav. Hodí se to během festivalu:
