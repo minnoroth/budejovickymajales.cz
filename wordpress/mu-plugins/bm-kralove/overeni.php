@@ -62,11 +62,11 @@ function tvrd( $popis, $ocekavano, $skutecnost ) {
 // 1. Skutečný kandidát ze stagingu: 100 + 200 + 400 + 90 = 790.
 $GLOBALS['typ'][217]  = 'kral';
 $GLOBALS['meta'][217] = array(
-	'body'          => '4',
-	'body_0_pocet'  => '100',
-	'body_1_pocet'  => '200',
-	'body_2_pocet'  => '400',
-	'body_3_pocet'  => '90',
+	'body'            => '4',
+	'body_0_segment'  => 'studentske_jamy', 'body_0_pocet' => '100',
+	'body_1_segment'  => 'kralovska_hra',   'body_1_pocet' => '200',
+	'body_2_segment'  => 'plneni_vyzev',    'body_2_pocet' => '400',
+	'body_3_segment'  => 'ostatni',         'body_3_pocet' => '90',
 );
 tvrd( 'Daniel Neubauer (100+200+400+90)', 790, bm_kralove_body( 217 ) );
 
@@ -165,6 +165,70 @@ $GLOBALS['typ'][201]  = 'kral';
 $GLOBALS['meta'][201] = array();
 bm_kralove_ulozit_soucet( 201 );
 tvrd( 'kandidát bez bodů dostane kopii s nulou', 0, $GLOBALS['meta'][201]['_bm_body_celkem'] ?? null );
+
+// 19. Rozpad po disciplínách u skutečného kandidáta.
+tvrd(
+	'rozpad bodů po disciplínách',
+	array(
+		array( 'klic' => 'studentske_jamy', 'popis' => 'Studentské jamy', 'pocet' => 100 ),
+		array( 'klic' => 'kralovska_hra',   'popis' => 'Královská hra',   'pocet' => 200 ),
+		array( 'klic' => 'plneni_vyzev',    'popis' => 'Plnění výzev',    'pocet' => 400 ),
+		array( 'klic' => 'ostatni',         'popis' => 'Ostatní',         'pocet' => 90 ),
+	),
+	bm_kralove_segmenty( 217 )
+);
+
+// 20. Pořadí dílků je dané tabulkou, ne pořadím řádků v administraci —
+// jinak by se pruhy dvou kandidátů nedaly porovnat.
+$GLOBALS['typ'][301]  = 'kral';
+$GLOBALS['meta'][301] = array(
+	'body'           => '2',
+	'body_0_segment' => 'ostatni',         'body_0_pocet' => '10',
+	'body_1_segment' => 'studentske_jamy', 'body_1_pocet' => '20',
+);
+tvrd( 'dílky se řadí podle tabulky, ne podle řádků',
+	array( 'studentske_jamy', 'ostatni' ),
+	array_column( bm_kralove_segmenty( 301 ), 'klic' ) );
+
+// 21. Dvakrát stejná disciplína se sečte do jednoho dílku.
+$GLOBALS['typ'][302]  = 'kral';
+$GLOBALS['meta'][302] = array(
+	'body'           => '2',
+	'body_0_segment' => 'kralovska_hra', 'body_0_pocet' => '30',
+	'body_1_segment' => 'kralovska_hra', 'body_1_pocet' => '70',
+);
+tvrd( 'dva řádky stejné disciplíny dají jeden dílek',
+	array( array( 'klic' => 'kralovska_hra', 'popis' => 'Královská hra', 'pocet' => 100 ) ),
+	bm_kralove_segmenty( 302 ) );
+
+// 22. Řádek bez vybrané disciplíny o body nepřijde.
+$GLOBALS['typ'][303]  = 'kral';
+$GLOBALS['meta'][303] = array( 'body' => '1', 'body_0_segment' => '', 'body_0_pocet' => '55' );
+tvrd( 'řádek bez disciplíny spadne do Ostatní', 55, bm_kralove_body( 303 ) );
+tvrd( 'a dostane barvu Ostatní', 'ostatni', bm_kralove_segmenty( 303 )[0]['klic'] ?? null );
+
+// 23. Disciplína přidaná do nabídky, kterou doplněk ještě nezná.
+$GLOBALS['typ'][304]  = 'kral';
+$GLOBALS['meta'][304] = array(
+	'body'           => '2',
+	'body_0_segment' => 'nocni_hra',       'body_0_pocet' => '40',
+	'body_1_segment' => 'studentske_jamy', 'body_1_pocet' => '10',
+);
+$neznamy = bm_kralove_segmenty( 304 );
+tvrd( 'neznámá disciplína jde na konec', 'Nocni hra', $neznamy[1]['popis'] ?? null );
+tvrd( 'a body se neztratí', 50, bm_kralove_body( 304 ) );
+
+// 24. Disciplína s nulou se nevykresluje — nulový dílek není vidět
+// a v legendě by jen mátl.
+$GLOBALS['typ'][305]  = 'kral';
+$GLOBALS['meta'][305] = array(
+	'body'           => '2',
+	'body_0_segment' => 'studentske_jamy', 'body_0_pocet' => '0',
+	'body_1_segment' => 'kralovska_hra',   'body_1_pocet' => '80',
+);
+tvrd( 'disciplína s nulou se vynechá',
+	array( 'kralovska_hra' ),
+	array_column( bm_kralove_segmenty( 305 ), 'klic' ) );
 
 echo $chyb ? "\n$chyb selhalo\n" : "\nvše prošlo\n";
 exit( $chyb ? 1 : 0 );

@@ -63,21 +63,100 @@ add_action( 'pre_get_posts', 'bm_kralove_radit_podle_bodu' );
  * @return int Součet bodů, nebo 0.
  */
 function bm_kralove_body( $id ) {
+	$soucet = 0;
+	foreach ( bm_kralove_segmenty( $id ) as $segment ) {
+		$soucet += $segment['pocet'];
+	}
+
+	return $soucet;
+}
+
+/**
+ * Popisy disciplín v pořadí, v jakém se vykreslují.
+ *
+ * Je to kopie voleb pole „Segment" ze Secure Custom Fields. Záměrně — doplněk
+ * nevolá jedinou funkci SCF, takže si musí popisky držet sám. Když se v poli
+ * přidá volba, přidej ji i sem; dokud se tak nestane, vypíše se odvozený
+ * popisek a barva jako u „Ostatní", takže se nic neztratí.
+ *
+ * Pořadí tady určuje pořadí barev v pruhu. Musí být u všech kandidátů stejné,
+ * jinak se pruhy nedají porovnat.
+ *
+ * @return array<string, string>
+ */
+function bm_kralove_popisy_segmentu() {
+	return array(
+		'studentske_jamy' => 'Studentské jamy',
+		'kralovska_hra'   => 'Královská hra',
+		'plneni_vyzev'    => 'Plnění výzev',
+		'ostatni'         => 'Ostatní',
+	);
+}
+
+/**
+ * Body kandidáta rozpadlé po disciplínách.
+ *
+ * Čte meta přímo přes jádro WordPressu, ne přes funkce Secure Custom Fields —
+ * stejně jako bm-termin.php. Kdyby se plugin s poli jednou vyměnil, rozpad
+ * funguje dál, protože tvar uložení (body = počet řádků, body_0_segment
+ * a body_0_pocet = první řádek) je daný databází, ne pluginem.
+ *
+ * Dva řádky se stejnou disciplínou sečte do jednoho dílu. Návod říká
+ * „jeden segment = jeden řádek", ale spolehnout se na to nejde a dva stejně
+ * barevné dílky vedle sebe by vypadaly jako chyba vykreslení.
+ *
+ * Disciplíny bez bodů se vynechávají — nulový dílek není vidět a v legendě
+ * by jen mátl.
+ *
+ * @param int $id ID kandidáta.
+ * @return array<int, array{klic:string, popis:string, pocet:int}>
+ */
+function bm_kralove_segmenty( $id ) {
 	$radku = (int) get_post_meta( $id, BM_KRALOVE_POLE_BODY, true );
 
 	// Záporný nebo nesmyslně velký počet řádků by znamenal poškozená data.
 	// Strop drží smyčku konečnou, i kdyby se to stalo.
 	if ( $radku < 1 ) {
-		return 0;
+		return array();
 	}
 	$radku = min( $radku, 100 );
 
-	$soucet = 0;
+	$sesbirane = array();
 	for ( $i = 0; $i < $radku; $i++ ) {
-		$soucet += (int) get_post_meta( $id, BM_KRALOVE_POLE_BODY . '_' . $i . '_pocet', true );
+		$klic  = (string) get_post_meta( $id, BM_KRALOVE_POLE_BODY . '_' . $i . '_segment', true );
+		$pocet = (int) get_post_meta( $id, BM_KRALOVE_POLE_BODY . '_' . $i . '_pocet', true );
+
+		// Řádek bez vybrané disciplíny spadne do „Ostatní". Body se nesmí
+		// ztratit jen proto, že někdo zapomněl vybrat z nabídky.
+		if ( '' === $klic ) {
+			$klic = 'ostatni';
+		}
+
+		$sesbirane[ $klic ] = ( isset( $sesbirane[ $klic ] ) ? $sesbirane[ $klic ] : 0 ) + $pocet;
 	}
 
-	return $soucet;
+	$vysledek = array();
+
+	foreach ( bm_kralove_popisy_segmentu() as $klic => $popis ) {
+		if ( ! empty( $sesbirane[ $klic ] ) ) {
+			$vysledek[] = array( 'klic' => $klic, 'popis' => $popis, 'pocet' => (int) $sesbirane[ $klic ] );
+		}
+		unset( $sesbirane[ $klic ] );
+	}
+
+	// Disciplína, která v nabídce přibyla a tady ještě není. Jde na konec
+	// s barvou „Ostatní" a popiskem odvozeným z klíče.
+	foreach ( $sesbirane as $klic => $pocet ) {
+		if ( $pocet ) {
+			$vysledek[] = array(
+				'klic'  => 'ostatni',
+				'popis' => ucfirst( str_replace( '_', ' ', $klic ) ),
+				'pocet' => (int) $pocet,
+			);
+		}
+	}
+
+	return $vysledek;
 }
 
 /**
@@ -317,10 +396,12 @@ function bm_kralove_ids( $rocnik_id, $kolik = -1 ) {
 function bm_kralove_poradi( $ids ) {
 	$radky = array();
 	foreach ( $ids as $poradi => $id ) {
-		$radky[] = array(
-			'id'      => (int) $id,
-			'body'    => bm_kralove_body( $id ),
-			'vstupni' => $poradi,
+		$segmenty = bm_kralove_segmenty( $id );
+		$radky[]  = array(
+			'id'       => (int) $id,
+			'segmenty' => $segmenty,
+			'body'     => array_sum( array_column( $segmenty, 'pocet' ) ),
+			'vstupni'  => $poradi,
 		);
 	}
 
@@ -438,9 +519,42 @@ function bm_kralove_zkratka( $atributy = array() ) {
 
 	return '<section class="bmk">'
 		. '<p class="bmk__rocnik">Průběžné pořadí — ročník ' . esc_html( $rocnik->name ) . '</p>'
+		. bm_kralove_legenda( $radky )
 		. '<ol class="bmk__seznam" itemscope itemtype="https://schema.org/ItemList">'
 		. $polozky
 		. '</ol></section>';
+}
+
+/**
+ * Legenda barev. Bez ní jsou barevné dílky jen ozdoba — teprve legenda říká,
+ * za co body jsou.
+ *
+ * Vypisují se jen disciplíny, které se ve výpisu opravdu objevily. Mrtvá
+ * položka v legendě vypadá jako chyba zadání.
+ *
+ * @param array $radky Řádky z bm_kralove_poradi().
+ * @return string
+ */
+function bm_kralove_legenda( $radky ) {
+	$pouzite = array();
+	foreach ( $radky as $radek ) {
+		foreach ( $radek['segmenty'] as $segment ) {
+			$pouzite[ $segment['popis'] ] = $segment['klic'];
+		}
+	}
+
+	if ( ! $pouzite ) {
+		return '';
+	}
+
+	$polozky = '';
+	foreach ( $pouzite as $popis => $klic ) {
+		$polozky .= '<li class="bmk__legenda-polozka" data-segment="' . esc_attr( $klic ) . '">'
+			. '<span class="bmk__tecka" aria-hidden="true"></span>'
+			. esc_html( $popis ) . '</li>';
+	}
+
+	return '<ul class="bmk__legenda">' . $polozky . '</ul>';
 }
 
 /**
@@ -461,6 +575,29 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 	// number_format, ne sprintf — desetinná tečka v šířce nesmí záviset
 	// na jazyce serveru, jinak CSS dostane „91,08%" a pruh zmizí.
 	$sirka = $nejvic > 0 ? number_format( $radek['body'] / $nejvic * 100, 2, '.', '' ) : '0';
+
+	// Délka celého pruhu je poměr k vedoucímu, dílky uvnitř jsou poměry
+	// disciplín k bodům tohoto kandidáta. Složené dohromady to vyjde:
+	// dílek zabírá stejnou část obrazovky jako jeho body z celkového maxima.
+	$dily   = '';
+	$rozpis = array();
+	foreach ( $radek['segmenty'] as $segment ) {
+		$podil   = $radek['body'] > 0 ? number_format( $segment['pocet'] / $radek['body'] * 100, 2, '.', '' ) : '0';
+		$titulek = $segment['popis'] . ': ' . number_format_i18n( $segment['pocet'] ) . ' b.';
+		$rozpis[] = $titulek;
+
+		// Barvu nese CSS podle data-segment, ne inline styl — jinak by se
+		// barvy disciplín nedaly přebarvit paletou při rebrandingu.
+		$dily .= '<span class="bmk-kral__dil" data-segment="' . esc_attr( $segment['klic'] ) . '"'
+			. ' style="width:' . esc_attr( $podil ) . '%"'
+			. ' title="' . esc_attr( $titulek ) . '"></span>';
+	}
+
+	// Titulek se myší na mobilu nevyvolá a čtečka ho nepřečte. Rozpis je
+	// proto i v textu, schovaný jen vizuálně.
+	$rozpis_text = $rozpis
+		? '<span class="bmk-jen-pro-ctecku">Rozpis bodů: ' . esc_html( implode( ', ', $rozpis ) ) . '.</span>'
+		: '';
 
 	$foto = get_the_post_thumbnail( $id, 'medium', array( 'itemprop' => 'image', 'loading' => 'lazy' ) );
 	if ( ! $foto ) {
@@ -483,8 +620,9 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 		. '<span class="bmk-kral__jmeno" itemprop="name">' . esc_html( get_the_title( $id ) ) . '</span>'
 		. '<span class="bmk-kral__skola" itemprop="description">' . $popis . '</span>'
 		. '<span class="bmk-kral__graf">'
-		. '<span class="bmk-kral__pruh" style="width:' . esc_attr( $sirka ) . '%" aria-hidden="true"></span>'
+		. '<span class="bmk-kral__pruh" style="width:' . esc_attr( $sirka ) . '%">' . $dily . '</span>'
 		. '<span class="bmk-kral__body">' . esc_html( number_format_i18n( $radek['body'] ) ) . ' b.</span>'
+		. $rozpis_text
 		. '</span></span>'
 		. '<meta itemprop="position" content="' . esc_attr( (string) $poradi ) . '">'
 		. '<meta itemprop="url" content="' . esc_url( get_permalink() . '#' . $kotva ) . '">'

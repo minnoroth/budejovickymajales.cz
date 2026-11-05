@@ -75,8 +75,14 @@ zkratka na výpis kandidátů neexistuje. Stránka `/kralove/` byla prázdná, p
 z úvodu vede korálový pás s tlačítkem **Průběžné pořadí**.
 
 **Řešení.** Zkratka `[bm_kralove]` vypíše žebříček: pořadí, fotka, jméno, škola, téma,
-pruh v poměru k vedoucímu a součet bodů. Vedle toho přidává do administrace řaditelný
-sloupec **Body celkem**.
+pruh v poměru k vedoucímu a součet bodů. Pruh je **dělený po disciplínách** — každá má
+svou barvu a nad výpisem je legenda, takže je vidět, za co body jsou. Vedle toho
+přidává do administrace řaditelný sloupec **Body celkem**.
+
+**Jak se skládá délka pruhu.** Celý pruh je poměr bodů kandidáta k vedoucímu, dílky
+uvnitř jsou poměry disciplín k bodům toho kandidáta. Složené dohromady to vyjde: dílek
+zabírá na obrazovce stejnou část jako jeho podíl na nejvyšším součtu. Barvy nejsou
+v PHP, ale v CSS podle atributu `data-segment` — jinak by je rebranding nepřebarvil.
 
 **Proč se součet počítá při každém čtení.** Uložené odvozené číslo se dřív nebo později
 rozejde se skutečností. Součet se proto nikdy nebere z databáze — vždycky se spočítá

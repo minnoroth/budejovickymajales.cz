@@ -547,8 +547,21 @@ Body se nesčítají do jednoho čísla. Zapisují se po **segmentech** — po d
 | **Plnění výzev** | body za splněné výzvy |
 | **Ostatní** | cokoliv, co se nevejde do předchozích |
 
-Na webu se ukazuje **jen součet**. Rozpad po segmentech je pro vás — v administraci
-je vidět, odkud body přišly, a dá se opravit jen ta disciplína, ve které se spletete.
+Na webu se každá disciplína ukáže **vlastní barvou** v pruhu kandidáta, takže je na
+první pohled vidět, odkud body přišly. Nad výpisem je legenda, která barvy pojmenovává.
+
+| Disciplína | Barva v pruhu |
+|---|---|
+| Studentské jamy | zelenomodrá |
+| Královská hra | korálová |
+| Plnění výzev | levandulová |
+| Ostatní | šedá |
+
+Barvy jsou z globální palety, takže se při změně vzhledu ročníku přebarví samy.
+
+**Když řádek necháš bez vybrané disciplíny**, body se neztratí — spadnou do *Ostatní*.
+**Dva řádky se stejnou disciplínou** se sečtou do jednoho dílku, takže se nic
+nerozdvojí; pořád ale platí, že čistší je mít jeden řádek na disciplínu.
 
 ### 6.3 Zapsat body
 
@@ -582,7 +595,8 @@ nevkládáš — výpis se vykreslí sám ze zadaných kandidátů.
 | | |
 |---|---|
 | Pořadí | podle součtu bodů, nejvíc nahoře. Při shodě rozhoduje pole **Order**, pak abeceda. |
-| Pruh | ukazuje poměr k vedoucímu kandidátovi, ne k součtu všech bodů. Vedoucí má vždy plný. |
+| Pruh | délka je poměr k vedoucímu kandidátovi, ne k součtu všech bodů. Vedoucí má vždy plný. |
+| Barvy v pruhu | jednotlivé disciplíny, v pořadí podle tabulky v 6.2 — u všech kandidátů stejném, aby šly pruhy porovnat. |
 | Ročník | ukáže se nejnovější ročník, **který má kandidáty**. Rok je napsaný nad výpisem. |
 | Chybějící fotka | místo ní se ukáže první písmeno jména. Řádek se nerozsype, ale je to vidět. |
 

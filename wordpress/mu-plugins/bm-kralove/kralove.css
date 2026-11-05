@@ -24,6 +24,7 @@
   --bmk-svetla:  var(--global-palette7,  #F2F2F0);
   --bmk-bila:    var(--global-palette9,  #FFFFFF);
   --bmk-koral:   var(--global-palette10, #EE7270);
+  --bmk-levand:  var(--global-palette14, #B6B4DA);
   --bmk-zluta:   var(--global-palette15, #F8E862);
 
   --bmk-ramecek: var(--bm-ramecek, 3px solid var(--global-palette3, #121212));
@@ -48,6 +49,67 @@
   text-transform: uppercase;
   color: var(--bmk-seda);
   margin: 0 0 20px;
+}
+
+
+/* ── Barvy disciplín ─────────────────────────────────────────────────── */
+
+/* Jediné místo, kde je napsané, jaká disciplína má jakou barvu. PHP posílá
+   jen data-segment, takže se barvy mění tady — a protože všechny vedou
+   do palety, překlopí je rebranding sám.
+
+   Žlutá tu schválně není: vedoucí kandidát má žlutou kartu a dílek by se
+   na ní ztratil. „Ostatní" je proto šedá, což se k zbytkové kategorii hodí. */
+:is(#primary, body) .bmk [data-segment="studentske_jamy"] { --bmk-barva: var(--bmk-hlavni); }
+:is(#primary, body) .bmk [data-segment="kralovska_hra"]   { --bmk-barva: var(--bmk-koral); }
+:is(#primary, body) .bmk [data-segment="plneni_vyzev"]    { --bmk-barva: var(--bmk-levand); }
+:is(#primary, body) .bmk [data-segment="ostatni"]         { --bmk-barva: var(--bmk-seda); }
+
+
+/* ── Legenda ─────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmk__legenda {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+:is(#primary, body) .bmk__legenda-polozka {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bmk-seda);
+}
+
+:is(#primary, body) .bmk__tecka {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--bmk-cerna);
+  background: var(--bmk-barva, var(--bmk-hlavni));
+  flex: 0 0 auto;
+}
+
+
+/* ── Text jen pro čtečku ─────────────────────────────────────────────── */
+
+/* Rozpis bodů po disciplínách. V pruhu je jen jako titulek, na který myš
+   na mobilu nedosáhne a čtečka ho nepřečte. */
+:is(#primary, body) .bmk-jen-pro-ctecku {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 
@@ -154,6 +216,7 @@
 :is(#primary, body) .bmk-kral__skola em { font-style: italic; }
 
 :is(#primary, body) .bmk-kral__graf {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -163,19 +226,29 @@
 /* Dráha pruhu. Šířku vlastního pruhu počítá PHP jako podíl k vedoucímu
    kandidátovi, ne k součtu všech bodů — tak to dělal i starý web. */
 :is(#primary, body) .bmk-kral__pruh {
-  display: block;
-  height: 12px;
+  display: flex;
+  height: 14px;
   min-width: 2px;
   max-width: 100%;
   border-radius: 999px;
-  background: var(--bmk-hlavni);
+  overflow: hidden;
+  /* Podklad se ukáže jen u kandidáta bez jediného bodu — ten nemá dílky. */
+  background: var(--bmk-svetla);
   border: 2px solid var(--bmk-cerna);
   box-sizing: border-box;
 }
 
-/* Vedoucí má pruh korálový, ať se na žlutém podkladu neztratí. */
-:is(#primary, body) .bmk-kral:first-child .bmk-kral__pruh {
-  background: var(--bmk-koral);
+/* Jeden dílek = jedna disciplína. Šířku počítá PHP jako podíl z bodů
+   kandidáta, takže dílky dohromady vždycky dají přesně sto procent pruhu. */
+:is(#primary, body) .bmk-kral__dil {
+  display: block;
+  height: 100%;
+  background: var(--bmk-barva, var(--bmk-hlavni));
+}
+
+/* Předěl mezi dílky. Bez něj splyne korálová s levandulovou. */
+:is(#primary, body) .bmk-kral__dil + .bmk-kral__dil {
+  border-left: 2px solid var(--bmk-cerna);
 }
 
 :is(#primary, body) .bmk-kral__body {
@@ -221,4 +294,6 @@
   :is(#primary, body) .bmk-kral__graf { gap: 10px; margin-top: 4px; }
   :is(#primary, body) .bmk-kral__body { font-size: 14px; }
   :is(#primary, body) .bmk-kral__bezfotky { font-size: 24px; }
+  :is(#primary, body) .bmk__legenda { gap: 6px 14px; }
+  :is(#primary, body) .bmk__legenda-polozka { font-size: 13px; }
 }
