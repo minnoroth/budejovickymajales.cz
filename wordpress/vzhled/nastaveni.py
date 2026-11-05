@@ -108,9 +108,12 @@ NASTAVENI = {
         "top": {"top_left": [], "top_center": [], "top_right": []},
         "main": {"main_left": ["mobile-logo"], "main_center": [], "main_right": ["popup-toggle"]},
         "bottom": {"bottom_left": [], "bottom_center": [], "bottom_right": []}},
-    "header_button_label": "E-shop",
-    "header_button_link": "https://shop.budejovickymajales.cz/",
-    "header_button_target": "_blank",
+    # Pro neziskovku je „Podpoř nás" silnější výzva než e-shop. E-shop
+    # z webu nemizí — je odkazem na té stránce, tedy o jeden klik dál.
+    # Rozhodnuto 4. 11. 2026, viz docs/wordpress/13-struktura-a-program.md.
+    "header_button_label": "Podpoř nás",
+    "header_button_link": "/podpor-nas/",
+    "header_button_target": "_self",
     "header_button_style": "filled",
     "header_button_background": {"color": "palette15", "hover": "palette9"},
     "header_button_color": {"color": "palette3", "hover": "palette3"},
@@ -118,9 +121,9 @@ NASTAVENI = {
     "header_button_typography": {"size": {"desktop": 15}, "lineHeight": {"desktop": ""},
                                  "family": "inherit", "google": False,
                                  "weight": "800", "variant": "800"},
-    "mobile_button_label": "E-shop",
-    "mobile_button_link": "https://shop.budejovickymajales.cz/",
-    "mobile_button_target": "_blank",
+    "mobile_button_label": "Podpoř nás",
+    "mobile_button_link": "/podpor-nas/",
+    "mobile_button_target": "_self",
     "mobile_button_background": {"color": "palette15", "hover": "palette9"},
     "mobile_button_color": {"color": "palette3", "hover": "palette3"},
     "mobile_button_radius": {"size": [999, 999, 999, 999], "unit": "px", "locked": True},

@@ -179,6 +179,82 @@
 }
 .wp-block-latest-posts__post-date { padding: 0 18px; font-size: 14px; font-weight: 600; color: var(--global-palette5); }
 
+/* ── Rozcestník kotev ─────────────────────────────────────────── */
+/* Nahrazuje rozbalovátko, které měla stránka v menu. Sekce jsou na jedné
+   stránce pod sebou a tyhle odkazy na ně skáčou. */
+.bm-kotvy {
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.bm-kotva {
+  display: inline-block;
+  padding: 9px 18px;
+  border: 2px solid var(--global-palette3);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--global-palette3);
+  background: var(--global-palette9);
+}
+.bm-kotva:hover { background: var(--global-palette15); color: var(--global-palette3); }
+
+/* Nadpis sekce nesmí po skoku skončit pod lepivou hlavičkou. */
+.entry-content h2[id] { scroll-margin-top: 96px; }
+
+/* ── Rozbalovací otázka ───────────────────────────────────────── */
+/* Nativní <details>, žádný JavaScript. Funguje na dotek i z klávesnice
+   a prohlížeč v něm umí hledat (Ctrl+F rozbalí i zavřené odpovědi). */
+.bm-otazka {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background: var(--global-palette9);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.bm-otazka summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 52px 16px 20px;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.3;
+  position: relative;
+}
+/* Vlastní znaménko místo trojúhelníčku prohlížeče, který vypadá v každém jinak. */
+.bm-otazka summary::-webkit-details-marker { display: none; }
+.bm-otazka summary::after {
+  content: "+";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+.bm-otazka[open] summary::after { content: "–"; }
+.bm-otazka summary:hover { background: var(--global-palette15); }
+.bm-otazka summary:focus-visible {
+  outline: 3px solid var(--global-palette3);
+  outline-offset: -3px;
+}
+.bm-otazka__text { padding: 0 20px 18px; }
+.bm-otazka__text p { margin: 0; }
+
+/* Věta pro sekci, kterou tým ještě nenapsal. */
+.bm-pripravujeme {
+  padding: 16px 20px;
+  border: 2px dashed var(--global-palette6);
+  border-radius: var(--bm-radius);
+  color: var(--global-palette5);
+  font-weight: 600;
+}
+
 /* ── Hlavička ─────────────────────────────────────────────────── */
 /* Aktivní položka menu dostane žluté podtržení místo barvy textu. */
 .site-header .primary-menu-container .menu-item.current-menu-item > a {
@@ -196,6 +272,17 @@ body.home .content-area { margin-top: 0; margin-bottom: 0; }
 
 /* ── Patička ──────────────────────────────────────────────────── */
 .site-footer .site-container { padding-top: 40px; padding-bottom: 40px; }
+/* Odkazy v patičce. Partneři a GDPR nejsou v hlavním menu, tohle je
+   jediné místo na webu, odkud na ně vede odkaz. */
+.bm-paticka-odkazy {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+  margin: 0 0 14px;
+}
+.bm-paticka-odkazy a { font-weight: 700; text-decoration: none; }
+.bm-paticka-odkazy a:hover { text-decoration: underline; }
 
 /* ── Mobil ────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
