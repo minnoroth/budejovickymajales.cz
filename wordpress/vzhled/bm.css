@@ -71,7 +71,8 @@ body.home .bm-pas-hlavni {
    měnit nedal. Viz funkce hero() ve vzhled/uvod.py.
 
    Horní číslo = výška hlavičky (88 px na monitoru) plus vzduch. Kdyby se
-   měnila velikost loga nebo odsazení hlavičky, mění se i tohle. */
+   měnila velikost loga nebo odsazení hlavičky, mění se i tohle.
+
    Vodorovné odsazení tady schválně není — to má blok v inline stylu, protože
    Kadence u bloků přes celou šířku padding zleva i zprava nuluje a obyčejná
    třída to nepřebije. */

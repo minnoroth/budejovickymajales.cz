@@ -190,10 +190,25 @@ CSS_SOUBORY = ("bm.css", "bm-akce.css")
 
 
 def nacti_css():
-    """Spojí zdrojové CSS soubory do jednoho bloku pro Customizer."""
+    """Spojí zdrojové CSS soubory do jednoho bloku pro Customizer.
+
+    Cestou zkontroluje, že komentáře jsou párové. Zbylé „*/“ navíc udělá
+    z následujícího textu neplatný selektor, který spolkne pravidlo pod
+    sebou — a prohlížeč to nikde nenahlásí. Stalo se to 5. 11. 2026
+    a projevilo se to tím, že úvodní pás neměl odsazení jen na monitoru
+    (pravidla v @media blocích přežila, to pod komentářem ne).
+    """
     slozka = os.path.dirname(os.path.abspath(__file__))
-    casti = [open(os.path.join(slozka, jmeno), encoding="utf-8").read()
-             for jmeno in CSS_SOUBORY]
+    casti = []
+    for jmeno in CSS_SOUBORY:
+        obsah = open(os.path.join(slozka, jmeno), encoding="utf-8").read()
+        zacatku, koncu = obsah.count("/*"), obsah.count("*/")
+        if zacatku != koncu:
+            raise SystemExit(
+                "%s má %d× „/*“ a %d× „*/“ — nepárový komentář zruší pravidlo "
+                "pod sebou. Oprav to, nic neukládám." % (jmeno, zacatku, koncu))
+        casti.append(obsah)
+
     return "\n\n".join(casti)
 
 
