@@ -12,6 +12,16 @@
  * jednu položku bez druhu a Široko se dělí na alko a nealko.
  */
 
+/*
+ * Jen z příkazové řádky. Soubor se nahrává na server spolu se zbytkem složky
+ * a bez téhle pojistky ho kdokoli spustí přes
+ * /wp-content/mu-plugins/<doplnek>/overeni.php a dostane výpis testů.
+ * Zjištěno 5. 11. 2026 na stagingu, kde to tak opravdu bylo.
+ */
+if ( 'cli' !== PHP_SAPI ) {
+	exit;
+}
+
 define( 'ABSPATH', __DIR__ );
 
 $GLOBALS['meta'] = array();
