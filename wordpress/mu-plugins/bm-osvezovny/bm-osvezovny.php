@@ -287,8 +287,10 @@ function bm_osvezovny_polozky( $id ) {
  * Takhle vyjde Široko s Alkem a Nealkem přesně jako dnes a zbytek zůstane
  * plochým seznamem.
  *
- * Položky bez druhu jdou vždy na konec a nikdy nedostanou nadpis — nevíme,
- * jak by se jmenoval.
+ * Položky bez druhu jdou vždy na konec. Nadpis „Ostatní" dostanou jen tehdy,
+ * když nadpisy má i zbytek kartičky — jinak by visely pod poslední skupinou
+ * a vypadaly jako omylem zařazené. U kartičky bez nadpisů je to prostě
+ * plochý seznam, jako dnes.
  *
  * @param array $polozky Nabídka z bm_osvezovny_polozky().
  * @return array<int, array{popis:string, polozky:array}>
@@ -306,7 +308,14 @@ function bm_osvezovny_skupiny( $polozky ) {
 		$podle_druhu[ $druh ][] = $polozka;
 	}
 
-	$nadpisy = count( $podle_druhu ) > 1;
+	// Nabídka, která se nedělí aspoň na dva pojmenované druhy, se nechává
+	// přesně tak, jak ji tým napsal — jeden seznam v pořadí řádků. Nadpis
+	// „Nealko" nad třemi drinky nic nerozlišuje a přeskládání řádků by tým
+	// jen mátlo, protože v editoru je vidí v jiném pořadí než na webu.
+	if ( count( $podle_druhu ) < 2 ) {
+		return $polozky ? array( array( 'popis' => '', 'polozky' => $polozky ) ) : array();
+	}
+
 	$skupiny = array();
 
 	// Pevné pořadí z nabídky pole, ne pořadí, v jakém druhy padly do řádků.
@@ -315,23 +324,17 @@ function bm_osvezovny_skupiny( $polozky ) {
 		if ( empty( $podle_druhu[ $klic ] ) ) {
 			continue;
 		}
-		$skupiny[] = array(
-			'popis'   => $nadpisy ? $popis : '',
-			'polozky' => $podle_druhu[ $klic ],
-		);
+		$skupiny[] = array( 'popis' => $popis, 'polozky' => $podle_druhu[ $klic ] );
 		unset( $podle_druhu[ $klic ] );
 	}
 
 	// Druh, který v nabídce přibyl a tady ještě není. Nesmí zmizet.
 	foreach ( $podle_druhu as $klic => $radky ) {
-		$skupiny[] = array(
-			'popis'   => $nadpisy ? ucfirst( str_replace( '_', ' ', (string) $klic ) ) : '',
-			'polozky' => $radky,
-		);
+		$skupiny[] = array( 'popis' => ucfirst( str_replace( '_', ' ', (string) $klic ) ), 'polozky' => $radky );
 	}
 
 	if ( $bez_druhu ) {
-		$skupiny[] = array( 'popis' => '', 'polozky' => $bez_druhu );
+		$skupiny[] = array( 'popis' => 'Ostatní', 'polozky' => $bez_druhu );
 	}
 
 	return $skupiny;

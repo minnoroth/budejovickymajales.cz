@@ -80,13 +80,15 @@
   box-shadow: var(--bmo-stin);
 }
 
-/* Hlášení, když filtr nenechá nic. Bez něj zmizí výpis a vypadá to,
-   jako by se stránka rozbila. */
-:is(#primary, body) .bmo__nic {
-  margin: 0 0 26px;
-  font-weight: 700;
-  color: var(--bmo-seda);
-}
+/* Filtr schovává položky a kartičky přes vlastnost `hidden`. Prohlížeč na ni
+   má pravidlo [hidden] { display: none }, jenže to má váhu jedné třídy —
+   a každý selektor tady začíná :is(#primary, body), takže `display: flex`
+   níž ho přebije a schované prvky zůstanou vidět. Vypadá to, jako by filtr
+   nefungoval, přitom běží správně. Proto tohle pravidlo, a se stejným
+   prefixem, aby vyhrálo.
+   Objeveno 5. 11. 2026 na stagingu — DOM hlásil hidden = true a položky
+   se dál vykreslovaly. */
+:is(#primary, body) .bmo [hidden] { display: none; }
 
 
 /* ── Mřížka podniků ──────────────────────────────────────────────────── */
@@ -98,6 +100,11 @@
   margin: 0;
   padding: 0;
   list-style: none;
+
+  /* Bez tohohle řádku natáhne mřížka všechny kartičky v řadě na výšku té
+     nejvyšší. Podnik s jednou položkou pak vedle Široka se sedmi vypadá
+     jako rozdělaný — dvě třetiny rámečku prázdné. */
+  align-items: start;
 }
 
 :is(#primary, body) .bmo-karta {

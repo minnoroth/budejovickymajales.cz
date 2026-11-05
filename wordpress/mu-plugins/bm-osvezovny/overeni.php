@@ -149,8 +149,23 @@ zaloz( 5, array(
 	array( 'nazev' => 'Gyros',   'druh' => 'jidlo' ),
 ) );
 $skupiny = bm_osvezovny_skupiny( bm_osvezovny_polozky( 5 ) );
-tvrd( 'pořadí skupin je dané nabídkou pole', array( 'Alko', 'Jídlo', '' ), popisy( $skupiny ) );
+// Když kartička nadpisy má, musí je mít všechny skupiny. Nepojmenovaná
+// položka pod poslední skupinou vypadá, jako by tam spadla omylem.
+tvrd( 'pořadí skupin je dané nabídkou pole', array( 'Alko', 'Jídlo', 'Ostatní' ), popisy( $skupiny ) );
 tvrd( 'položka bez druhu je poslední', 'Překvapení', $skupiny[2]['polozky'][0]['nazev'] );
+
+// Opačný případ: kartička bez nadpisů je plochý seznam a „Ostatní" by v ní
+// bylo jediné slovo navíc. Tohle je Mezi plátky na dnešním webu.
+zaloz( 51, array(
+	array( 'nazev' => 'Pivo', 'druh' => 'alko' ),
+	array( 'nazev' => 'Překvapení' ),
+) );
+$plocha = bm_osvezovny_skupiny( bm_osvezovny_polozky( 51 ) );
+tvrd( 'jeden druh + nezařazené => jediný plochý seznam', array( '' ), popisy( $plocha ) );
+tvrd( 'plochý seznam drží pořadí řádků', array( 'Pivo', 'Překvapení' ), array_column( $plocha[0]['polozky'], 'nazev' ) );
+
+zaloz( 52, array( array( 'nazev' => 'Jen tohle' ) ) );
+tvrd( 'samé nezařazené => žádný nadpis', array( '' ), popisy( bm_osvezovny_skupiny( bm_osvezovny_polozky( 52 ) ) ) );
 
 
 /* ── 6. Poškozená a rozdělaná data ───────────────────────────────────── */

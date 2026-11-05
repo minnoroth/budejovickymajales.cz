@@ -54,11 +54,6 @@
 	var filtr = document.createElement('ul');
 	filtr.className = 'bmo__filtr';
 
-	var hlaska = document.createElement('p');
-	hlaska.className = 'bmo__nic';
-	hlaska.hidden = true;
-	hlaska.textContent = 'V téhle kategorii letos nic není.';
-
 	var tlacitka = [];
 
 	function prepni(vybrany) {
@@ -72,29 +67,28 @@
 
 		// Kartička bez jediné viditelné položky by zůstala jako prázdný
 		// rámeček s adresou. Schová se celá.
-		var videt = 0;
+		//
+		// Prázdný výpis tu nehlídá nic schválně: tlačítko vzniká jen pro
+		// druh, který aspoň jedna položka má, takže po kliknutí vždycky
+		// něco zbude. Hláška „nic tu není" by byla kód, který nejde vyvolat.
 		karty.forEach(function (karta) {
-			var zbylo = Array.prototype.some.call(
+			karta.hidden = !Array.prototype.some.call(
 				karta.querySelectorAll('.bmo-polozka'),
 				function (polozka) { return !polozka.hidden; }
 			);
-			karta.hidden = !zbylo;
-			if (zbylo) {
-				videt++;
-			}
 		});
 
 		// Nadpis skupiny nad schovanými položkami by visel ve vzduchu.
+		// Při zapnutém filtru mizí všechny: nadpis „Jídlo" nad jídlem,
+		// které si návštěvník sám vyfiltroval, neříká nic.
 		Array.prototype.forEach.call(koren.querySelectorAll('.bmo-karta__skupina'), function (nadpis) {
 			var dalsi = nadpis.nextElementSibling;
 			var zbylo = dalsi && Array.prototype.some.call(
 				dalsi.querySelectorAll('.bmo-polozka'),
 				function (polozka) { return !polozka.hidden; }
 			);
-			nadpis.hidden = !zbylo;
+			nadpis.hidden = vybrany !== '' || !zbylo;
 		});
-
-		hlaska.hidden = videt > 0;
 	}
 
 	function pridej(klic, popis) {
@@ -116,5 +110,4 @@
 	pritomne.forEach(function (druh) { pridej(druh[0], druh[1]); });
 
 	koren.insertBefore(filtr, seznam);
-	koren.insertBefore(hlaska, seznam);
 }());
