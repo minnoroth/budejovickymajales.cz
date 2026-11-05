@@ -47,6 +47,7 @@ poskládá stránky. Nic se nepřepisuje v kódu.
 | podívat se, kdo je přihlášený | Vstupenky (Tickets) → Přihlášení (Attendees) | [5.4](#54-kde-se-čtou-přihlášení) |
 | přidat kandidáta na krále | Králové → Přidat krále | [6](#6-přidat-krále-a-zapsat-body) |
 | zapsat body králi | Králové → Všichni králové → klik na jméno | [6.3](#63-zapsat-body) |
+| zjistit, kdo vede | Králové → Všichni králové, sloupec **Body celkem** | [6.5](#65-kde-se-pořadí-ukáže) |
 | napsat novinku | Příspěvky (Posts) → Přidat příspěvek (Add Post) | [7](#7-napsat-aktualitu) |
 | opravit text na stránce | Stránky (Pages) → Všechny stránky (All Pages) | [8](#8-upravit-text-stránky) |
 | nahrát fotky | Média (Media) → Přidat soubor (Add Media File) | [9](#9-nahrát-obrázky) |
@@ -530,9 +531,10 @@ Králové jsou kandidáti na krále Majálesu. Každý má jméno, školu, téma
 > **U krále není pole na delší text.** Je to záměr — ukazuje se jen jméno, škola, téma,
 > fotka a body. Delší bio se nikam nevejde.
 
-> V boxu **Pořadí krále** je pole **Order** s číslem. Tím se dá určit, v jakém pořadí
-> se kandidáti na webu vypíšou (nižší číslo = dřív). Když to necháš na nule, seřadí se
-> sami. Většinou to řešit nemusíš.
+> V boxu **Pořadí krále** je pole **Order** s číslem. Na webu se kandidáti řadí podle
+> bodů, takže tohle pole rozhoduje jen při **shodě bodů** — nižší číslo je výš. To se
+> hodí hlavně na začátku ročníku, kdy mají všichni nulu. Když to necháš na nule, řadí
+> se při shodě podle abecedy. Většinou to řešit nemusíš.
 
 ### 6.2 Co jsou segmenty
 
@@ -545,7 +547,8 @@ Body se nesčítají do jednoho čísla. Zapisují se po **segmentech** — po d
 | **Plnění výzev** | body za splněné výzvy |
 | **Ostatní** | cokoliv, co se nevejde do předchozích |
 
-Díky tomu je na webu vidět, odkud body přišly, ne jen celkový součet.
+Na webu se ukazuje **jen součet**. Rozpad po segmentech je pro vás — v administraci
+je vidět, odkud body přišly, a dá se opravit jen ta disciplína, ve které se spletete.
 
 ### 6.3 Zapsat body
 
@@ -568,6 +571,58 @@ se stejným segmentem by vypadaly jako chyba.
 
 Body se dají přepisovat průběžně, klidně několikrát denně. Jen nezapomeň po každé změně
 kliknout na **Aktualizovat (Update)** — jinak se nic neuloží.
+
+### 6.5 Kde se pořadí ukáže
+
+Na stránce **[/kralove/](https://novy.budejovickymajales.cz/kralove/)**. Nic tam
+nevkládáš — výpis se vykreslí sám ze zadaných kandidátů.
+
+**Co stránka dělá sama:**
+
+| | |
+|---|---|
+| Pořadí | podle součtu bodů, nejvíc nahoře. Při shodě rozhoduje pole **Order**, pak abeceda. |
+| Pruh | ukazuje poměr k vedoucímu kandidátovi, ne k součtu všech bodů. Vedoucí má vždy plný. |
+| Ročník | ukáže se nejnovější ročník, **který má kandidáty**. Rok je napsaný nad výpisem. |
+| Chybějící fotka | místo ní se ukáže první písmeno jména. Řádek se nerozsype, ale je to vidět. |
+
+**Proč ročník „který má kandidáty" a ne prostě letošní.** Ročník 2028 v Akcích vznikne
+dřív, než školy nahlásí kandidáty. Kdyby se výpis držel letošního ročníku, byla by
+stránka od ledna do března prázdná. Takhle na ní zůstane loňské konečné pořadí a rok
+nad výpisem řekne, čí je.
+
+> **Pozor na pole Škola.** Z názvu školy se skládá adresa kotvy, na kterou odkazují
+> weby škol a Instagram — `/kralove#gymji`. Kotva vznikne z názvu bez diakritiky,
+> malými písmeny, s pomlčkami místo mezer. Když školu pojmenuješ jinak než loni,
+> **starý odkaz přestane fungovat**: `Česká` dá `ceska`, ale `Gymnázium Česká` dá
+> `gymnazium-ceska`. Dva kandidáti ze stejné školy jsou v pořádku — druhý dostane
+> kotvu s dvojkou na konci.
+
+**Názvy škol, na které se odkazuje ze starého webu.** Piš je přesně takhle, jinak
+odkazy přestanou mířit na kandidáta:
+
+| Napiš do pole Škola | Vznikne kotva |
+|---|---|
+| GYMJI | `gymji` |
+| GJVJ | `gjvj` |
+| ČAG | `cag` |
+| BIGY | `bigy` |
+| ČRG | `crg` |
+| Zdrávka | `zdravka` |
+| Dukelská | `dukelska` |
+| Vakantis | `vakantis` |
+| OACB | `oacb` |
+| Stavárna | `stavarna` |
+| SŠIPS | `ssips` |
+| SPŠAUTO | `spsauto` |
+| Česká | `ceska` |
+| Husova 9 | `husova-9` |
+
+Nová škola v seznamu chybět může — kotvu dostane taky, jen na ni zatím nikdo
+neodkazuje.
+
+**V administraci** má seznam **Králové** sloupec **Body celkem** se součtem. Dá se podle
+něj kliknutím seřadit, takže je hned vidět, kdo vede.
 
 ---
 

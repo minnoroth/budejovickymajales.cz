@@ -40,6 +40,7 @@ add_action( 'added_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'updated_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'deleted_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'admin_init', 'bm_kralove_dopocitat_chybejici' );
+add_action( 'wp_enqueue_scripts', 'bm_kralove_zarad_predem' );
 add_shortcode( 'bm_kralove', 'bm_kralove_zkratka' );
 
 add_filter( 'manage_' . BM_KRALOVE_TYP . '_posts_columns', 'bm_kralove_sloupec' );
@@ -353,6 +354,33 @@ function bm_kralove_kotva( $skola, &$obsazene ) {
 }
 
 /**
+ * Zařadí styl. Volá se ze dvou míst ze stejného důvodu jako u programu:
+ * z wp_enqueue_scripts, aby se CSS stihlo do hlavičky a stránka neproblikla,
+ * a ze zkratky kvůli umístění mimo obsah stránky (widget, šablona).
+ *
+ * @return void
+ */
+function bm_kralove_zarad() {
+	$soubor = plugin_dir_path( __FILE__ ) . 'kralove.css';
+	$verze  = file_exists( $soubor ) ? (string) filemtime( $soubor ) : '1.0.0';
+
+	wp_enqueue_style( 'bm-kralove', plugins_url( 'kralove.css', __FILE__ ), array(), $verze );
+}
+
+/**
+ * Styl se zařadí jen na stránce, která zkratku opravdu obsahuje.
+ *
+ * @return void
+ */
+function bm_kralove_zarad_predem() {
+	$prispevek = get_post();
+
+	if ( $prispevek instanceof WP_Post && has_shortcode( $prispevek->post_content, 'bm_kralove' ) ) {
+		bm_kralove_zarad();
+	}
+}
+
+/**
  * Vypíše žebříček kandidátů.
  *
  * Atributy:
@@ -367,6 +395,8 @@ function bm_kralove_zkratka( $atributy = array() ) {
 		'rocnik' => '',
 		'pocet'  => 0,
 	), $atributy, 'bm_kralove' );
+
+	bm_kralove_zarad();
 
 	$rocnik = bm_kralove_rocnik( (string) $a['rocnik'] );
 	if ( ! $rocnik ) {
@@ -393,9 +423,9 @@ function bm_kralove_zkratka( $atributy = array() ) {
 		$polozky .= bm_kralove_polozka( $radek, $index + 1, $nejvic, $obsazene );
 	}
 
-	return '<section class="bm-kralove">'
-		. '<p class="bm-kralove__rocnik">Průběžné pořadí — ročník ' . esc_html( $rocnik->name ) . '</p>'
-		. '<ol class="bm-kralove__seznam" itemscope itemtype="https://schema.org/ItemList">'
+	return '<section class="bmk">'
+		. '<p class="bmk__rocnik">Průběžné pořadí — ročník ' . esc_html( $rocnik->name ) . '</p>'
+		. '<ol class="bmk__seznam" itemscope itemtype="https://schema.org/ItemList">'
 		. $polozky
 		. '</ol></section>';
 }
@@ -424,7 +454,7 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 		// Prázdné místo by rozhodilo řádek. Písmeno drží rozměr a je vidět,
 		// že fotka chybí — návod na to tým upozorňuje.
 		$pismeno = mb_substr( wp_strip_all_tags( get_the_title( $id ) ), 0, 1 );
-		$foto    = '<span class="bm-kral__bezfotky" aria-hidden="true">' . esc_html( $pismeno ) . '</span>';
+		$foto    = '<span class="bmk-kral__bezfotky" aria-hidden="true">' . esc_html( $pismeno ) . '</span>';
 	}
 
 	$popis = esc_html( $skola );
@@ -432,16 +462,16 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 		$popis = '<strong>' . esc_html( $skola ) . '</strong> — <em>' . esc_html( $tema ) . '</em>';
 	}
 
-	return '<li class="bm-kral" id="' . esc_attr( $kotva ) . '"'
+	return '<li class="bmk-kral" id="' . esc_attr( $kotva ) . '"'
 		. ' itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">'
-		. '<span class="bm-kral__poradi" aria-hidden="true">' . esc_html( (string) $poradi ) . '.</span>'
-		. '<span class="bm-kral__foto">' . $foto . '</span>'
-		. '<span class="bm-kral__info">'
-		. '<span class="bm-kral__jmeno" itemprop="name">' . esc_html( get_the_title( $id ) ) . '</span>'
-		. '<span class="bm-kral__skola" itemprop="description">' . $popis . '</span>'
-		. '<span class="bm-kral__graf">'
-		. '<span class="bm-kral__pruh" style="width:' . esc_attr( $sirka ) . '%" aria-hidden="true"></span>'
-		. '<span class="bm-kral__body">' . esc_html( number_format_i18n( $radek['body'] ) ) . ' b.</span>'
+		. '<span class="bmk-kral__poradi" aria-hidden="true">' . esc_html( (string) $poradi ) . '.</span>'
+		. '<span class="bmk-kral__foto">' . $foto . '</span>'
+		. '<span class="bmk-kral__info">'
+		. '<span class="bmk-kral__jmeno" itemprop="name">' . esc_html( get_the_title( $id ) ) . '</span>'
+		. '<span class="bmk-kral__skola" itemprop="description">' . $popis . '</span>'
+		. '<span class="bmk-kral__graf">'
+		. '<span class="bmk-kral__pruh" style="width:' . esc_attr( $sirka ) . '%" aria-hidden="true"></span>'
+		. '<span class="bmk-kral__body">' . esc_html( number_format_i18n( $radek['body'] ) ) . ' b.</span>'
 		. '</span></span>'
 		. '<meta itemprop="position" content="' . esc_attr( (string) $poradi ) . '">'
 		. '<meta itemprop="url" content="' . esc_url( get_permalink() . '#' . $kotva ) . '">'
@@ -454,7 +484,7 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
  * @return string
  */
 function bm_kralove_prazdno() {
-	return '<section class="bm-kralove bm-kralove--prazdno">'
+	return '<section class="bmk bmk--prazdno">'
 		. '<p>Kandidáty teprve sbíráme. Jakmile je školy nahlásí, objeví se tady '
 		. 'průběžné pořadí i s body.</p></section>';
 }

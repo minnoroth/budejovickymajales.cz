@@ -12,6 +12,7 @@ Proč je co takhle a kde se to mění klikáním popisuje
 | `menu.py` | založí hlavní menu (spustit jen jednou) |
 | `uvod.py` | obsah úvodní stránky |
 | `program.py` | obsah stránky Program |
+| `kralove.py` | obsah stránky Králové |
 | `oriznout-logo.py` | ořízne průhledný rám loga pro hlavičku (potřebuje Pillow) |
 | `pripojeni.py` | společné přihlášení, REST a zápis do Customizeru |
 
