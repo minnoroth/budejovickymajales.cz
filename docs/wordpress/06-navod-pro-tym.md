@@ -357,16 +357,35 @@ Popsáno v [kroku 11–13](#25-žánr-a-kategorie). Ve zkratce: v boxu **Kategor
 > *Venkovní scéna*, jednou pod *Vnitřní scéna*. Podívej se na odsazení a vyber ten,
 > který odpovídá scéně.
 
-### 4.3 Proč je barva u kategorie a ne u žánru
+### 4.3 Odkud se bere barva kategorie
 
-Každá kategorie má svou barvu. V programu se podle ní barevně odlišují kartičky akcí,
-takže návštěvník na první pohled pozná hudbu od divadla.
+V programu se akce barevně odlišují podle kategorie, takže návštěvník na první pohled
+pozná hudbu od divadla. Šest největších kategorií má svou barvu, zbytek je neutrálně
+šedý.
 
-Kdyby barvu měl každý žánr zvlášť, bylo by na stránce přes čtyřicet barev. Z barevného
-systému by se stal zmatek a nikdo by si nic nespojil. **Devět barev si člověk zapamatuje,
-čtyřicet ne.**
+| Kategorie | Barva |
+|---|---|
+| Hudba | zelenomodrá |
+| Divadlo | levandulová |
+| Filmy | žlutá |
+| Volba krále | korálová |
+| Venkovní scéna | svěží zelená |
+| Vnitřní scéna | tlumená růžová |
+| Online, Studentské promítání, Program pro nejmenší | šedá |
 
-Proto: **žánry barvu nemají, dědí ji po své kategorii.** Nehledej u žánru barvu, není tam.
+**Barvu nenastavuješ ty a nenajdeš ji u kategorie.** U kategorie sice je pole *Barva*,
+ale je prázdné a má zůstat prázdné. Barvy se počítají z palety ročníku (Vzhled →
+Přizpůsobit → Barvy), takže když se příští ročník přebarví web, přebarví se program
+s ním. Kdyby barva byla uložená u kategorie, zůstal by program v loňských barvách
+a nikdo by nevěděl proč.
+
+Změnit barvu jedné kategorie proto znamená zásah do souboru `program.css` — to už je
+práce pro někoho, kdo umí CSS. Přebarvit **celý web** naopak zvládneš sám: je to patnáct
+polí ve Vzhled → Přizpůsobit → Barvy a program se přebarví s ním.
+
+Žánry barvu nemají a mít nebudou — kdyby ji měl každý zvlášť, bylo by na stránce přes
+čtyřicet barev a z barevného systému by se stal zmatek. **Žánr dědí barvu po své
+kategorii.**
 
 ### 4.4 Kdy založit nový žánr
 

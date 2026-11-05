@@ -64,10 +64,16 @@
    a must-use doplněk bm-rubriky.php hlídá, že akce se žánrem má
    vždycky i nadřazenou kategorii. Na tyhle třídy se dá spolehnout.
 
-   Barvy ročníku jsou čtyři, obsahových kategorií šest. Pět jich
-   tedy má vlastní barvu a zbytek (obě scény, Online, akce bez
-   kategorie) je černý. Vědomý kompromis, ne opomenutí —
-   zdůvodnění v docs/wordpress/10-vypis-akci-navrh.md.
+   TOTOŽNÁ TABULKA je v mu-plugins/bm-program/bm-program/program.css.
+   Stránka Program a tenhle výpis musí ukazovat stejnou barvu u stejné
+   kategorie; když se jedna mění, mění se obě. Dřív se rozešly a nikdo
+   si toho nevšiml, protože se vedle sebe nikdy nezobrazí.
+
+   Barvy ročníku jsou čtyři, kategorií devět. Čtyři sedí přímo na slotu,
+   dvě vznikají mícháním dvou slotů — i ty projdou rebrandingem, protože
+   color-mix() se počítá z aktuální palety. Zbylé tři (Online, Studentské
+   promítání, akce bez kategorie) jsou černé; v programu 2026 nemají ani
+   jedno vystoupení.
 
    Text je na každé barvě černý kromě tmavé zelenomodré a černé,
    kde by měl kontrast 3,5 : 1 a neprošel by.
@@ -99,6 +105,29 @@
 :is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-program-pro-nejmensi)) {
   --bm-kat: var(--global-palette2);
   --bm-kat-text: var(--global-palette9);
+}
+/* Obě scény jsou dohromady 36 ze 101 vystoupení — na černou je jich
+   moc. Hex je záloha pro Safari pod 16.2, které color-mix() neumí;
+   @supports níž ho nahradí výpočtem z palety. */
+:is(#primary, body) .tribe-events .tribe_events_cat-venkovni-scena,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-venkovni-scena)) {
+  --bm-kat: #A1CC78;
+  --bm-kat-text: var(--global-palette3);
+}
+:is(#primary, body) .tribe-events .tribe_events_cat-vnitrni-scena,
+:is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-vnitrni-scena)) {
+  --bm-kat: #CF96AA;
+  --bm-kat-text: var(--global-palette3);
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  :is(#primary, body) .tribe-events .tribe_events_cat-venkovni-scena,
+  :is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-venkovni-scena)) {
+    --bm-kat: color-mix(in srgb, var(--global-palette1) 40%, var(--global-palette15));
+  }
+  :is(#primary, body) .tribe-events .tribe_events_cat-vnitrni-scena,
+  :is(#primary, body) :is(.tribe-events-single:has(.tribe_events_cat-vnitrni-scena)) {
+    --bm-kat: color-mix(in srgb, var(--global-palette14) 55%, var(--global-palette10));
+  }
 }
 /* Volba krále je korálová i na úvodní stránce. Stojí schválně až
    tady: když akce spadne do dvou barevných kategorií, vyhraje

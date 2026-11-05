@@ -64,28 +64,42 @@
   --bmp-stin-s: 3px 3px 0 var(--bmp-cerna);
 
   /* ── Barvy kategorií ──────────────────────────────────────────────── */
-  /* Zdroj barvy je kaskáda: pole „Barva" u kategorie akce (SCF color
-     picker, skript ho dosadí jako inline styl) → tahle tabulka → šedá.
-     Tabulka je tedy jen záchrana pro kategorii s prázdným polem.
+  /* Zdroj barvy kategorie je TATO TABULKA, ne databáze. Pole „Barva"
+     u kategorie je dnes prázdné u všech devíti a má zůstat prázdné:
+     kdyby v něm byl hex, skript ho dosadí jako inline styl a přebije
+     paletu. Příští ročník by pak přepsal paletu v Customizeru a program
+     by mu zůstal v loňských barvách, aniž by mu to kdo řekl. Proto je
+     barva odvozená z palety a ne uložená vedle ní.
 
-     Přiřazení sedí na to, co dnes v polích „Barva" doopravdy je:
-     Hudba #1EA198 = slot 1, Divadlo #EE7270 = slot 10, Filmy #B6B4DA
-     = slot 14, Venkovní scéna #F8E862 = slot 15. Pozor, bm-akce.css
-     (výpis akcí) má Divadlo a Filmy prohozené — je to starší volba,
-     která se s poli „Barva" rozešla. Když se to bude sjednocovat, patří
-     oprava do polí a do obou souborů naráz.
+     Čtyři kategorie sedí přímo na slotu, dvě vznikají mícháním dvou
+     slotů. Míchané taky projdou rebrandingem — color-mix() se počítá
+     v prohlížeči z aktuální palety, není to zamrzlý hex.
 
-     Vnitřní scéna a Volba krále žádný slot v paletě nemají; jsou to
-     světlé odstíny slotů 1 a 10, takže rebranding palety je protáhne
-     s sebou. Text na kategorii je vždycky černý, proto tu nesmí přistát
-     tmavý slot (2 ani 3). */
-  --bmp-kat-hudba:          var(--bmp-hlavni);
-  --bmp-kat-divadlo:        var(--bmp-koral);
-  --bmp-kat-filmy:          var(--bmp-levandulova);
-  --bmp-kat-venkovni-scena: var(--bmp-zluta);
-  --bmp-kat-vnitrni-scena:  var(--bmp-hlavni);
-  --bmp-kat-volba-krale:    var(--bmp-koral);
-  --bmp-kat-vychozi:        var(--bmp-svetla);
+        Hudba                 slot 1              #1EA198  zelenomodrá
+        Divadlo               slot 14             #B6B4DA  levandulová
+        Filmy                 slot 15             #F8E862  žlutá
+        Volba krále           slot 10             #EE7270  korálová
+        Venkovní scéna        40 % s1 + 60 % s15  #A1CC78  svěží zelená
+        Vnitřní scéna         55 % s14 + 45 % s10 #CF96AA  tlumená růžová
+        Program pro nejmenší  slot 2              #0C6F69  tmavá → bílý text
+
+     Proč zrovna šest barev: Hudba je 42 ze 101 vystoupení, obě scény
+     dalších 36. Kdyby scény zůstaly šedé, je čtvrtek v časové ose skoro
+     jednobarevný (ověřeno na datech 2026). Online, Studentské promítání
+     a akce bez kategorie zůstávají neutrální — v programu 2026 nemají
+     ani jedno vystoupení.
+
+     Kontrast černého textu na barvě: 5,89 / 9,39 / 14,91 / 6,49 / 10,19
+     / 7,67. Slot 2 má na černé jen 3,12, proto jediný dostává bílý text
+     přes --kat-text. Tmavý slot s černým textem = nečitelný blok osy. */
+  --bmp-kat-hudba:       var(--bmp-hlavni);
+  --bmp-kat-divadlo:     var(--bmp-levandulova);
+  --bmp-kat-filmy:       var(--bmp-zluta);
+  --bmp-kat-volba-krale: var(--bmp-koral);
+  --bmp-kat-nejmensi:    var(--bmp-hlavni-tmav);
+  --bmp-kat-venkovni:    #A1CC78;   /* záloha bez color-mix(), viz @supports níž */
+  --bmp-kat-vnitrni:     #CF96AA;
+  --bmp-kat-vychozi:     var(--bmp-svetla);
 
   /* Světlé pozadí karty ve „Mém programu" a vlasová linka. */
   --bmp-moje-pozadi: var(--bmp-nejsvetlejsi);
@@ -105,22 +119,26 @@
    vyšly průhledné. */
 @supports (color: color-mix(in srgb, red, blue)) {
   :is(#primary, body) .bmp {
-    --bmp-kat-vnitrni-scena: color-mix(in srgb, var(--bmp-hlavni) 50%, var(--bmp-bila));
-    --bmp-kat-volba-krale:   color-mix(in srgb, var(--bmp-koral) 60%, var(--bmp-bila));
-    --bmp-kat-vychozi:       color-mix(in srgb, var(--bmp-svetla) 80%, var(--bmp-linka));
+    --bmp-kat-venkovni: color-mix(in srgb, var(--bmp-hlavni) 40%, var(--bmp-zluta));
+    --bmp-kat-vnitrni:  color-mix(in srgb, var(--bmp-levandulova) 55%, var(--bmp-koral));
+    --bmp-kat-vychozi:  color-mix(in srgb, var(--bmp-svetla) 80%, var(--bmp-linka));
     --bmp-moje-pozadi:       color-mix(in srgb, var(--bmp-zluta) 12%, var(--bmp-bila));
     --bmp-vlasova:           color-mix(in srgb, var(--bmp-linka) 45%, var(--bmp-bila));
   }
 }
 
-/* Barvu kategorie nese jediná proměnná --kat. Nastaví ji buď tahle
-   tabulka podle slugu, nebo skript inline podle pole „Barva". */
-:is(#primary, body) .bmp [data-kat="hudba"]          { --kat: var(--bmp-kat-hudba); }
-:is(#primary, body) .bmp [data-kat="divadlo"]        { --kat: var(--bmp-kat-divadlo); }
-:is(#primary, body) .bmp [data-kat="filmy"]          { --kat: var(--bmp-kat-filmy); }
-:is(#primary, body) .bmp [data-kat="venkovni-scena"] { --kat: var(--bmp-kat-venkovni-scena); }
-:is(#primary, body) .bmp [data-kat="vnitrni-scena"]  { --kat: var(--bmp-kat-vnitrni-scena); }
-:is(#primary, body) .bmp [data-kat="volba-krale"]    { --kat: var(--bmp-kat-volba-krale); }
+/* Barvu kategorie nese proměnná --kat, barvu nápisu na ní --kat-text.
+   Nastavuje je tahle tabulka podle slugu. Kdyby někdo vyplnil pole
+   „Barva", skript ji dosadí inline a tohle přebije — viz komentář
+   u tabulky výš, proč to není žádoucí. */
+:is(#primary, body) .bmp [data-kat="hudba"]                { --kat: var(--bmp-kat-hudba); }
+:is(#primary, body) .bmp [data-kat="divadlo"]              { --kat: var(--bmp-kat-divadlo); }
+:is(#primary, body) .bmp [data-kat="filmy"]                { --kat: var(--bmp-kat-filmy); }
+:is(#primary, body) .bmp [data-kat="volba-krale"]          { --kat: var(--bmp-kat-volba-krale); }
+:is(#primary, body) .bmp [data-kat="venkovni-scena"]       { --kat: var(--bmp-kat-venkovni); }
+:is(#primary, body) .bmp [data-kat="vnitrni-scena"]        { --kat: var(--bmp-kat-vnitrni); }
+:is(#primary, body) .bmp [data-kat="program-pro-nejmensi"] { --kat: var(--bmp-kat-nejmensi);
+                                                             --kat-text: var(--bmp-bila); }
 
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -308,7 +326,7 @@
   background: var(--bmp-cerna); color: var(--bmp-bila);
 }
 :is(#primary, body) .bmp .bmp-chip--kat[aria-pressed="true"] {
-  background: var(--kat, var(--bmp-kat-vychozi)); color: var(--bmp-cerna);
+  background: var(--kat, var(--bmp-kat-vychozi)); color: var(--kat-text, var(--bmp-cerna));
 }
 :is(#primary, body) .bmp .bmp-chip__tecka {
   display: inline-block; width: 10px; height: 10px; border-radius: 50%;
@@ -358,7 +376,7 @@
 :is(#primary, body) .bmp .bmp-celoden__pas {
   cursor: pointer;
   border: var(--bmp-ramecek); border-radius: var(--bmp-radius-s);
-  background: var(--kat, var(--bmp-kat-vychozi));
+  background: var(--kat, var(--bmp-kat-vychozi)); color: var(--kat-text, var(--bmp-cerna));
   padding: 8px 14px; font-weight: 800; font-size: 14px;
 }
 :is(#primary, body) .bmp .bmp-celoden__pas small { display: block; font-weight: 600; font-size: 12px; }
@@ -432,7 +450,7 @@
 :is(#primary, body) .bmp .bmp-osa__blok {
   position: absolute; left: 3px; right: 3px; cursor: pointer;
   border: 2px solid var(--bmp-cerna); border-radius: 8px;
-  background: var(--kat, var(--bmp-kat-vychozi));
+  background: var(--kat, var(--bmp-kat-vychozi)); color: var(--kat-text, var(--bmp-cerna));
   padding: 5px 7px; overflow: hidden;
   font-size: 12.5px; font-weight: 800; line-height: 1.16;
   display: flex; flex-direction: column; gap: 2px;
@@ -506,7 +524,7 @@
   border: 1.5px solid var(--bmp-cerna); background: var(--bmp-bila);
   text-transform: uppercase; letter-spacing: .03em; color: var(--bmp-cerna);
 }
-:is(#primary, body) .bmp .bmp-stitek--kat   { background: var(--kat, var(--bmp-kat-vychozi)); }
+:is(#primary, body) .bmp .bmp-stitek--kat   { background: var(--kat, var(--bmp-kat-vychozi)); color: var(--kat-text, var(--bmp-cerna)); }
 :is(#primary, body) .bmp .bmp-stitek--rez   { background: var(--bmp-zluta); }
 :is(#primary, body) .bmp .bmp-stitek--ted   { background: var(--bmp-koral); color: var(--bmp-bila); border-color: var(--bmp-koral); }
 :is(#primary, body) .bmp .bmp-stitek--kolize { background: var(--bmp-koral); color: var(--bmp-bila); }
