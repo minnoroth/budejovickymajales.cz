@@ -21,13 +21,14 @@
  * a přihlášení, což je přesně ta registrace, kterou festival nechce.
  *
  * Co se stane, když se tenhle soubor smaže:
- * Rezervace fungují dál přesně jako dnes, jen se přestanou posílat odhlašovací
- * odkazy a rezervace zase ruší pořadatel v administraci. Odkazy v už odeslaných
- * e-mailech přestanou fungovat (ukáže se běžná úvodní stránka). Nic se nerozbije —
- * doplněk nic nenahrazuje, jen přidává vrstvu navíc.
+ * Rezervace fungují dál přesně jako dnes, jen z potvrzovacího e-mailu zmizí
+ * odhlašovací odkaz a rezervace zase ruší pořadatel v administraci. Potvrzení
+ * samo chodí dál, protože ho posílá Event Tickets, ne tenhle doplněk. Odkazy
+ * v už odeslaných e-mailech přestanou fungovat (ukáže se běžná úvodní stránka).
+ * Nic se nerozbije — doplněk nic nenahrazuje, jen přidává vrstvu navíc.
  *
  * Na čem z Event Tickets to visí (grep na „EVENT TICKETS" najde všechna místa):
- *   1) akce  tec_tickets_commerce_attendee_after_create    — vznikl účastník
+ *   1) filtr tec_tickets_emails_rsvp_template_args         — obsah potvrzení
  *   2) data  typy příspěvků a meta klíče Tickets Commerce  — viz blok konstant níž
  *   3) volání TEC\Tickets\Commerce\Order::modify_status()  — zrušení objednávky,
  *      které vrátí místo do kapacity a uklidí účastníky
@@ -93,9 +94,8 @@ const BM_REZERVACE_META_KUPUJICI_KRESTNI = '_tec_tc_order_purchaser_first_name';
 const BM_REZERVACE_META_KUPUJICI_PRIJMENI = '_tec_tc_order_purchaser_last_name';
 const BM_REZERVACE_META_KUPUJICI_EMAIL   = '_tec_tc_order_purchaser_email';
 
-// Vlastní značky doplňku na objednávce. Osobní údaj v nich není.
-const BM_REZERVACE_META_ODESLANO = '_bm_odkaz_odeslan';
-const BM_REZERVACE_META_ZRUSENO  = '_bm_zruseno_navstevnikem';
+// Vlastní značka doplňku na objednávce. Osobní údaj v ní není.
+const BM_REZERVACE_META_ZRUSENO = '_bm_zruseno_navstevnikem';
 
 // Čím se nahradí jméno kupujícího po zrušení.
 const BM_REZERVACE_ANONYM = 'Rezervace zrušena návštěvníkem';
@@ -152,98 +152,119 @@ function bm_rezervace_odkaz( $id_objednavky ) {
 
 
 /* ──────────────────────────────────────────────────────────────────────────
-   2. Vlastní e-mail s odkazem
+   2. Odkaz v potvrzovacím e-mailu
 
-   Posílá se VEDLE potvrzení od Event Tickets, ne místo něj a ne do něj.
-   Vkládat odkaz filtrem do cizí e-mailové šablony by znamenalo viset na její
-   struktuře, a ta se mezi verzemi mění mnohem ochotněji než hooky. Cenou jsou
-   dva e-maily místo jednoho; proto je ten náš krátký a v předmětu říká, k čemu je.
+   Odkaz se přidává DO potvrzení, které posílá Event Tickets, ne vedle něj.
+   Dva e-maily naráz od stejného odesílatele o stejné akci nejdou rozlišit —
+   návštěvník za tři týdny neví, ve kterém z nich odkaz hledat.
 
-   Odesílá se přes wp_mail(), takže jakmile se na webu nastaví SMTP (etapa 0),
-   začne chodit správnou cestou bez zásahu do tohohle souboru.
+   Nejde o zásah do šablony. Event Tickets má na „obsah navíc" vlastní filtr
+   a vykresluje ho sám (views/emails/rsvp/body.php volá template-parts/body/
+   additional-content). Nekopíruje se sem žádná šablona pluginu.
+
+   Proč zrovna `tec_tickets_emails_rsvp_template_args` a ne
+   `tec_tickets_emails_rsvp_additional_content`:
+
+     Nastavení „Use ticket email settings" je u RSVP ve výchozím stavu ZAPNUTÉ
+     (Email/RSVP.php: tribe_get_option( …'use-ticket-email', true )). Při něm si
+     e-mail vezme obsah navíc od e-mailu Ticket, takže filtr …_rsvp_additional_content
+     se vůbec nespustí. Filtr nad template_args běží až potom, co se obsah vybral
+     z jedné nebo druhé větve, takže funguje v obou. Ověřeno ve zdrojovém kódu
+     Event Tickets 5.30.2 (Emails/Email_Abstract.php: get_template_context()).
    ────────────────────────────────────────────────────────────────────────── */
 
-// EVENT TICKETS 1/3: akce, kterou plugin spouští po vzniku každého účastníka.
-// Priorita 100 je schválně vysoká — plugin si na stejné akci v prioritě 10
-// teprve zapisuje, jestli účastník přijde, nebo nepřijde.
-add_action( 'tec_tickets_commerce_attendee_after_create', 'bm_rezervace_poslat_odkaz', 100, 2 );
+// EVENT TICKETS 1/3: filtr nad podklady pro potvrzovací e-mail k rezervaci.
+add_filter( 'tec_tickets_emails_rsvp_template_args', 'bm_rezervace_doplnit_odkaz', 20, 4 );
 
 /**
- * Pošle návštěvníkovi e-mail s odhlašovacím odkazem.
+ * Přidá odhlašovací odkaz do potvrzovacího e-mailu k rezervaci.
  *
- * @param mixed $ucastnik   Příspěvek nově vzniklého účastníka.
- * @param mixed $objednavka Příspěvek objednávky, ke které patří.
+ * Když se objednávka nedá určit — typicky v náhledu e-mailu v administraci,
+ * kde žádná není — vrací podklady beze změny. Náhled tím zůstane funkční.
+ *
+ * @param array  $args     Podklady pro šablonu e-mailu.
+ * @param string $id       Identifikátor e-mailu.
+ * @param string $sablona  Název šablony.
+ * @param mixed  $email    Objekt e-mailu.
+ * @return array
  */
-function bm_rezervace_poslat_odkaz( $ucastnik, $objednavka ) {
-	if ( ! $ucastnik instanceof WP_Post || ! $objednavka instanceof WP_Post ) {
-		return;
+function bm_rezervace_doplnit_odkaz( $args, $id = '', $sablona = '', $email = null ) {
+	if ( ! is_array( $args ) || ! is_object( $email ) || ! method_exists( $email, 'get' ) ) {
+		return $args;
 	}
 
-	if ( BM_REZERVACE_OBJEDNAVKA !== $objednavka->post_type ) {
-		return;
+	$id_objednavky = bm_rezervace_objednavka_z_emailu( $email );
+
+	if ( ! $id_objednavky ) {
+		return $args;
 	}
 
-	// Placené lístky se takhle rušit nesmí, jen bezplatné rezervace.
-	if ( ! bm_rezervace_je_rsvp( $ucastnik->ID ) ) {
-		return;
+	// Placené lístky se takhle rušit nesmí a odpověď „Nepřijdu" se nemá
+	// z čeho odhlašovat.
+	$ucastnici = bm_rezervace_ucastnici( $id_objednavky );
+
+	if ( ! $ucastnici || ! bm_rezervace_je_rsvp( $ucastnici[0] ) ) {
+		return $args;
 	}
 
-	// Odpověď „Nepřijdu" se nemá z čeho odhlašovat.
-	if ( 'no' === get_post_meta( $ucastnik->ID, BM_REZERVACE_META_RSVP, true ) ) {
-		return;
+	if ( ! bm_rezervace_pocet_mist( $ucastnici ) ) {
+		return $args;
 	}
 
-	// Jedna objednávka = jeden e-mail, i když má víc míst a akce se spustí
-	// pro každé z nich zvlášť.
-	if ( get_post_meta( $objednavka->ID, BM_REZERVACE_META_ODESLANO, true ) ) {
-		return;
+	$odkaz = bm_rezervace_odkaz( $id_objednavky );
+
+	$text = '<p>' . esc_html__( 'Kdyby ti to nevyšlo, dej nám prosím vědět tímhle odkazem a místo se uvolní někomu dalšímu:', 'bm' ) . '</p>'
+		. '<p><a href="' . esc_url( $odkaz ) . '">' . esc_html( $odkaz ) . '</a></p>'
+		. '<p>' . esc_html__( 'Odkaz ruší celou rezervaci, i když sis zamluvil víc míst. Je jen pro tebe, neposílej ho dál. Nic se nezruší hned — na stránce, která se otevře, to ještě jednou potvrdíš tlačítkem.', 'bm' ) . '</p>';
+
+	$puvodni = isset( $args['additional_content'] ) ? (string) $args['additional_content'] : '';
+
+	$args['additional_content'] = $puvodni . $text;
+
+	return $args;
+}
+
+/**
+ * Vytáhne z objektu e-mailu ID objednávky.
+ *
+ * Odesílač rezervací plní e-mailu klíč „tickets" polem účastníků a u účastníka
+ * je objednávka nadřazeným příspěvkem (Commerce/Emails/RSVP_Email_Sender.php).
+ *
+ * @param object $email Objekt e-mailu Event Tickets.
+ * @return int ID objednávky, nebo 0.
+ */
+function bm_rezervace_objednavka_z_emailu( $email ) {
+	$listky = $email->get( 'tickets' );
+
+	if ( ! is_array( $listky ) ) {
+		return 0;
 	}
 
-	$email = bm_rezervace_cist( $ucastnik->ID, BM_REZERVACE_META_EMAIL );
-	if ( ! is_email( $email ) ) {
-		$email = bm_rezervace_cist( $objednavka->ID, BM_REZERVACE_META_KUPUJICI_EMAIL );
+	foreach ( $listky as $listek ) {
+		$id_ucastnika = 0;
+
+		if ( is_array( $listek ) && isset( $listek['attendee_id'] ) ) {
+			$id_ucastnika = (int) $listek['attendee_id'];
+		}
+
+		if ( ! $id_ucastnika ) {
+			continue;
+		}
+
+		$ucastnik = get_post( $id_ucastnika );
+
+		if ( ! $ucastnik instanceof WP_Post || BM_REZERVACE_UCASTNIK !== $ucastnik->post_type ) {
+			continue;
+		}
+
+		$id_objednavky = (int) $ucastnik->post_parent;
+
+		if ( $id_objednavky && BM_REZERVACE_OBJEDNAVKA === get_post_type( $id_objednavky ) ) {
+			return $id_objednavky;
+		}
 	}
 
-	if ( ! is_email( $email ) ) {
-		return;
-	}
-
-	// Značka se zapisuje před odesláním — jeden pokus na objednávku. Jinak by
-	// se při chybě odesílání zkoušelo dokola u každého dalšího místa.
-	update_post_meta( $objednavka->ID, BM_REZERVACE_META_ODESLANO, current_time( 'mysql' ) );
-
-	$jmeno   = bm_rezervace_cist( $ucastnik->ID, BM_REZERVACE_META_JMENO );
-	$id_akce = (int) get_post_meta( $ucastnik->ID, BM_REZERVACE_META_AKCE, true );
-	$akce    = $id_akce ? get_the_title( $id_akce ) : get_bloginfo( 'name' );
-
-	$radky = array(
-		$jmeno ? sprintf( 'Ahoj %s,', $jmeno ) : 'Ahoj,',
-		'',
-		sprintf( 'máme tvoji rezervaci na akci %s. Potvrzení s podrobnostmi chodí v samostatném e-mailu.', $akce ),
-		'',
-		'Kdyby ti to nevyšlo, dej nám prosím vědět tímhle odkazem a místo se uvolní někomu dalšímu:',
-		'',
-		bm_rezervace_odkaz( $objednavka->ID ),
-		'',
-		'Odkaz ruší celou rezervaci, i když sis zamluvil víc míst. Je jen pro tebe,'
-			. ' neposílej ho dál. Nic se nezruší hned — na stránce, která se otevře,'
-			. ' to ještě jednou potvrdíš tlačítkem.',
-		'',
-		'Díky a těšíme se,',
-		'Budějovický Majáles',
-	);
-
-	$odeslano = wp_mail(
-		$email,
-		sprintf( 'Rezervace na %s — odkaz pro zrušení', $akce ),
-		implode( "\r\n", $radky ),
-		array( 'Content-Type: text/plain; charset=UTF-8' )
-	);
-
-	// Do logu jen čísla, žádná jména ani adresy — log čte i hosting.
-	if ( ! $odeslano ) {
-		error_log( sprintf( 'bm-rezervace: odhlašovací odkaz se nepodařilo odeslat, objednávka ID %d', (int) $objednavka->ID ) );
-	}
+	return 0;
 }
 
 

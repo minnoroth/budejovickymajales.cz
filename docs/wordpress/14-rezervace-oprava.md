@@ -83,8 +83,11 @@ v datech webu, ne ve zdrojáku. Tady stačil jeden dotaz na REST API.
 
 **Co z nálezu 4 platí dál:**
 
-- „Do e-mailové šablony sahat nemusíme, vlastní e-mail se pošle vedle toho od pluginu
-  přes `wp_mail()`." — platí beze změny, jen se věší na jinou akci.
+- „Do e-mailové šablony sahat nemusíme." — platí, ale jinak, než analýza mínila:
+  odkaz **nejde vedle potvrzení, ale do něj**. Event Tickets má na obsah navíc vlastní
+  filtr a vykresluje ho sám, takže se nekopíruje žádná jeho šablona. Dva e-maily naráz
+  od stejného odesílatele o stejné akci by návštěvník stejně nerozlišil — za tři týdny
+  by nevěděl, ve kterém z nich odkaz hledat. Změněno 5. 11. 2026 po připomínce zadavatele.
 - „Tvrdé smazání účastníka nejde, protože má v sobě kontrolu oprávnění." — platí i v nové
   větvi, jen jinudy: mazání účastníka je v `TEC\Tickets\Commerce\Attendee::delete()`
   a vede přes repozitář, ke kterému se nepřihlášený návštěvník nedostane.
@@ -147,8 +150,23 @@ Stručně, podrobnosti jsou v komentářích doplňku a v
 | Objednávka | jen hash v meta | příspěvek `tec_tc_order` |
 | Účastník | `tribe_rsvp_attendees` | `tec_tc_attendee`, rodičem je objednávka |
 | Meta | `_tribe_rsvp_*` | `_tec_tickets_commerce_*` |
-| E-mail po rezervaci | `event_tickets_rsvp_tickets_generated` | `tec_tickets_commerce_attendee_after_create` |
+| E-mail po rezervaci | `event_tickets_rsvp_tickets_generated` | filtr `tec_tickets_emails_rsvp_template_args` nad potvrzením |
 | Zrušení | přepočet kapacity + přepis stavu u každého místa zvlášť | `Order::modify_status( $id, 'refunded' )` nad celou objednávkou |
+
+### Proč `…_template_args` a ne `…_additional_content`
+
+Nabízel by se filtr `tec_tickets_emails_rsvp_additional_content` — jméno sedí přesně.
+Ve výchozím nastavení se ale **nespustí**: volba „Use ticket email settings" je
+u RSVP zapnutá (`Emails/Email/RSVP.php`, `tribe_get_option( …'use-ticket-email', true )`)
+a při ní si potvrzení bere obsah navíc od e-mailu *Ticket*, tedy přes filtr
+`…_ticket_additional_content`.
+
+`tec_tickets_emails_rsvp_template_args` běží až potom, co se obsah vybral z jedné nebo
+druhé větve (`Emails/Email_Abstract.php`, `get_template_context()`), takže funguje
+v obou případech. Ověřeno ve zdrojovém kódu Event Tickets 5.30.2.
+
+Je to past stejného druhu jako celý nález 4: **jméno hooku vypadá správně a přesto
+nikdy nedoběhne.** Grep by to neodhalil, odpověď je ve větvi nad nastavením.
 
 **Jedna věc se tím zjednodušila.** Analýza varuje, že se token musí podepisovat nad číslem
 objednávky, protože jinak odkaz ze tří rezervovaných míst uvolní jedno. V nové větvi je

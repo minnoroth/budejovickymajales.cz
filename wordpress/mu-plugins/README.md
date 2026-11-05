@@ -80,8 +80,9 @@ kalendáře. Podrobnosti a pasti REST API jsou v [bm-program/README.md](bm-progr
 > SMTP přes Google Workspace (FluentSMTP), zapnuté DKIM, záznam `_dmarc` a zkušební
 > e-mail doručený do schránky na Gmailu, Seznamu i Outlooku.
 >
-> Doplněk sám nic neodesílá přímo — používá `wp_mail()`. Jakmile SMTP na webu je,
-> začne chodit správnou cestou a v tomhle souboru se nemění ani řádek.
+> Doplněk sám žádný e-mail neposílá — jen přidá odkaz do potvrzení, které odesílá
+> Event Tickets. Jakmile SMTP na webu je, začne potvrzení chodit správnou cestou
+> a v tomhle souboru se nemění ani řádek.
 
 **Problém.** Návštěvník si zamluví místo a pak mu to nevyjde. Dnes rezervaci zrušit
 nemůže — musí napsat pořadateli, a většinou nenapíše. Místo propadne a akce je „plná"
@@ -129,7 +130,7 @@ Tři místa, všechna označená v kódu komentářem `EVENT TICKETS` (dají se 
 
 | # | Co | Jak |
 |---|---|---|
-| 1 | Vznikla rezervace → pošli e-mail | akce `tec_tickets_commerce_attendee_after_create` |
+| 1 | Odkaz do potvrzovacího e-mailu | filtr `tec_tickets_emails_rsvp_template_args` |
 | 2 | Kde jsou data | typy příspěvků `tec_tc_order` a `tec_tc_attendee`, meta `_tec_tickets_commerce_*` — všechny v bloku konstant na začátku souboru |
 | 3 | Zrušení a vrácení kapacity | `TEC\Tickets\Commerce\Order::modify_status( $id, 'refunded' )` |
 
@@ -170,14 +171,16 @@ Zůstává schválně: z počtu těchhle značek se po festivalu spočítá, **k
 opravdu zrušilo**. To číslo rozhoduje o tom, jestli má smysl stavět čekací frontu
 (etapa 2 analýzy). Bez něj by se stavěla naslepo.
 
-Do logu serveru se zapisuje jen při neodeslaném e-mailu, a jen číslo objednávky.
+Doplněk do logu serveru nezapisuje nic — e-maily neodesílá, takže nemá co hlásit.
 
 ### Jak ověřit, že žije
 
 1. Založ testovací rezervaci na libovolnou akci na vlastní e-mail.
-2. Musí přijít **dva** e-maily: potvrzení od pluginu a náš s předmětem
-   „Rezervace na … — odkaz pro zrušení".
-3. Otevři odkaz z druhého e-mailu. Musí se ukázat stránka s otázkou a tlačítkem,
+2. Musí přijít **jeden** e-mail — potvrzení od Event Tickets — a dole v něm
+   odhlašovací odkaz. Když potvrzení přijde bez odkazu, doplněk se nenačetl
+   nebo se objednávka nedala určit; zkontroluj Nastavení → Lístky → E-maily,
+   jestli je e-mail k rezervaci vůbec zapnutý.
+3. Otevři ten odkaz. Musí se ukázat stránka s otázkou a tlačítkem,
    **a rezervace musí pořád platit**.
 4. Klikni na tlačítko. Stránka potvrdí zrušení.
 5. V administraci v Lístky → Účastníci u té akce už rezervace není a volných míst
