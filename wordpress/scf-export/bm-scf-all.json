@@ -4,27 +4,6 @@
         "title": "Akce – nastavení webu",
         "fields": [
             {
-                "key": "field_tribe_events_v_carouselu",
-                "label": "V carouselu",
-                "name": "v_carouselu",
-                "aria-label": "",
-                "type": "true_false",
-                "instructions": "Zobrazit akci v carouselu na homepage. Nezávislé na označení „Doporučená akce“ (Top představení), které má The Events Calendar vlastní.",
-                "required": 0,
-                "conditional_logic": 0,
-                "wrapper": {
-                    "width": "",
-                    "class": "",
-                    "id": ""
-                },
-                "message": "",
-                "default_value": 0,
-                "allow_in_bindings": 1,
-                "ui": 1,
-                "ui_on_text": "Ano",
-                "ui_off_text": "Ne"
-            },
-            {
                 "key": "field_tribe_events_bezbarierovost_vyjimka",
                 "label": "Bezbariérovost – výjimka",
                 "name": "bezbarierovost_vyjimka",

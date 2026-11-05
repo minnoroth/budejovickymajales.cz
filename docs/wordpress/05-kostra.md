@@ -37,7 +37,6 @@ mohl překlepnout a založit duplicitní termín. Takhle je to zaškrtávací se
 |---|---|---|
 | `tribe_events_cat` | `barva` (color picker) | barva kategorie, žánry ji dědí |
 | `tribe_venue` | `bezbarierovost` (ano/ne) | vyplní se jednou pro 28 míst místo 102× ročně |
-| `tribe_events` | `v_carouselu` (ano/ne) | **mrtvé pole, ke smazání** — carousel i program čtou nativní „Featured Event" z TEC |
 | `tribe_events` | `bezbarierovost_vyjimka` | zdědit / ano / ne, výchozí zdědit |
 
 ## Doplněno 22. 10. 2026 — lokalizace a ověření role

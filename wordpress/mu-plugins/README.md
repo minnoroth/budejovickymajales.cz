@@ -144,9 +144,10 @@ nativní *Feature Event* z The Events Calendar, který čte program, a pole *V c
 které nečetlo nic. Dvě zaškrtávátka se stejným významem, z nichž jedno je tiše mrtvé,
 je přesně ta věc, na které se někdo při předávání webu zasekne.
 
-> **Zbývá dokončit:** pole *V carouselu* je pořád v administraci. Musí se smazat v SCF
-> → Field Groups → *Akce – nastavení webu* a pak znovu vyexportovat `bm-scf-all.json`.
-> Dokud se to nestane, je v administraci mrtvé zaškrtávátko.
+Pole *V carouselu* je **smazané** (5. 11. 2026) i s uloženými hodnotami u akcí.
+Skupiny polí drží Secure Custom Fields jako interní typ `acf-field-group` registrovaný
+s `show_in_rest => false`, takže se na ně zvenčí nedá sáhnout — smazal to jednorázový
+doplněk v `mu-plugins/`, který se hned po doběhnutí odstranil.
 
 **Nadpis je uvnitř zkratky**, ne ve stránce. Když není co ukázat, zmizí celá sekce —
 holý nadpis nad prázdnem vypadá jako rozbitá stránka.
