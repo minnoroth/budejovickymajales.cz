@@ -3,7 +3,10 @@ from pripojeni import rest
 
 
 STROM = [
-    ("Program", 83, [("Lineup", 88), ("Přehled programů", 89)]),
+    # Program nemá podstránky: zkratka [bm_program] drží Lineup i Seznam
+    # na jedné stránce. Stránky /program/lineup/ a /program/prehled/ jsou
+    # od 5. 11. 2026 v koši, znovu je sem nepřidávat.
+    ("Program", 83, []),
     ("Králové", 85, []),
     ("Partneři", 84, [("Osvěžovny", 90), ("Podpoř nás!", 91)]),
     ("Praktické info", 86, [("Pro návštěvníky", 92), ("Doprava", 94),
