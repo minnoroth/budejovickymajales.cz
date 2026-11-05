@@ -508,6 +508,25 @@ Přihlášení (Attendees). Role Dramaturgie na něj nedosáhne; požádej sprá
 > přes WhatsApp a po festivalu smaž, co jsi stáhl/a. Co s tím smíte dělat, je ve
 > zpracování osobních údajů na stránce GDPR.
 
+### 5.5 Když někdo potřebuje rezervaci zrušit
+
+Návštěvník to zvládne sám — v e-mailu, který mu po rezervaci přijde, má odhlašovací
+odkaz. Místo se uvolní a ty nemusíš dělat nic.
+
+Když to z nějakého důvodu musíš udělat za něj, platí jediné pravidlo:
+
+> **Maž celou rezervaci, ne jednotlivá místa.**
+>
+> Na obrazovce Přihlášení (Attendees) vypadá každé místo jako samostatný řádek. Když
+> z třímístné rezervace smažeš jeden řádek a návštěvník si pak zbytek zruší sám
+> odkazem z e-mailu, akci se vrátí tři místa místo dvou — a na akci se pak vejde
+> o jednoho člověka víc, než má.
+>
+> Není to chyba webu, tak počítá volná místa plugin Event Tickets. Smazat celou
+> rezervaci (všechny řádky s týmž jménem naráz) je proto vždycky bezpečné.
+
+Jednomístných rezervací je drtivá většina, takže na tohle většinou vůbec nenarazíš.
+
 ---
 
 ## 6. Přidat krále a zapsat body
