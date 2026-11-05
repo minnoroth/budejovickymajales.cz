@@ -36,6 +36,7 @@ v [docs/wordpress/00-analyza.md](docs/wordpress/00-analyza.md).
 | [docs/wordpress/12-rezervace-analyza.md](docs/wordpress/12-rezervace-analyza.md) | Analýza rezervačního systému: rušení rezervace a čekací fronta |
 | [docs/wordpress/13-struktura-a-program.md](docs/wordpress/13-struktura-a-program.md) | Struktura menu a sjednocení Programu s Lineupem. Otevřená rozhodnutí |
 | [docs/wordpress/15-carousel-a-kralove.md](docs/wordpress/15-carousel-a-kralove.md) | **Analýza carouselu na úvodu a výpisu králů.** Oba mají hotový model a chybějící výstup |
+| [docs/wordpress/16-body-po-disciplinach.md](docs/wordpress/16-body-po-disciplinach.md) | **Jak ukázat přesné body po disciplínách.** Proč tooltip na mobilu nefunguje — měření na skutečných datech |
 
 Dokumenty `01`–`04` jsou podkladová analýza z první fáze: otázky na zadavatele, detailní návrh
 modulů, ověřená fakta o pluginech a test ovládání WordPressu přes MCP. Jsou referenční —

@@ -576,6 +576,7 @@ první pohled vidět, odkud body přišly. Nad výpisem je legenda, která barvy
 | Ostatní | šedá |
 
 Barvy jsou z globální palety, takže se při změně vzhledu ročníku přebarví samy.
+**Pod pruhem jsou navíc přesné body** za každou disciplínu, obarvené stejnou tečkou.
 
 **Když řádek necháš bez vybrané disciplíny**, body se neztratí — spadnou do *Ostatní*.
 **Dva řádky se stejnou disciplínou** se sečtou do jednoho dílku, takže se nic
@@ -615,6 +616,7 @@ nevkládáš — výpis se vykreslí sám ze zadaných kandidátů.
 | Pořadí | podle součtu bodů, nejvíc nahoře. Při shodě rozhoduje pole **Order**, pak abeceda. |
 | Pruh | délka je poměr k vedoucímu kandidátovi, ne k součtu všech bodů. Vedoucí má vždy plný. |
 | Barvy v pruhu | jednotlivé disciplíny, v pořadí podle tabulky v 6.2 — u všech kandidátů stejném, aby šly pruhy porovnat. |
+| Čísla pod pruhem | přesné body za každou disciplínu, barva tečky odpovídá barvě v pruhu. Disciplína s nulou se nevypisuje. |
 | Ročník | ukáže se nejnovější ročník, **který má kandidáty**. Rok je napsaný nad výpisem. |
 | Chybějící fotka | místo ní se ukáže první písmeno jména. Řádek se nerozsype, ale je to vidět. |
 
