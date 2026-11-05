@@ -32,6 +32,20 @@ function update_option( $k, $v, $a = null ) {}
 function get_posts( $a ) { return array(); }
 function number_format_i18n( $n ) { return (string) $n; }
 function esc_html( $s ) { return $s; }
+function add_shortcode() {}
+
+/**
+ * Náhrada za sanitize_title. Jádro WordPressu dělá totéž: odstraní diakritiku,
+ * zmenší písmena a mezery nahradí pomlčkami. Tady je proto, aby test běžel bez
+ * WordPressu — skutečnou podobu kotev ověřuje až vykreslená stránka.
+ */
+function sanitize_title( $s ) {
+	$s = iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $s );
+	$s = strtolower( (string) $s );
+	$s = preg_replace( '/[^a-z0-9]+/', '-', $s );
+
+	return trim( (string) $s, '-' );
+}
 
 require __DIR__ . '/bm-kralove.php';
 
@@ -113,6 +127,37 @@ tvrd( 'pořadí sloupců', array( 'cb', 'title', 'bm_body', 'date' ), array_keys
 // 12. Seznam bez sloupce s datem.
 $sloupce = bm_kralove_sloupec( array( 'cb' => '', 'title' => 'Název' ) );
 tvrd( 'bez sloupce Datum se přidá na konec', array( 'cb', 'title', 'bm_body' ), array_keys( $sloupce ) );
+
+// 13. Pořadí: řadí se podle bodů sestupně.
+$GLOBALS['typ'][101] = 'kral'; $GLOBALS['meta'][101] = array( 'body' => '1', 'body_0_pocet' => '100' );
+$GLOBALS['typ'][102] = 'kral'; $GLOBALS['meta'][102] = array( 'body' => '1', 'body_0_pocet' => '300' );
+$GLOBALS['typ'][103] = 'kral'; $GLOBALS['meta'][103] = array( 'body' => '1', 'body_0_pocet' => '200' );
+$poradi = bm_kralove_poradi( array( 101, 102, 103 ) );
+tvrd( 'řazení podle bodů sestupně', array( 102, 103, 101 ), array_column( $poradi, 'id' ) );
+
+// 14. Shoda bodů drží vstupní pořadí (Pořadí a abeceda z dotazu).
+$GLOBALS['typ'][104] = 'kral'; $GLOBALS['meta'][104] = array();
+$GLOBALS['typ'][105] = 'kral'; $GLOBALS['meta'][105] = array();
+$poradi = bm_kralove_poradi( array( 105, 104 ) );
+tvrd( 'při shodě bodů zůstane vstupní pořadí', array( 105, 104 ), array_column( $poradi, 'id' ) );
+
+// 15. Kotva: diakritika pryč, malá písmena.
+$obsazene = array();
+tvrd( 'kotva z ČAG', 'cag', bm_kralove_kotva( 'ČAG', $obsazene ) );
+tvrd( 'kotva z Husova 9', 'husova-9', bm_kralove_kotva( 'Husova 9', $obsazene ) );
+
+// 16. Shoda kotev — šest škol „t" na starém webu sdílelo jednu kotvu.
+$obsazene = array();
+$kotvy = array();
+for ( $i = 0; $i < 6; $i++ ) {
+	$kotvy[] = bm_kralove_kotva( 't', $obsazene );
+}
+tvrd( 'šest stejných škol dostane šest kotev', array( 't', 't-2', 't-3', 't-4', 't-5', 't-6' ), $kotvy );
+
+// 17. Prázdná škola kotvu mít musí, jinak by odkaz nikam nevedl.
+$obsazene = array();
+tvrd( 'prázdná škola', 'kandidat', bm_kralove_kotva( '', $obsazene ) );
+tvrd( 'druhá prázdná škola', 'kandidat-2', bm_kralove_kotva( '', $obsazene ) );
 
 echo $chyb ? "\n$chyb selhalo\n" : "\nvše prošlo\n";
 exit( $chyb ? 1 : 0 );

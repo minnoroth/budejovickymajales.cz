@@ -40,6 +40,7 @@ add_action( 'added_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'updated_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'deleted_post_meta', 'bm_kralove_po_zapisu_meta', 10, 3 );
 add_action( 'admin_init', 'bm_kralove_dopocitat_chybejici' );
+add_shortcode( 'bm_kralove', 'bm_kralove_zkratka' );
 
 add_filter( 'manage_' . BM_KRALOVE_TYP . '_posts_columns', 'bm_kralove_sloupec' );
 add_action( 'manage_' . BM_KRALOVE_TYP . '_posts_custom_column', 'bm_kralove_obsah_sloupce', 10, 2 );
@@ -215,4 +216,245 @@ function bm_kralove_radit_podle_bodu( $dotaz ) {
 
 	$dotaz->set( 'meta_key', BM_KRALOVE_META_SOUCET );
 	$dotaz->set( 'orderby', 'meta_value_num' );
+}
+
+/**
+ * Ročník, jehož žebříček se vypíše.
+ *
+ * Bere nejnovější ročník, který má aspoň jednoho kandidáta — ne prostě
+ * nejnovější ročník. Rozdíl je vidět na podzim: ročník 2028 už v Akcích
+ * existuje, kandidáty ještě nemá, a stránka by byla prázdná. Takhle na ní
+ * zůstane loňské konečné pořadí, dokud školy nenahlásí nové kandidáty.
+ * Aby to nemátlo, vypisuje se nad žebříčkem vždycky rok.
+ *
+ * @param string $zadany Název nebo slug ročníku ze zkratky, nebo prázdno.
+ * @return WP_Term|null
+ */
+function bm_kralove_rocnik( $zadany = '' ) {
+	if ( '' !== $zadany ) {
+		$rocnik = get_term_by( 'slug', $zadany, 'rocnik' );
+		if ( ! $rocnik ) {
+			$rocnik = get_term_by( 'name', $zadany, 'rocnik' );
+		}
+
+		return $rocnik instanceof WP_Term ? $rocnik : null;
+	}
+
+	$rocniky = get_terms( array(
+		'taxonomy'   => 'rocnik',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'DESC',
+	) );
+
+	if ( is_wp_error( $rocniky ) ) {
+		return null;
+	}
+
+	foreach ( $rocniky as $rocnik ) {
+		if ( bm_kralove_ids( $rocnik->term_id, 1 ) ) {
+			return $rocnik;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * ID publikovaných kandidátů ročníku.
+ *
+ * @param int $rocnik_id ID ročníku.
+ * @param int $kolik     Kolik nejvýš, -1 pro všechny.
+ * @return int[]
+ */
+function bm_kralove_ids( $rocnik_id, $kolik = -1 ) {
+	return get_posts( array(
+		'post_type'        => BM_KRALOVE_TYP,
+		'post_status'      => 'publish',
+		'numberposts'      => $kolik,
+		'fields'           => 'ids',
+		'orderby'          => 'menu_order title',
+		'order'            => 'ASC',
+		'no_found_rows'    => true,
+		'tax_query'        => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			array(
+				'taxonomy' => 'rocnik',
+				'field'    => 'term_id',
+				'terms'    => $rocnik_id,
+			),
+		),
+	) );
+}
+
+/**
+ * Seřadí kandidáty podle bodů sestupně.
+ *
+ * Řadí se v PHP ze spočítaných součtů, ne dotazem podle uložené kopie —
+ * veřejné pořadí tak nemůže být špatně ani ve chvíli, kdy se kopie rozejde.
+ * Kandidátů je dvacet na ročník, takže na tom nezáleží výkonnostně.
+ *
+ * Při shodě bodů rozhoduje pořadí z pole „Pořadí" a pak abeceda. Bez toho by
+ * se nerozhodnutí kandidáti na začátku ročníku (všichni nula) přehazovali
+ * při každém načtení stránky.
+ *
+ * @param int[] $ids ID kandidátů, už seřazená podle Pořadí a abecedy.
+ * @return array<int, array{id:int, body:int}>
+ */
+function bm_kralove_poradi( $ids ) {
+	$radky = array();
+	foreach ( $ids as $poradi => $id ) {
+		$radky[] = array(
+			'id'      => (int) $id,
+			'body'    => bm_kralove_body( $id ),
+			'vstupni' => $poradi,
+		);
+	}
+
+	usort( $radky, static function ( $a, $b ) {
+		if ( $a['body'] === $b['body'] ) {
+			return $a['vstupni'] <=> $b['vstupni'];
+		}
+
+		return $b['body'] <=> $a['body'];
+	} );
+
+	return $radky;
+}
+
+/**
+ * Kotva kandidáta pro odkaz zvenčí.
+ *
+ * Instagram škol i starý web odkazují na /kralove#gymji, kde „gymji" je název
+ * školy bez diakritiky malými písmeny. Tahle pravidla dělá sanitize_title().
+ *
+ * Shodu ošetřuje druhý parametr: na starém webu mělo šest kandidátů školu „t"
+ * a sdíleli jednu kotvu, takže odkaz skočil na náhodného z nich.
+ *
+ * @param string   $skola    Název školy.
+ * @param string[] $obsazene Už použité kotvy, předává se odkazem.
+ * @return string
+ */
+function bm_kralove_kotva( $skola, &$obsazene ) {
+	$zaklad = sanitize_title( $skola );
+	if ( '' === $zaklad ) {
+		$zaklad = 'kandidat';
+	}
+
+	$kotva = $zaklad;
+	$poradi = 2;
+	while ( in_array( $kotva, $obsazene, true ) ) {
+		$kotva = $zaklad . '-' . $poradi;
+		$poradi++;
+	}
+
+	$obsazene[] = $kotva;
+
+	return $kotva;
+}
+
+/**
+ * Vypíše žebříček kandidátů.
+ *
+ * Atributy:
+ *   rocnik  název nebo slug ročníku; prázdno = nejnovější s kandidáty
+ *   pocet   kolik kandidátů vypsat; 0 = všechny (úvodní stránka chce tři)
+ *
+ * @param array $atributy Atributy zkratky.
+ * @return string
+ */
+function bm_kralove_zkratka( $atributy = array() ) {
+	$a = shortcode_atts( array(
+		'rocnik' => '',
+		'pocet'  => 0,
+	), $atributy, 'bm_kralove' );
+
+	$rocnik = bm_kralove_rocnik( (string) $a['rocnik'] );
+	if ( ! $rocnik ) {
+		return bm_kralove_prazdno();
+	}
+
+	$radky = bm_kralove_poradi( bm_kralove_ids( $rocnik->term_id ) );
+	if ( ! $radky ) {
+		return bm_kralove_prazdno();
+	}
+
+	// Pruh se měří k vedoucímu, ne k součtu všech bodů — tak to dělal starý web.
+	$nejvic = max( array_column( $radky, 'body' ) );
+
+	$pocet = max( 0, (int) $a['pocet'] );
+	if ( $pocet > 0 ) {
+		$radky = array_slice( $radky, 0, $pocet );
+	}
+
+	$obsazene = array();
+	$polozky  = '';
+
+	foreach ( $radky as $index => $radek ) {
+		$polozky .= bm_kralove_polozka( $radek, $index + 1, $nejvic, $obsazene );
+	}
+
+	return '<section class="bm-kralove">'
+		. '<p class="bm-kralove__rocnik">Průběžné pořadí — ročník ' . esc_html( $rocnik->name ) . '</p>'
+		. '<ol class="bm-kralove__seznam" itemscope itemtype="https://schema.org/ItemList">'
+		. $polozky
+		. '</ol></section>';
+}
+
+/**
+ * Jeden kandidát.
+ *
+ * @param array    $radek    Řádek z bm_kralove_poradi().
+ * @param int      $poradi   Pořadí v žebříčku od jedné.
+ * @param int      $nejvic   Body vedoucího kandidáta.
+ * @param string[] $obsazene Už použité kotvy, předává se odkazem.
+ * @return string
+ */
+function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
+	$id    = $radek['id'];
+	$skola = (string) get_post_meta( $id, 'skola', true );
+	$tema  = (string) get_post_meta( $id, 'tema', true );
+	$kotva = bm_kralove_kotva( $skola, $obsazene );
+
+	// number_format, ne sprintf — desetinná tečka v šířce nesmí záviset
+	// na jazyce serveru, jinak CSS dostane „91,08%" a pruh zmizí.
+	$sirka = $nejvic > 0 ? number_format( $radek['body'] / $nejvic * 100, 2, '.', '' ) : '0';
+
+	$foto = get_the_post_thumbnail( $id, 'medium', array( 'itemprop' => 'image', 'loading' => 'lazy' ) );
+	if ( ! $foto ) {
+		// Prázdné místo by rozhodilo řádek. Písmeno drží rozměr a je vidět,
+		// že fotka chybí — návod na to tým upozorňuje.
+		$pismeno = mb_substr( wp_strip_all_tags( get_the_title( $id ) ), 0, 1 );
+		$foto    = '<span class="bm-kral__bezfotky" aria-hidden="true">' . esc_html( $pismeno ) . '</span>';
+	}
+
+	$popis = esc_html( $skola );
+	if ( '' !== $tema ) {
+		$popis = '<strong>' . esc_html( $skola ) . '</strong> — <em>' . esc_html( $tema ) . '</em>';
+	}
+
+	return '<li class="bm-kral" id="' . esc_attr( $kotva ) . '"'
+		. ' itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">'
+		. '<span class="bm-kral__poradi" aria-hidden="true">' . esc_html( (string) $poradi ) . '.</span>'
+		. '<span class="bm-kral__foto">' . $foto . '</span>'
+		. '<span class="bm-kral__info">'
+		. '<span class="bm-kral__jmeno" itemprop="name">' . esc_html( get_the_title( $id ) ) . '</span>'
+		. '<span class="bm-kral__skola" itemprop="description">' . $popis . '</span>'
+		. '<span class="bm-kral__graf">'
+		. '<span class="bm-kral__pruh" style="width:' . esc_attr( $sirka ) . '%" aria-hidden="true"></span>'
+		. '<span class="bm-kral__body">' . esc_html( number_format_i18n( $radek['body'] ) ) . ' b.</span>'
+		. '</span></span>'
+		. '<meta itemprop="position" content="' . esc_attr( (string) $poradi ) . '">'
+		. '<meta itemprop="url" content="' . esc_url( get_permalink() . '#' . $kotva ) . '">'
+		. '</li>';
+}
+
+/**
+ * Hlášení, když kandidáti ještě nejsou. Prázdná stránka by vypadala jako chyba.
+ *
+ * @return string
+ */
+function bm_kralove_prazdno() {
+	return '<section class="bm-kralove bm-kralove--prazdno">'
+		. '<p>Kandidáty teprve sbíráme. Jakmile je školy nahlásí, objeví se tady '
+		. 'průběžné pořadí i s body.</p></section>';
 }
