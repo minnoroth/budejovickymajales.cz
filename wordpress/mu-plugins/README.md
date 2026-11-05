@@ -204,3 +204,59 @@ musí být pás čitelný. Barva z palety je proto dál pozadím a fotka leží 
 
 **Jak ověřit, že žije.** Nastav u stránky Úvod náhledový obrázek a načti úvodní stránku.
 Když ho odebereš, pás se vrátí k zelené.
+
+---
+
+## bm-osvezovny/ — podniky se zvýhodněnou nabídkou
+
+**Problém.** Osvěžovny byly ručně psaná stránka: devět nadpisů, pod každým odrážky
+s cenami vlepenými do věty. Vzhled držel `<style>` blok **uvnitř obsahu stránky**
+a v něm osmkrát natvrdo loňská modrá `#0000ff`. Rebranding by přebarvil celý web
+kromě osvěžoven. A nabídku, kterou každý rok přepisuje někdo jiný, se přepisovala
+jako HTML — jeden špatně zavřený `</ul>` rozsype zbytek stránky.
+
+**Řešení.** Typ obsahu **Osvěžovna** (název, adresa, odkaz na mapu) s opakovatelným
+polem **Nabídka** (název, popis, cena, druh). Zkratka `[bm_osvezovny]` je vykreslí
+jako kartičky. Celé rozhodnutí včetně toho, proč obrací doporučení z
+[`02-moduly-detail.md`](../../docs/wordpress/02-moduly-detail.md), je v
+[`17-osvezovny.md`](../../docs/wordpress/17-osvezovny.md).
+
+**Proč je cena text, a ne číslo.** Vedle „105 Kč" je v nabídce i „Sleva 20 % na vše"
+a položky úplně bez ceny. Číselné pole by tohle neuneslo. Prázdná cena se na webu
+nevypíše vůbec.
+
+**Proč je druh nepovinný.** Zařadit „Květnový infarkt" (yerba maté, mangový džus,
+espresso a trochu zlata) nejde a hádat za tým se nemá. Položka bez druhu se vypíše
+normálně, jen se neukáže pod filtrem.
+
+**Proč nadpisy skupin nejsou vždycky.** Objeví se jen u podniku, který má aspoň dva
+různé vyplněné druhy — ze skutečných dat tři z devíti. Nadpis „Nealko" nad třemi
+drinky nic nerozlišuje. Kartička bez nadpisů navíc drží pořadí řádků z editoru,
+aby tým viděl na webu totéž pořadí jako v administraci.
+
+**Proč typ obsahu i pole v PHP, a ne v `scf-export/`.** Import do SCF se dělá rukou
+v administraci, nedá se vynutit ani zopakovat skriptem. Cena: osvěžovny nejsou vidět
+v **SCF → Post Types** ani **Field Groups**. Je to nejednotnost s Králi a stojí za to
+ji jednou srovnat.
+
+**Proč filtr staví JavaScript.** Kdyby tlačítka vykreslilo PHP a skript se nenačetl,
+zůstala by na stránce tlačítka, která nic nedělají. Bez skriptu je vidět celá nabídka
+a žádný filtr. Tlačítko navíc vzniká jen pro druh, který aspoň jedna položka má.
+
+**Past, na kterou se došláplo.** Filtr schovává položky přes `hidden`. Prohlížeč na to
+má `[hidden] { display: none }` s vahou jedné třídy, jenže naše selektory začínají
+`:is(#primary, body)` kvůli Kadence — `display: flex` to přebije a schované položky
+zůstanou vidět. V DOM `hidden = true`, na obrazovce nic. Řeší to vlastní pravidlo
+se stejným prefixem v `osvezovny.css`.
+
+**Jak ověřit, že žije.**
+
+```bash
+cd wordpress/mu-plugins/bm-osvezovny
+docker run --rm -v "$PWD":/t -w /t php:8.3-cli php overeni.php
+```
+
+Třicet testů nad skutečnými daty z dnešního webu, bez WordPressu a bez databáze.
+Soubor jde spustit jen z příkazové řádky — na serveru leží ve veřejné složce.
+
+Na webu: `/osvezovny/` musí mít devět kartiček, 24 položek a nad nimi filtr.

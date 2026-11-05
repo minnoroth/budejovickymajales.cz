@@ -113,6 +113,11 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   `.moje-skupina > p` tedy nefunguje, musí se počítat s tím mezikrokem.
 - **`className` v atributech bloku nestačí.** WordPress vykresluje uloženou HTML, ne atributy,
   takže třída musí být i v samotném `<p class="…">`.
+- **`[hidden]` prohrává s `:is(#primary, body)`.** Prohlížeč má na vlastnost `hidden`
+  pravidlo `[hidden] { display: none }` s vahou jedné třídy. Protože kvůli Kadence každý
+  selektor v našich stylech začíná `:is(#primary, body)`, přebije ho jakékoli naše
+  `display: flex`. Prvek je v DOM `hidden = true` a na obrazovce se nic nestane —
+  vypadá to, jako by skript nefungoval. Potřebuje vlastní pravidlo se stejným prefixem.
 
 ### Doplňky a vývoj
 
@@ -120,6 +125,10 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   jen soubory `.php` ležící přímo v ní. Doplněk, který má vedle PHP i skripty a styly,
   proto potřebuje v kořeni malý zavaděč — viz `bm-program-nacti.php`. Ten má navíc
   `file_exists`, aby smazání složky neshodilo web na fatální chybu.
+- **Všechno ve složce doplňku je na webu veřejné.** `wp-content/mu-plugins/` je pod
+  kořenem webu, takže `…/bm-kralove/overeni.php` šlo spustit z prohlížeče a vypsalo celý
+  test. Testovací soubory proto začínají `if ( 'cli' !== PHP_SAPI ) { exit; }` a na server
+  se nenahrávají.
 - **PHP na stroji není, ale Docker ano.** Syntaxi ověříš ve stejné verzi, jaká běží
   na serveru:
   ```
