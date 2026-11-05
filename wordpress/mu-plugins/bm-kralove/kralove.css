@@ -95,6 +95,45 @@
   flex: 0 0 auto;
 }
 
+/* Menší tečka pro čísla pod pruhem, kde jde o řádek textu, ne o legendu. */
+:is(#primary, body) .bmk__tecka--male {
+  width: 10px;
+  height: 10px;
+  border-width: 1.5px;
+}
+
+
+/* ── Body po disciplínách pod pruhem ─────────────────────────────────── */
+
+/* Proč pod pruhem a ne v něm: při skutečném rozložení bodů ročníku 2024 je
+   dílek od pátého místa níž na mobilu užší než 13 px. Číslo se tam nevejde
+   a prstem se do něj netrefí nikdo — doporučená nejmenší plocha na dotek je
+   44 px. Měření a zvážené varianty jsou v
+   docs/wordpress/16-body-po-disciplinach.md.
+
+   Řádek je aria-hidden, protože samotná čísla bez názvů by čtečka přečetla
+   jako „2 100 1 800 1 500 498". Pojmenovaný rozpis pro ni je v .bmk-jen-pro-ctecku. */
+:is(#primary, body) .bmk-kral__cisla {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+:is(#primary, body) .bmk-kral__cislo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bmk-cerna);
+  /* Číslice stejné šířky, ať čísla pod sebou u sousedních kandidátů
+     neposkakují. */
+  font-variant-numeric: tabular-nums;
+}
+
 
 /* ── Text jen pro čtečku ─────────────────────────────────────────────── */
 
@@ -296,4 +335,8 @@
   :is(#primary, body) .bmk-kral__bezfotky { font-size: 24px; }
   :is(#primary, body) .bmk__legenda { gap: 6px 14px; }
   :is(#primary, body) .bmk__legenda-polozka { font-size: 13px; }
+  /* Na úzkém displeji se čísla zalomí na druhý řádek — mezera mezi nimi
+     se proto zmenší, ať se jich na řádek vejde co nejvíc. */
+  :is(#primary, body) .bmk-kral__cisla { gap: 3px 10px; }
+  :is(#primary, body) .bmk-kral__cislo { font-size: 12px; gap: 5px; }
 }

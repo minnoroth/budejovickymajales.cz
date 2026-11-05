@@ -84,6 +84,14 @@ uvnitř jsou poměry disciplín k bodům toho kandidáta. Složené dohromady to
 zabírá na obrazovce stejnou část jako jeho podíl na nejvyšším součtu. Barvy nejsou
 v PHP, ale v CSS podle atributu `data-segment` — jinak by je rebranding nepřebarvil.
 
+**Proč jsou čísla pod pruhem, a ne v něm.** Marketing chtěl vidět přesné body za každou
+disciplínu, nejlépe tooltipem po najetí nebo po klepnutí. Měření na skutečném rozložení
+bodů ročníku 2024 ukázalo, že to nejde: od pátého místa níž je dílek pruhu na mobilu
+užší než 13 px, u šesti kandidátů z dvaceti je nulový. Doporučená nejmenší plocha na
+dotek je 44 px. Čísla se proto vypisují natrvalo pod pruhem, kde je nemusí nikdo hledat
+ani se do nich trefovat. Zvážené varianty jsou v
+[16-body-po-disciplinach.md](../../docs/wordpress/16-body-po-disciplinach.md).
+
 **Proč se součet počítá při každém čtení.** Uložené odvozené číslo se dřív nebo později
 rozejde se skutečností. Součet se proto nikdy nebere z databáze — vždycky se spočítá
 z bodů. Uložená kopie `_bm_body_celkem` slouží jedinému účelu: řazení sloupce
