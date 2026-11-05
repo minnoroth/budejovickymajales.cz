@@ -469,11 +469,16 @@
   position: absolute; left: 0; right: 0; height: 0; z-index: 14;
   border-top: 2px solid var(--bmp-koral); pointer-events: none;
 }
-/* Popisek jen u prvního sloupce, čára jde přes všechny. */
-:is(#primary, body) .bmp .bmp-osa__ted--popisek::before {
-  content: "TEĎ"; position: absolute; left: 0; top: -9px;
+/* Popisek sedí na časové ose, čára jde přes všechny sloupce.
+   Dřív byl popisek v prvním sloupci s akcemi a překrýval název a čas akce,
+   která zrovna hrála. Na ose kryje nanejvýš celou hodinu, a to je v pořádku:
+   když je „teď" přesně ve 20:00, je ten údaj v popisku stejně. */
+:is(#primary, body) .bmp .bmp-osa__ted-popisek {
+  position: absolute; left: 0; right: 0; z-index: 16;
+  transform: translateY(-50%);
   background: var(--bmp-koral); color: var(--bmp-bila);
-  font-size: 11px; font-weight: 800; padding: 1px 5px; border-radius: 3px;
+  font-size: 11px; font-weight: 800; text-align: center;
+  padding: 1px 0; pointer-events: none;
 }
 
 

@@ -7,7 +7,7 @@ a stavbu nového webu na WordPressu**, ne aplikaci. Přehled je v [README.md](RE
 |---|---|
 | Rozestavěný web | <https://novy.budejovickymajales.cz> |
 | Starý web | <https://budejovickymajales.cz> |
-| Pracovní větev | `docs/wordpress-migration` (`main` je zastaralý) |
+| Hlavní větev | `main` — práce jde přes pull requesty, větve se po merge mažou |
 
 ---
 
