@@ -319,6 +319,29 @@ body.home .bm-pas-hlavni {
 }
 
 /* ── Hlavička ─────────────────────────────────────────────────── */
+/* Tlačítko v hlavičce má vypadat stejně jako „Podpořit →" v heru.
+   Barvu, text a cíl řeší Customizer (nastaveni.py), tady zbývá šipka
+   a rámeček: popisek tlačítka Kadence prohání přes esc_html(), takže
+   do něj HTML dát nejde, a rámeček Kadence u tohohle tlačítka nemá. */
+.header-button,
+.mobile-header-button {
+  border: 2px solid var(--global-palette3);
+}
+.header-button::after,
+.mobile-header-button::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 8px;
+  transition: transform .12s ease;
+}
+.header-button:hover::after,
+.mobile-header-button:hover::after { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) {
+  .header-button::after,
+  .mobile-header-button::after { transition: none; }
+  .header-button:hover::after,
+  .mobile-header-button:hover::after { transform: none; }
+}
 /* V hlavičce je jen logo, bez názvu webu. Tým dodává logo na šířku
    i s nápisem, takže se omezuje výškou — u loga na šířku je výška to,
    co musí sednout na hlavičku, a šířka se dopočítá sama. Kdyby se

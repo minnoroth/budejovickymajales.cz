@@ -114,20 +114,27 @@ NASTAVENI = {
     # Pro neziskovku je „Podpoř nás" silnější výzva než e-shop. E-shop
     # z webu nemizí — je odkazem na té stránce, tedy o jeden klik dál.
     # Rozhodnuto 4. 11. 2026, viz docs/wordpress/13-struktura-a-program.md.
-    "header_button_label": "Podpoř nás",
+    # Stejné tlačítko jako „Podpořit →" v heru: korálová, stejný text.
+    # Šipka v popisku být nemůže — Kadence ho prohání přes esc_html(),
+    # takže by se vypsala jako text. Dolepuje ji CSS (.header-button::after).
+    "header_button_label": "Podpořit",
     "header_button_link": "/podpor-nas/",
-    "header_button_target": "_self",
+    # POZOR: tohle není řetězec, ale pravda/nepravda. Kadence píše
+    # target="_blank", když je hodnota pravdivá — a „_self" je pravdivý
+    # řetězec, takže se odkaz otevíral v novém okně. Odkaz vede na vlastní
+    # web, tam nové okno nepatří.
+    "header_button_target": False,
     "header_button_style": "filled",
-    "header_button_background": {"color": "palette15", "hover": "palette9"},
+    "header_button_background": {"color": "palette10", "hover": "palette9"},
     "header_button_color": {"color": "palette3", "hover": "palette3"},
     "header_button_radius": {"size": [999, 999, 999, 999], "unit": "px", "locked": True},
     "header_button_typography": {"size": {"desktop": 15}, "lineHeight": {"desktop": ""},
                                  "family": "inherit", "google": False,
                                  "weight": "800", "variant": "800"},
-    "mobile_button_label": "Podpoř nás",
+    "mobile_button_label": "Podpořit",
     "mobile_button_link": "/podpor-nas/",
-    "mobile_button_target": "_self",
-    "mobile_button_background": {"color": "palette15", "hover": "palette9"},
+    "mobile_button_target": False,
+    "mobile_button_background": {"color": "palette10", "hover": "palette9"},
     "mobile_button_color": {"color": "palette3", "hover": "palette3"},
     "mobile_button_radius": {"size": [999, 999, 999, 999], "unit": "px", "locked": True},
 
