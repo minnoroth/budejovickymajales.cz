@@ -79,7 +79,7 @@ nabídka — a žádná mrtvá tlačítka, protože bez skriptu nevzniknou vůbe
 | `wordpress/mu-plugins/bm-osvezovny/bm-osvezovny.php` | typ obsahu, pole, zkratka |
 | `wordpress/mu-plugins/bm-osvezovny/osvezovny.css` | vzhled kartiček, barvy z palety |
 | `wordpress/mu-plugins/bm-osvezovny/osvezovny.js` | filtr nad výpisem |
-| `wordpress/mu-plugins/bm-osvezovny/overeni.php` | 30 testů, běží bez WordPressu |
+| `wordpress/mu-plugins/bm-osvezovny/overeni.php` | testy nad skutečnými daty, běží bez WordPressu |
 | `wordpress/vzhled/osvezovny.py` | překlopí stránku 90 |
 | `wordpress/vzhled/osvezovny-data.py` | jednorázové naplnění daty z dnešního webu |
 

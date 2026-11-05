@@ -256,7 +256,8 @@ cd wordpress/mu-plugins/bm-osvezovny
 docker run --rm -v "$PWD":/t -w /t php:8.3-cli php overeni.php
 ```
 
-Třicet testů nad skutečnými daty z dnešního webu, bez WordPressu a bez databáze.
+Testy nad skutečnými daty z dnešního webu, bez WordPressu a bez databáze. Počet
+vypíše sám — natvrdo napsané číslo by se po přidání testu rozešlo.
 Soubor jde spustit jen z příkazové řádky — na serveru leží ve veřejné složce.
 
 Na webu: `/osvezovny/` musí mít devět kartiček, 24 položek a nad nimi filtr.
