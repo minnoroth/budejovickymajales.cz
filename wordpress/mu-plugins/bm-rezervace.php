@@ -213,9 +213,14 @@ function bm_rezervace_doplnit_odkaz( $args, $id = '', $sablona = '', $email = nu
 
 	$odkaz = bm_rezervace_odkaz( $id_objednavky );
 
-	$text = '<p>' . esc_html__( 'Kdyby ti to nevyšlo, dej nám prosím vědět tímhle odkazem a místo se uvolní někomu dalšímu:', 'bm' ) . '</p>'
+	// Texty jsou česky natvrdo jako ve zbytku doplňku — web je jednojazyčný
+	// a zavádět kvůli třem větám překladovou doménu by byl jen další soubor,
+	// který musí nástupce najít.
+	$text = '<p>Kdyby ti to nevyšlo, dej nám prosím vědět tímhle odkazem a místo se uvolní někomu dalšímu:</p>'
 		. '<p><a href="' . esc_url( $odkaz ) . '">' . esc_html( $odkaz ) . '</a></p>'
-		. '<p>' . esc_html__( 'Odkaz ruší celou rezervaci, i když sis zamluvil víc míst. Je jen pro tebe, neposílej ho dál. Nic se nezruší hned — na stránce, která se otevře, to ještě jednou potvrdíš tlačítkem.', 'bm' ) . '</p>';
+		. '<p>Odkaz ruší celou rezervaci, i když sis zamluvil víc míst. Je jen pro tebe,'
+		. ' neposílej ho dál. Nic se nezruší hned — na stránce, která se otevře, to ještě'
+		. ' jednou potvrdíš tlačítkem.</p>';
 
 	$puvodni = isset( $args['additional_content'] ) ? (string) $args['additional_content'] : '';
 
