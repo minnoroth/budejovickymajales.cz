@@ -531,6 +531,9 @@ Králové jsou kandidáti na krále Majálesu. Každý má jméno, školu, téma
 > **U krále není pole na delší text.** Je to záměr — ukazuje se jen jméno, škola, téma,
 > fotka a body. Delší bio se nikam nevejde.
 
+> **Kandidát nemá vlastní stránku.** Ukazuje se jen v žebříčku na `/kralove/`. Tlačítko
+> **Zobrazit krále** v editoru proto nikam nevede — ignoruj ho.
+
 > V boxu **Pořadí krále** je pole **Order** s číslem. Na webu se kandidáti řadí podle
 > bodů, takže tohle pole rozhoduje jen při **shodě bodů** — nižší číslo je výš. To se
 > hodí hlavně na začátku ročníku, kdy mají všichni nulu. Když to necháš na nule, řadí

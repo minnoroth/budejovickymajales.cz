@@ -7,6 +7,17 @@
 - 5 skupin polí — Králové, Ročník, barva u kategorie programu,
   bezbariérovost u místa, nastavení u akce
 
+## Proč Králové nejsou veřejný typ obsahu
+
+Typ `kral` má `public: false` a `publicly_queryable: false` **schválně**. WordPress
+jinak ke každému kandidátovi vyrobí vlastní adresu `/kral/<jméno>/` — a protože ten
+typ nemá pole na text, je to prázdná stránka se jménem a fotkou. Na starém webu nic
+takového nebylo (dvacet kotev na jedné stránce, nula odkazů) a nikdo o to nestojí;
+na produkci by to znamenalo dvacet prázdných stránek se jmény studentů v Googlu.
+
+Kandidáti se ukazují jen v žebříčku na `/kralove/`, který vykresluje doplněk
+`bm-kralove`. Zapnout zpátky jde v **SCF → Post Types → Králové → Viditelnost**.
+
 ## Import
 
 V administraci WordPressu: **SCF → Tools → Import Field Groups**,
