@@ -580,6 +580,7 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 	// disciplín k bodům tohoto kandidáta. Složené dohromady to vyjde:
 	// dílek zabírá stejnou část obrazovky jako jeho body z celkového maxima.
 	$dily   = '';
+	$cisla  = '';
 	$rozpis = array();
 	foreach ( $radek['segmenty'] as $segment ) {
 		$podil   = $radek['body'] > 0 ? number_format( $segment['pocet'] / $radek['body'] * 100, 2, '.', '' ) : '0';
@@ -591,7 +592,21 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 		$dily .= '<span class="bmk-kral__dil" data-segment="' . esc_attr( $segment['klic'] ) . '"'
 			. ' style="width:' . esc_attr( $podil ) . '%"'
 			. ' title="' . esc_attr( $titulek ) . '"></span>';
+
+		// Číslo pod pruhem, ne uvnitř dílku. Při skutečném rozložení bodů
+		// (ročník 2024) je dílek od pátého místa níž na mobilu užší než
+		// 13 px, takže se do něj žádné číslo nevejde a na dotek se do něj
+		// nedá trefit. Měření je v docs/wordpress/16-body-po-disciplinach.md.
+		$cisla .= '<li class="bmk-kral__cislo" data-segment="' . esc_attr( $segment['klic'] ) . '"'
+			. ' title="' . esc_attr( $titulek ) . '">'
+			. '<span class="bmk__tecka bmk__tecka--male"></span>'
+			. esc_html( number_format_i18n( $segment['pocet'] ) ) . '</li>';
 	}
+
+	// Čtečka obrazovky dostane pojmenovaný rozpis o kus níž. Tenhle řádek
+	// jsou jen čísla a barvy — bez legendy by z něj přečetla
+	// „2 100 1 800 1 500 498", což nikomu nic neřekne.
+	$cisla = $cisla ? '<ul class="bmk-kral__cisla" aria-hidden="true">' . $cisla . '</ul>' : '';
 
 	// Titulek se myší na mobilu nevyvolá a čtečka ho nepřečte. Rozpis je
 	// proto i v textu, schovaný jen vizuálně.
@@ -623,7 +638,7 @@ function bm_kralove_polozka( $radek, $poradi, $nejvic, &$obsazene ) {
 		. '<span class="bmk-kral__pruh" style="width:' . esc_attr( $sirka ) . '%">' . $dily . '</span>'
 		. '<span class="bmk-kral__body">' . esc_html( number_format_i18n( $radek['body'] ) ) . ' b.</span>'
 		. $rozpis_text
-		. '</span></span>'
+		. '</span>' . $cisla . '</span>'
 		. '<meta itemprop="position" content="' . esc_attr( (string) $poradi ) . '">'
 		. '<meta itemprop="url" content="' . esc_url( get_permalink() . '#' . $kotva ) . '">'
 		. '</li>';

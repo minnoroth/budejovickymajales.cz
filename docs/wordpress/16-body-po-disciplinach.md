@@ -125,7 +125,17 @@ Odhad: **1,5 hodiny** i s úpravou návodu a ověřením na obou šířkách.
 | Dlouhá čísla | Pět číslic plus mezera (`12 345`) u všech čtyř disciplín je nejhorší případ. |
 | Odečítač obrazovky | Skrytý rozpis `.bmk-jen-pro-ctecku` by se zdvojil — při vypsání čísel ho odebrat. |
 
-## 6. Otázka na zadavatele
+## 6. Rozhodnuto 5. 11. 2026
+
+Zadavatel si varianty prohlédl na maketě se skutečným rozložením bodů a vybral
+**variantu C** — čísla pod pruhem, názvy nese legenda. Hotovo, nasazeno.
+
+Varianta B (čísla uvnitř pruhu) se na maketě potvrdila jako hezká na počítači
+a **úplně neúčinná na mobilu**: tam se nevešlo ani jedno číslo, protože i nejširší
+dílek vedoucího kandidáta má 44 px na hraně. Kdyby se k C někdy přidávala, pak jen
+jako doplněk na širokém okně.
+
+## 7. Původní otázka na zadavatele (zodpovězeno výběrem varianty C)
 
 Varianta D vypisuje **jen čísla** a spoléhá na legendu nad výpisem. Druhá možnost je
 psát i zkrácené názvy (`jamy 2 100 · hra 1 800 · výzvy 1 500 · ostatní 498`) — je to
