@@ -257,6 +257,71 @@ body.home .bm-pas-hlavni {
   .wp-block-latest-posts.is-grid li { transition: none; }
 }
 
+/* ── Aktuality: kartičky výpisu ───────────────────────────────── */
+/* Kartička je ta samá jako v „Nepřehlédni", u Králů a v Osvěžovnách:
+   černý obrys a plakátový stín při najetí. Kadence umí jen měkký stín,
+   nebo nic — proto se kreslí tady. Pozadí kartičky si drží sama, i když
+   je archiv přepnutý na „unboxed"; to vypnulo jen rám od Kadence.
+
+   Selektor je obecný schválně: stejně vypadá i výsledek hledání nebo
+   výpis rubriky, což je totéž podání téže věci. */
+.loop-entry {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background: var(--global-palette9);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  transition: box-shadow .12s ease;
+}
+.loop-entry:hover,
+.loop-entry:focus-within { box-shadow: 3px 3px 0 var(--global-palette3); }
+@media (prefers-reduced-motion: reduce) { .loop-entry { transition: none; } }
+
+.loop-entry .entry-content-wrap {
+  padding: 18px 20px 20px;
+  display: flex; flex-direction: column; gap: 9px; flex: 1;
+}
+.loop-entry .entry-header { display: flex; flex-direction: column; gap: 9px; }
+.loop-entry .entry-title { font-size: 21px; font-weight: 800; line-height: 1.18; margin: 0; }
+.loop-entry .entry-title a { color: var(--global-palette3); text-decoration: none; }
+.loop-entry .entry-meta { font-size: 13px; color: var(--global-palette5); }
+.loop-entry .entry-summary { font-size: 14px; color: var(--global-palette4); }
+.loop-entry .entry-summary p { margin: 0; }
+.loop-entry .entry-footer { margin-top: auto; padding-top: 2px; }
+.loop-entry .more-link-wrap { margin: 0; font-size: 13px; font-weight: 800; }
+
+/* Rubrika jako štítek — stejný tvar jako u akcí v programu. */
+.loop-entry .entry-taxonomies .category-links a {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 2px 10px;
+  background: var(--global-palette1); color: var(--global-palette3);
+  text-decoration: none;
+}
+
+/* Náhledový obrázek sedí na obrysu, ne uvnitř odsazení. */
+.loop-entry .post-thumbnail { margin: 0; }
+.loop-entry .post-thumbnail img {
+  display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover;
+  border-bottom: var(--bm-ramecek);
+}
+
+/* Kadence dělí šířku na tři stejné sloupce, takže jediný článek vypadal
+   jako díra po dvou dalších. Kartičky mají strop šířky a pakují se zleva:
+   jeden článek je pak první v řadě, ne zbytek po rozpadlé mřížce. */
+.site-main .kadence-posts-list.grid-cols {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 360px));
+  justify-content: start;
+}
+
+/* Text článku drží šířku — přes celý obsah se dlouhý řádek špatně čte. */
+body.single-post .entry-content > p,
+body.single-post .entry-content > ul,
+body.single-post .entry-content > ol { max-width: 62ch; }
+
 /* ── Rozcestník kotev ─────────────────────────────────────────── */
 /* Nahrazuje rozbalovátko, které měla stránka v menu. Sekce jsou na jedné
    stránce pod sebou a tyhle odkazy na ně skáčou. */
@@ -626,7 +691,9 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
 /* Stránky, které si nadpis nedávají do obsahu (O festivalu, Historie,
    Kontakt), ho dostávají od Kadence v titulkovém pásu. Dřív byl bílý na
    zelené, od 6. 11. 2026 je černý na bílé a podtržení platí i pro něj. */
-.entry-hero .entry-title {
+.entry-hero .entry-title,
+/* Výpis Aktualit má nadpis v jiné třídě než stránky a příspěvky. */
+.entry-hero .archive-title {
   display: inline;
   padding: 0 2px;
   background-image: linear-gradient(

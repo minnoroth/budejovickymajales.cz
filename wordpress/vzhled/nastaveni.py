@@ -191,18 +191,38 @@ NASTAVENI = {
     # obsahu (O festivalu, Historie, Kontakt). Od 6. 11. 2026 je bílý
     # a nadpis černý, aby vypadal stejně jako na stránkách stavěných
     # skriptem; podtržení barvou sekce mu dává bm.css.
-    "page_title_background": {"desktop": {"color": "palette9"}},
+    # Pás v barvě stránky = žádný viditelný pás. Bílá (palette9) tu byla od
+    # 6. 11., kdy nahradila zelenou; proti papírové stránce ale dělala šev,
+    # který nikdo nečetl jako záměr.
+    "page_title_background": {"desktop": {"color": "palette8"}},
     "page_title_font": pismo(48, 40, 34, 1.08, barva="palette3"),
     # Bez "above" Kadence pás nevykreslí a bílý titulek skončí na bílém pozadí.
     "post_title_layout": "above",
     "post_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "post_title_elements": ["categories", "title", "meta"],
-    "post_title_background": {"desktop": {"color": "palette9"}},
+    "post_title_background": {"desktop": {"color": "palette8"}},
     "post_title_font": pismo(44, 36, 32, 1.1, barva="palette3"),
     "post_title_meta_color": {"color": "palette5", "hover": "palette2"},
     "post_title_category_color": {"color": "palette2", "hover": "palette3"},
     "post_title_height": {"size": {"mobile": "", "tablet": "", "desktop": ""},
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
+
+    # ── Aktuality: výpis a článek ────────────────────────────────────
+    # Aktuality byly poslední část webu ve výchozím vzhledu Kadence: nadpis
+    # na střed v šedém pásu, kartičky s měkkým stínem a bílý rám kolem textu
+    # článku. Na jedné obrazovce se tím potkala tři skoro bílá pozadí
+    # (#FAFAF9 stránka, #F2F2F0 pás, #FFFFFF rám) a švy mezi nimi vypadaly
+    # jako nečistota, ne jako záměr. Zůstává jedna plocha: papírová stránka.
+    "post_archive_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
+    # Pás v barvě stránky = žádný pás. Vypnout ho úplně nejde, aniž by zmizel
+    # i nadpis; takhle zůstane nadpis tam, kde ho mají ostatní stránky.
+    "post_archive_title_background": {"desktop": {"color": "palette8"}},
+    # Písmo nadpisu archivu se tu nenastavuje: „post_archive_title_font"
+    # Kadence nezná a Customizer ho odmítne. Nadpis bere velikost z h1.
+    # „unboxed" sundá z kartiček i z článku bílý rám od Kadence. Kartičkám
+    # kreslí vlastní obrys bm.css — plakátový rámeček Kadence nenabízí.
+    "post_archive_content_style": "unboxed",
+    "post_content_style": "unboxed",
 
     # ── Patička ──────────────────────────────────────────────────────
     "footer_wrap_background": {"desktop": {"color": "palette3"}},
