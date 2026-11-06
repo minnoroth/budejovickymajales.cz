@@ -47,6 +47,25 @@ Text sedí přímo na stránce, bez bílého rámu, a drží šířku 62 znaků 
 obsah se dlouhý řádek špatně čte. Rubrika, nadpis s podtržením a řádek s autorem
 a datem zůstaly, jak byly.
 
+## Dvě pasti v jedné kartičce
+
+Po prvním nasazení zadavatel: *„Je to rozházené."* Měl pravdu nadvakrát.
+
+**Text seděl rovnou na obrysu.** Odsazení `.loop-entry .entry-content-wrap`
+přebíjí Kadence pravidlem `.archive.content-style-unboxed .entry-content-wrap
+{ padding: 0 }` — o třídu delším. Je to **popáté stejná past**, pokaždé v jiném
+rohu webu. Opravuje se přidáním `body` do selektoru.
+
+**Mezery se sčítaly.** Kartička dostala flexový `gap`, jenže Kadence dává
+každému prvku ještě svůj okraj (0,5em, 1em). Dohromady z toho bylo 15 px mezi
+štítkem a nadpisem, 22 mezi nadpisem a datem a 40 mezi datem a perexem — proto
+to působilo rozsypaně. Teď drží rytmus jedna mezera a okraje jsou vynulované:
+**8 · 8 · 14 · 14**, nahoře 21, dole 23.
+
+Je to podruhé táž chyba; poprvé v modálu detailu akce. Zápis
+`.loop-entry .entry-header .entry-meta { margin: 0 }` je tam schválně
+dvojmo — kratší selektor na datum nestačí.
+
 ## Kde to žije
 
 | Co | Kde |
