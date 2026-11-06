@@ -242,6 +242,21 @@ body.home .bm-pas-hlavni {
 }
 .wp-block-latest-posts__post-date { padding: 0 18px; font-size: 14px; font-weight: 600; color: var(--global-palette5); }
 
+/* Stejný plakátový stín při najetí jako mají kartičky všude jinde —
+   v carouselu (.bmc-karta:hover), v programu (.bmp-karta:hover)
+   i v osvěžovnách (.bmo-karta:hover). Aktuality na to zapomněly, takže
+   vypadaly jako jediná kartička na webu, která na myš nereaguje.
+   Focus-within je tam kvůli klávesnici: kartička není odkaz, odkaz je
+   uvnitř ní. */
+.wp-block-latest-posts.is-grid li { transition: box-shadow .12s ease; }
+.wp-block-latest-posts.is-grid li:hover,
+.wp-block-latest-posts.is-grid li:focus-within {
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wp-block-latest-posts.is-grid li { transition: none; }
+}
+
 /* ── Rozcestník kotev ─────────────────────────────────────────── */
 /* Nahrazuje rozbalovátko, které měla stránka v menu. Sekce jsou na jedné
    stránce pod sebou a tyhle odkazy na ně skáčou. */
