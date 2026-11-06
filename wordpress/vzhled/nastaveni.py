@@ -179,16 +179,20 @@ NASTAVENI = {
     "page_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "page_title_height": {"size": {"mobile": "", "tablet": "", "desktop": ""},
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
-    "page_title_background": {"desktop": {"color": "palette1"}},
-    "page_title_font": pismo(48, 40, 34, 1.08, barva="palette9"),
+    # Titulkový pás kreslí Kadence u stránek, které si nadpis nedávají do
+    # obsahu (O festivalu, Historie, Kontakt). Od 6. 11. 2026 je bílý
+    # a nadpis černý, aby vypadal stejně jako na stránkách stavěných
+    # skriptem; podtržení barvou sekce mu dává bm.css.
+    "page_title_background": {"desktop": {"color": "palette9"}},
+    "page_title_font": pismo(48, 40, 34, 1.08, barva="palette3"),
     # Bez "above" Kadence pás nevykreslí a bílý titulek skončí na bílém pozadí.
     "post_title_layout": "above",
     "post_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "post_title_elements": ["categories", "title", "meta"],
-    "post_title_background": {"desktop": {"color": "palette1"}},
-    "post_title_font": pismo(44, 36, 32, 1.1, barva="palette9"),
-    "post_title_meta_color": {"color": "palette9", "hover": "palette15"},
-    "post_title_category_color": {"color": "palette15", "hover": "palette9"},
+    "post_title_background": {"desktop": {"color": "palette9"}},
+    "post_title_font": pismo(44, 36, 32, 1.1, barva="palette3"),
+    "post_title_meta_color": {"color": "palette5", "hover": "palette2"},
+    "post_title_category_color": {"color": "palette2", "hover": "palette3"},
     "post_title_height": {"size": {"mobile": "", "tablet": "", "desktop": ""},
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
 

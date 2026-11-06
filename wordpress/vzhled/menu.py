@@ -17,6 +17,9 @@ Změna z 6. 11. 2026 (zadavatel):
 
 - Pořadí hlavní úrovně je Program, Králové, Osvěžovny — králové jsou to,
   čím se festival liší od ostatních, osvěžovny jsou servis.
+- Položka „O festivalu" vede na stránku se skutečným textem, ne na rozcestník:
+  obsah stránky O nás se přenesl na /o-festivalu/ a položka „O nás" z menu
+  zmizela. Dělá to o-festivalu.py.
 - Praktické info se stěhuje pod O festivalu, a to jako první položka.
   Dokument 13-struktura-a-program.md to nedoporučoval (je to informace pro
   návštěvníka, kdežto O festivalu je o organizaci); zadavatel na přesunu
@@ -41,7 +44,9 @@ STROM = [
         # Praktické info je pro návštěvníka, ne o organizaci — proto stojí
         # nad vším ostatním, oddělené od zbytku seznamu.
         ("Praktické info", 86),
-        ("O nás", 97),
+        # „O nás" tu není schválně: její text se 6. 11. 2026 přenesl na
+        # stránku O festivalu, na kterou vede sama položka menu. Viz
+        # o-festivalu.py. Položka by vedla na totéž o úroveň níž.
         ("Historie", 99),
         # Aktuality jsou tu nejnavštěvovanější položka ze zbytku.
         ("Aktuality", 114),

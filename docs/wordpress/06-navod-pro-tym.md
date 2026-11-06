@@ -810,6 +810,10 @@ neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 > i podstránky. Když se pořadí položek v menu změní, barvy se posunou s nimi.
 > Stránka, která v menu není, zůstane černobílá.
 
+> **Stránka „O nás“ je v konceptech.** Její text se 6. 11. 2026 přenesl na stránku
+> *O festivalu*, na kterou vede položka v menu. Kdyby ji někdo hledal, je ve
+> **Stránky (Pages) → Koncepty (Drafts)**.
+
 ### 9.1 Otevřít stránku
 
 1. V levém menu **Stránky (Pages)** → **Všechny stránky (All Pages)**.

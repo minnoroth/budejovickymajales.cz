@@ -108,6 +108,42 @@ a přidávají `.site-header` navíc.
 z položky menu, takže by zálohu nikdy nepustila ke slovu a menu by zůstalo
 jednobarevné. Správně je `var(--bm-polozka, var(--global-palette15))`.
 
+## Čtyři věci z prvního proklikání (6. 11. 2026)
+
+**Logo sedělo o 8 px níž než štítky.** Kadence dává obalu loga odsazení 16 px shora
+a 0 zdola; hlavička se pak sice zarovná na střed, ale kolem loga je nesymetrická
+mezera. Odsazení se v `bm.css` nuluje.
+
+**Rozbalovátko se zavíralo cestou dolů.** Kartička visí 36 px pod položkou a v té
+mezeře nebylo nic, takže kurzor opustil položku dřív, než došel do nabídky.
+Mezeru teď překlenuje neviditelný `::before` samotné kartičky — patří jí, takže
+položka zůstane „pod myší“.
+
+**Obsah nestál na stejné svislici jako nadpis.** Skupiny mají `contentSize` 1160 px,
+jenže obal stránky je širší (1242 px při 1440), takže WordPress bloky uvnitř
+centroval a přidával jim 41 px z každé strany. Nadpis je `display: inline` a ten se
+centrovat nedá, takže jediný zůstal vlevo — a rozdíl byl vidět. Na mobilu je obal
+užší než 1160 px, proto se to tam neprojevilo. Řeší to pravidlo, které blokům uvnitř
+skupin podstránky ruší `max-width`; pásy přes celou šířku na úvodu jsou z něj vyjmuté,
+jinak by se hero roztáhlo přes celé okno.
+
+**Titulkový pás Kadence byl pořád zelený.** Stránky, které si nadpis nedávají do
+obsahu (O festivalu, Historie, Kontakt, Aktuality), dostávají nadpis od Kadence
+v samostatném pásu. Ten teď má bílé pozadí, černý nadpis a stejné podtržení jako
+nadpisy v obsahu, takže obě skupiny stránek vypadají stejně.
+
+## Rozcestník O festivalu zrušen
+
+Stránka `/o-festivalu/` byla prázdný rozcestník — jedna věta a „Úvodní text dodá
+zadavatel“. Kliknutí na položku menu tedy skončilo na stránce, která nic neříká,
+kdežto skutečný text byl vedle, na podstránce *O nás*.
+
+Text se přenesl na `/o-festivalu/` a stránka *O nás* je v konceptech (nemazala se,
+vrátí se jedním klikem). Z rozbalovátka položka *O nás* zmizela. Adresa zůstává
+`/o-festivalu/`, takže podstránky mají dál `/o-festivalu/<nazev>/`.
+
+Dělá to `wordpress/vzhled/o-festivalu.py`, jednorázově a opakovaně spustitelně.
+
 ## Co zůstává otevřené
 
 - **Žlutá znamená dvě věci.** Program má žlutou sekci a zároveň je na něm žlutá

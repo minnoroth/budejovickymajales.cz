@@ -17,6 +17,7 @@ Proč je co takhle a kde se to mění klikáním popisuje
 | `program.py` | obsah stránky Program |
 | `kralove.py` | obsah stránky Králové |
 | `osvezovny.py` | obsah stránky Osvěžovny |
+| `o-festivalu.py` | zruší prázdný rozcestník, přenese na něj text z O nás a tu schová do konceptů |
 | `osvezovny-data.py` | **jednorázové** naplnění osvěžoven daty z dnešního webu |
 | `oriznout-logo.py` | ořízne průhledný rám loga pro hlavičku (potřebuje Pillow) |
 | `pripojeni.py` | společné přihlášení, REST a zápis do Customizeru |
