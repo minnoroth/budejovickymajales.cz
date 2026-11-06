@@ -337,6 +337,86 @@
 	}
 
 	/* ─────────────────────────────────────────────────────────────────────
+	   Program vložený do stránky
+
+	   Každý požadavek na WordPress stojí na sdíleném hostingu kolem 1,2 s
+	   bez ohledu na objem dat, a program jich potřebuje tři za sebou.
+	   Doplněk proto tytéž veřejné endpointy zavolá na serveru a výsledek
+	   vloží do stránky — viz bm-program.php. Tahle část ho vyzvedne.
+
+	   Je to zkratka, ne závislost: když blok chybí, je poškozený nebo mu
+	   chybí pole, program se zeptá přes REST jako dřív. Vynutit tu delší
+	   cestu jde adresou ?program=rest, což je jediný způsob, jak ji po
+	   zapnutí zkratky ještě někdy projít.
+	   ───────────────────────────────────────────────────────────────────── */
+
+	var ID_VLOZENYCH_DAT = 'bm-program-vlozena-data';
+
+	/**
+	 * Akce z vložených dat je ořezaná na pole, která pohled čte. Když
+	 * v PHP někdo ten výčet zkrátí moc, pozná se to tady a program se
+	 * radši zeptá přes REST, než aby vykreslil půlku programu.
+	 */
+	function akceJeCela(akce) {
+		return !!akce && akce.id !== undefined && akce.title !== undefined &&
+			!!akce.start_date_details && !!akce.end_date_details;
+	}
+
+	function vlozenaData() {
+		if (typeof document === 'undefined') {
+			return null;
+		}
+		if (typeof location !== 'undefined' && /[?&]program=rest\b/.test(location.search)) {
+			return null;
+		}
+
+		var blok = document.getElementById(ID_VLOZENYCH_DAT);
+		if (!blok) {
+			return null;
+		}
+
+		var data;
+		try {
+			data = JSON.parse(blok.textContent);
+		} catch (chyba) {
+			return null;
+		}
+
+		if (!data || !Array.isArray(data.akce)) {
+			return null;
+		}
+		if (data.akce.length && !akceJeCela(data.akce[0])) {
+			return null;
+		}
+
+		return data;
+	}
+
+	/**
+	 * Z nepoužitých odpovědí udělá program. Je to jediné místo, kde se
+	 * data upravují — obě cesty (vložená i přes REST) jím procházejí, aby
+	 * se nemohly rozejít.
+	 */
+	function sestav(rocnik, syroveAkce, syroveKategorie, syroveMista) {
+		/* Hranici 6:00 musí dodržet klient — TEC si konec rozsahu přepsal na
+		   23:59:59, takže v odpovědi je i to, co se děje den po festivalu.
+		   Ořezává se jen konec: začátek rozsahu hlídá už dotaz, takže akce
+		   z brzkého rána prvního dne se nesmí ztratit. */
+		var akce = (syroveAkce || [])
+			.filter(function (polozka) {
+				return !rocnik || !rocnik.datum_do || klicDneAkce(polozka) <= rocnik.datum_do;
+			})
+			.map(upravAkci);
+
+		return {
+			rocnik: rocnik,
+			akce: akce,
+			kategorie: (syroveKategorie || []).map(upravKategorii),
+			mista: (syroveMista || []).map(upravMisto)
+		};
+	}
+
+	/* ─────────────────────────────────────────────────────────────────────
 	   Rezervace jedné akce
 
 	   Kapacita a obsazenost se nenačítají s programem, ale až když se
@@ -428,6 +508,16 @@
 			koren += '/';
 		}
 
+		var vlozena = vlozenaData();
+		if (vlozena) {
+			return sestav(
+				vlozena.rocnik ? terminRocniku(vlozena.rocnik) : null,
+				vlozena.akce,
+				vlozena.kategorie,
+				vlozena.mista
+			);
+		}
+
 		var vybrany = await vyberRocnik(koren);
 		var rocnik = vybrany.rocnik;
 
@@ -460,22 +550,7 @@
 			syrove = syrove.concat((odpoved && odpoved.events) || []);
 		});
 
-		/* Hranici 6:00 musí dodržet klient — TEC si konec rozsahu přepsal na
-		   23:59:59, takže v odpovědi je i to, co se děje den po festivalu.
-		   Ořezává se jen konec: začátek rozsahu hlídá už dotaz, takže akce
-		   z brzkého rána prvního dne se nesmí ztratit. */
-		var akce = syrove
-			.filter(function (polozka) {
-				return !rocnik || !rocnik.datum_do || klicDneAkce(polozka) <= rocnik.datum_do;
-			})
-			.map(upravAkci);
-
-		return {
-			rocnik: rocnik,
-			akce: akce,
-			kategorie: vse[0].map(upravKategorii),
-			mista: vse[1].map(upravMisto)
-		};
+		return sestav(rocnik, syrove, vse[0], vse[1]);
 	}
 
 	bmProgram.HRANICE_DNE = HRANICE_DNE;

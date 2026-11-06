@@ -16,6 +16,11 @@
  * do databáze. Když TEC přepíše vnitřnosti, nás se to netýká — rozbít nás umí
  * jen změna REST API, a to je vidět hned.
  *
+ * Od 7. 11. 2026 si PHP tytéž veřejné endpointy zavolá i samo (vnitřně, přes
+ * rest_do_request) a výsledek vloží do stránky, aby program nečekal na tři
+ * požadavky za sebou. Pravidlo se tím neporušuje: mluví se pořád jen REST
+ * API, jen bez odbočky přes síť. Podrobnosti dole u BM_PROGRAM_CACHE.
+ *
  * Proč je záchranný blok rovnou v HTML a ne v <noscript>:
  * Kryje tři selhání naráz — vypnutý JavaScript, chybu ve skriptu i nedostupné
  * REST API. Ve <noscript> by poslední dvě nezabraly. Skript ho odstraní,
@@ -26,6 +31,342 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_enqueue_scripts', 'bm_program_zarad_predem' );
 add_shortcode( 'bm_program', 'bm_program_zkratka' );
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Program vložený rovnou do stránky
+
+   Proč: každý požadavek na WordPress stojí na sdíleném hostingu kolem
+   1,2 vteřiny, a to bez ohledu na množství dat — naměřeno 7. 11. 2026:
+   statický soubor 0,13 s, 2,6 kB z REST 1,34 s, 544 kB z REST 1,20 s. Je to
+   nastartování PHP a pluginů, ne přenos. Program potřeboval tři takové
+   požadavky za sebou (termín ročníku se musí znát dřív, než se dá zeptat na
+   akce), takže se vykresloval kolem čtyř vteřin.
+
+   Stránka si svou 1,2 s platí tak jako tak. Když se do ní program vloží
+   rovnou, vykreslí se v témže okamžiku a žádný další požadavek není.
+
+   Co se tím NEMĚNÍ: javascript dál umí celou cestu přes REST. Vložená data
+   jsou zkratka, ne nová závislost — když chybí, jsou poškozená nebo moc
+   velká, program se doptá jako dřív a návštěvník nic nepozná.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const BM_PROGRAM_CACHE = 'bm_program_vlozena_data';
+
+// Záloha pro případ, že by některá cesta úprav neodpálila zneplatnění níž.
+const BM_PROGRAM_PLATNOST = 15 * MINUTE_IN_SECONDS;
+
+// Přes tenhle strop se do stránky radši nevkládá nic a program se doptá
+// po svém. Ročník 2026 má 102 akcí a vejde se zhruba do 100 kB.
+const BM_PROGRAM_STROP = 300 * 1024;
+
+/**
+ * Pole akce, která se vkládají do stránky.
+ *
+ * JE TO SMLOUVA S JAVASCRIPTEM. Čte je `upravAkci()` v program-data.js
+ * a mapování akcí v program-view.js (hledej „AKCE = (DATA.akce"). Když
+ * pohled začne používat další pole kalendáře, musí přibýt i sem — jinak
+ * ho uvidí jen při načtení přes REST a ve vložených datech bude chybět.
+ *
+ * Proč se vůbec ořezává: syrová akce z kalendáře má přes 3 kB, z toho
+ * polovinu v polích, která nikdo nečte (global_id_lineage, rest_url,
+ * cost_details, organizer…). Ořezaná má 578 B.
+ */
+const BM_PROGRAM_POLE_AKCE = array(
+	'id', 'title', 'description', 'excerpt', 'url', 'all_day', 'featured',
+	'hide_from_listings', 'status', 'start_date_details', 'end_date_details',
+	'ticketed',
+);
+
+add_action( 'save_post_tribe_events', 'bm_program_zapomen' );
+add_action( 'save_post_tribe_venue', 'bm_program_zapomen' );
+add_action( 'deleted_post', 'bm_program_zapomen' );
+add_action( 'created_term', 'bm_program_zapomen' );
+add_action( 'edited_term', 'bm_program_zapomen' );
+add_action( 'delete_term', 'bm_program_zapomen' );
+
+/**
+ * Zahodí vloženou kopii programu. Visí na úpravách akcí, míst a termínů;
+ * co by se přes ně nepropsalo, dožene patnáctiminutová platnost.
+ *
+ * @return void
+ */
+function bm_program_zapomen() {
+	delete_transient( BM_PROGRAM_CACHE );
+}
+
+/**
+ * Jeden dotaz na vlastní REST API, bez HTTP a bez druhého startu WordPressu.
+ *
+ * @param string              $cesta     Například „/wp/v2/rocnik".
+ * @param array<string,mixed> $parametry Parametry dotazu.
+ * @return array<mixed>|null Tělo odpovědi, nebo null při chybě.
+ */
+function bm_program_rest( $cesta, $parametry = array() ) {
+	$pozadavek = new WP_REST_Request( 'GET', $cesta );
+	foreach ( $parametry as $klic => $hodnota ) {
+		$pozadavek->set_param( $klic, $hodnota );
+	}
+
+	$odpoved = rest_do_request( $pozadavek );
+	if ( $odpoved->is_error() ) {
+		return null;
+	}
+
+	$data = rest_get_server()->response_to_data( $odpoved, false );
+
+	return is_array( $data ) ? $data : null;
+}
+
+/**
+ * Datum ze Secure Custom Fields na ISO.
+ *
+ * POZOR: stejné pravidlo má `naIso()` v program-data.js. Je tu podruhé
+ * schválně — PHP musí znát rozsah ročníku dřív, než se může zeptat na akce,
+ * takže bez něj se dotaz nedá složit. Kdyby se obě verze rozešly, projeví se
+ * to tím, že se vloží jiný ročník, ne nesmyslná data.
+ *
+ * @param mixed $hodnota Hodnota z pole termínu.
+ * @return string ISO datum, nebo prázdný řetězec.
+ */
+function bm_program_iso( $hodnota ) {
+	$text = trim( (string) $hodnota );
+
+	if ( preg_match( '/^\d{8}$/', $text ) ) {
+		return substr( $text, 0, 4 ) . '-' . substr( $text, 4, 2 ) . '-' . substr( $text, 6, 2 );
+	}
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}/', $text ) ) {
+		return substr( $text, 0, 10 );
+	}
+
+	return '';
+}
+
+/**
+ * Rozsah dotazu na akce jednoho ročníku.
+ *
+ * Konec je o den dál v 6:00, aby nevypadly ranní sety po půlnoci. Hranici
+ * 6:00 pak dodrží až filtr v javascriptu — TEC si hodinu stejně přepíše
+ * na 23:59:59. Totéž dělá `strankaAkci()` v program-data.js.
+ *
+ * @param array<string,mixed> $termin Termín ročníku s klíči datum_od a datum_do.
+ * @return array{0:string,1:string} Začátek a konec rozsahu.
+ */
+function bm_program_rozsah( $termin ) {
+	$konec = gmdate( 'Y-m-d', strtotime( $termin['datum_do'] . ' +1 day' ) );
+
+	return array( $termin['datum_od'] . ' 00:00:00', $konec . ' 06:00:00' );
+}
+
+/**
+ * Poskládá program nejnovějšího ročníku, který nějaký má.
+ *
+ * Stejné pravidlo jako `vyberRocnik()` v program-data.js: rozhoduje datum
+ * akce, ne zaškrtnutý ročník.
+ *
+ * @return array<string,mixed>|null Data pro javascript, nebo null.
+ */
+function bm_program_sestav() {
+	$terminy = bm_program_rest( '/wp/v2/rocnik', array(
+		'per_page' => 100,
+		'_fields'  => 'id,name,slug,acf',
+	) );
+	if ( ! $terminy ) {
+		return null;
+	}
+
+	// Nejnovější napřed. Názvy jsou roky, stejné pravidlo má bm-termin.php.
+	usort( $terminy, static function ( $a, $b ) {
+		return strnatcmp( (string) $b['name'], (string) $a['name'] );
+	} );
+
+	$vitez = null;
+	$akce  = array();
+
+	foreach ( $terminy as $termin ) {
+		$acf = isset( $termin['acf'] ) && is_array( $termin['acf'] ) ? $termin['acf'] : array();
+		$od  = bm_program_iso( isset( $acf['datum_od'] ) ? $acf['datum_od'] : '' );
+		$do  = bm_program_iso( isset( $acf['datum_do'] ) ? $acf['datum_do'] : '' );
+		if ( '' === $od || '' === $do ) {
+			continue;
+		}
+
+		list( $zacatek, $konec ) = bm_program_rozsah( array( 'datum_od' => $od, 'datum_do' => $do ) );
+
+		$stranka = bm_program_rest( '/tribe/events/v1/events', array(
+			'per_page'   => 50,
+			'page'       => 1,
+			'start_date' => $zacatek,
+			'end_date'   => $konec,
+			'status'     => 'publish',
+		) );
+
+		if ( ! $stranka || empty( $stranka['total'] ) ) {
+			continue;
+		}
+
+		$vitez = $termin;
+		$akce  = isset( $stranka['events'] ) ? $stranka['events'] : array();
+
+		// Strop stránkování je u kalendáře 50 i tehdy, když se požádá o víc.
+		$stranek = min( (int) ( isset( $stranka['total_pages'] ) ? $stranka['total_pages'] : 1 ), 40 );
+		for ( $i = 2; $i <= $stranek; $i++ ) {
+			$dalsi = bm_program_rest( '/tribe/events/v1/events', array(
+				'per_page'   => 50,
+				'page'       => $i,
+				'start_date' => $zacatek,
+				'end_date'   => $konec,
+				'status'     => 'publish',
+			) );
+			if ( $dalsi && ! empty( $dalsi['events'] ) ) {
+				$akce = array_merge( $akce, $dalsi['events'] );
+			}
+		}
+		break;
+	}
+
+	if ( ! $vitez ) {
+		// Ročník bez programu není chyba — javascript na to má stav
+		// „Program se připravuje". Vložíme tedy termín a prázdné akce.
+		$vitez = isset( $terminy[0] ) ? $terminy[0] : null;
+	}
+
+	return array(
+		'rocnik'    => $vitez,
+		'akce'      => array_map( 'bm_program_orez_akci', $akce ),
+		'kategorie' => bm_program_vsechny( '/wp/v2/tribe_events_cat', 'id,name,slug,parent,acf' ),
+		'mista'     => bm_program_vsechny( '/wp/v2/tribe_venue', 'id,slug,link,title,acf' ),
+	);
+}
+
+/**
+ * Všechny stránky jednoho seznamu z wp/v2. Konec se pozná kratší odpovědí.
+ *
+ * @param string $cesta Cesta endpointu.
+ * @param string $pole  Seznam polí pro _fields.
+ * @return array<mixed>
+ */
+function bm_program_vsechny( $cesta, $pole ) {
+	$vse = array();
+
+	for ( $stranka = 1; $stranka <= 10; $stranka++ ) {
+		$davka = bm_program_rest( $cesta, array(
+			'per_page' => 100,
+			'page'     => $stranka,
+			'_fields'  => $pole,
+		) );
+		if ( ! $davka ) {
+			break;
+		}
+		$vse = array_merge( $vse, $davka );
+		if ( count( $davka ) < 100 ) {
+			break;
+		}
+	}
+
+	return $vse;
+}
+
+/**
+ * Ořeže akci na pole, která javascript opravdu čte. Viz BM_PROGRAM_POLE_AKCE.
+ *
+ * @param array<string,mixed> $akce Syrová akce z kalendáře.
+ * @return array<string,mixed>
+ */
+function bm_program_orez_akci( $akce ) {
+	$orez = array();
+
+	foreach ( BM_PROGRAM_POLE_AKCE as $klic ) {
+		if ( array_key_exists( $klic, $akce ) ) {
+			$orez[ $klic ] = $akce[ $klic ];
+		}
+	}
+
+	// Vnořené objekty se ořezávají zvlášť — plné mají přes kilobajt.
+	$misto = isset( $akce['venue'] ) && is_array( $akce['venue'] ) ? $akce['venue'] : array();
+	if ( $misto ) {
+		$orez['venue'] = array_intersect_key( $misto, array_flip( array( 'id', 'slug', 'venue', 'city' ) ) );
+	}
+
+	$obraz = isset( $akce['image'] ) && is_array( $akce['image'] ) ? $akce['image'] : array();
+	if ( ! empty( $obraz['url'] ) ) {
+		$orez['image'] = array( 'url' => $obraz['url'] );
+	}
+
+	$orez['categories'] = array_map( static function ( $kategorie ) {
+		return array_intersect_key( $kategorie, array_flip( array( 'id', 'name', 'slug', 'parent' ) ) );
+	}, isset( $akce['categories'] ) && is_array( $akce['categories'] ) ? $akce['categories'] : array() );
+
+	$orez['tags'] = array_map( static function ( $stitek ) {
+		return array_intersect_key( $stitek, array_flip( array( 'id', 'name' ) ) );
+	}, isset( $akce['tags'] ) && is_array( $akce['tags'] ) ? $akce['tags'] : array() );
+
+	return $orez;
+}
+
+/**
+ * Vložená data programu, z mezipaměti nebo čerstvá.
+ *
+ * Skládá se vždycky jako nepřihlášený návštěvník. Kdyby to běželo pod
+ * redaktorem, mohly by se do mezipaměti dostat rozepsané akce a pak by se
+ * ukazovaly všem.
+ *
+ * @return array<string,mixed>|null
+ */
+function bm_program_data() {
+	$cerstve = isset( $_GET['program'] ) && 'cerstvy' === $_GET['program']; // phpcs:ignore WordPress.Security.NonceVerification
+
+	if ( ! $cerstve ) {
+		$ulozene = get_transient( BM_PROGRAM_CACHE );
+		if ( is_array( $ulozene ) ) {
+			return $ulozene;
+		}
+	}
+
+	$puvodni = get_current_user_id();
+	wp_set_current_user( 0 );
+
+	try {
+		$data = bm_program_sestav();
+	} catch ( Throwable $e ) {
+		$data = null;
+	}
+
+	wp_set_current_user( $puvodni );
+
+	if ( is_array( $data ) ) {
+		set_transient( BM_PROGRAM_CACHE, $data, BM_PROGRAM_PLATNOST );
+	}
+
+	return $data;
+}
+
+/**
+ * Data jako blok JSON do stránky.
+ *
+ * JSON_HEX_TAG je tu kvůli bezpečnosti, ne kvůli kráse: bez něj by
+ * `</script>` v popisu akce ukončilo blok a zbytek popisu by se stal
+ * HTML stránky. S ním je z lomené závorky < a ukončit blok nejde.
+ *
+ * @return string
+ */
+function bm_program_vlozena_data() {
+	$data = bm_program_data();
+	if ( ! is_array( $data ) ) {
+		return '';
+	}
+
+	$json = wp_json_encode(
+		$data,
+		JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+	);
+
+	if ( ! is_string( $json ) || strlen( $json ) > BM_PROGRAM_STROP ) {
+		return '';
+	}
+
+	return '<script type="application/json" id="bm-program-vlozena-data">' . $json . '</script>';
+}
 
 /**
  * Zařadí styl a skripty. Volá se ze dvou míst, protože každé samo o sobě
@@ -102,7 +443,9 @@ function bm_program_zkratka() {
 			// — musí dávat smysl, ať se program nakonec vykreslí, nebo ne.
 			. '<p>Program se načítá. Celý je dostupný i v kalendáři akcí:</p>'
 			. '<ul>' . $polozky . '</ul>'
-			. '</div></div>';
+			. '</div>'
+			. bm_program_vlozena_data()
+			. '</div>';
 	} catch ( Throwable $e ) {
 		// I když selže zařazení souborů, musí ze zkratky vypadnout odkaz
 		// do kalendáře. Prázdná stránka Program je horší než strohý seznam.

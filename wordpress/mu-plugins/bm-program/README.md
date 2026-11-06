@@ -178,21 +178,59 @@ Návod tím ale neztrácí smysl: zaškrtnutý ročník pořád něco znamená p
 Jak tu větu přeformulovat, **je rozhodnutí pro zadavatele**, ne pro toho, kdo opravuje
 program. Proto je tady poznámka a ne oprava.
 
-## Proč to při první návštěvě trvá
+## Proč je program vložený rovnou do stránky
 
-Každý dotaz na REST API stojí na sdíleném Wedosu **přes vteřinu**, i když vrací pár
-kilobajtů. Naměřeno 4. 11. 2026: `wp/v2/rocnik` 1,25 s, sonda na ročník 1,5 s, stránka
-akcí 1,3 s.
+Naměřeno 7. 11. 2026 na stagingu, vždy s vyhnutou cache:
 
-Pod tři kolečka se to dostat nedá — termín ročníku se musí znát dřív, než se dá zeptat na
-akce. Všechno ostatní jede souběžně: sondy na ročníky po trojicích, a jakmile je ročník
-známý, zbývající stránky akcí spolu s barvami kategorií a bezbariérovostí míst naráz. Tím
-se celek drží kolem **4 vteřin při studené cache** (101 akcí ročníku 2026); postupné
-dotazování stálo 5,2 s.
+| Co | Odpověď | Velikost |
+|---|---|---|
+| statický soubor (`program.css`) | **0,13 s** | 44 kB |
+| HTML stránky `/program/` | 1,29 s | 141 kB |
+| REST `wp/v2/rocnik` | 1,34 s | 2,6 kB |
+| REST `tribe/events/v1/events` | 1,21 s | 25 kB |
+| REST rozcestník `/wp-json/` | 1,20 s | **544 kB** |
 
-Po tu dobu je na stránce vidět záchranný blok. **Proto v něm stojí „Program se načítá",
-a ne „Program se nenačetl"** — ta věta musí dávat smysl, ať se program nakonec vykreslí,
-nebo ne.
+Podstatné jsou poslední dva řádky: **2,6 kB trvá 1,34 s a 544 kB trvá 1,20 s.** Čas
+nezávisí na objemu dat. Je to zhruba 1,2 s na nastartování PHP, pluginů a tématu,
+zaplacené při každém požadavku znovu. Statický soubor, který PHP nepotřebuje, je za
+0,13 s.
+
+Program potřeboval tři takové požadavky za sebou (termín ročníku se musí znát dřív, než
+se dá zeptat na akce), takže se vykresloval kolem **4 vteřin**. Pod tři kolečka to
+zkrátit nešlo.
+
+**Stránka si svou 1,2 s platí tak jako tak**, takže od 7. 11. 2026 si tytéž veřejné
+endpointy zavolá `bm-program.php` sám — vnitřně přes `rest_do_request()`, bez HTTP
+a bez druhého startu WordPressu — a výsledek vloží do stránky jako
+`<script type="application/json" id="bm-program-vlozena-data">`. Program se pak vykreslí
+v tom samém okamžiku, kdy se stránka zobrazí.
+
+Naměřeno po změně: **0 dotazů na REST**, program hotový ve 1,21 s, záchranný blok se
+vůbec neukáže. Cesta přes REST zůstává; `?program=rest` ji vynutí a trvá 4,97 s.
+
+### Co u toho hlídat
+
+| Riziko | Čím je zavřené |
+|---|---|
+| zastaralá kopie | zneplatnění při uložení akce, místa a termínu **plus** platnost 15 minut jako záloha; `?program=cerstvy` přestaví hned |
+| `</script>` v popisu akce ukončí blok | `JSON_HEX_TAG` — z lomené závorky je `\u003C`. Ověřeno vložením `</script><script>…` do akce: nespustilo se |
+| rozepsané akce by viděli všichni | data se skládají pod `wp_set_current_user( 0 )` a s `status=publish`. Ověřeno: koncept ve vložených datech není |
+| budoucí cache stránek (Wedos, Cloudflare) | dneska žádná není (každý požadavek měří 1,2 s). Až bude, musí se při uložení akce promazávat taky |
+
+### Smlouva o polích
+
+`BM_PROGRAM_POLE_AKCE` v `bm-program.php` říká, která pole akce se do stránky vkládají.
+Syrová akce z kalendáře má přes 3 kB, z toho polovinu v polích, co nikdo nečte; ořezaná
+má 578 B. **Když pohled začne používat další pole, musí přibýt i do toho seznamu** —
+jinak ho uvidí jen při načtení přes REST. Javascript si na to dává pozor sám: chybí-li
+první akci `start_date_details`, vložená data zahodí a doptá se.
+
+### Záchranný blok
+
+Při normálním provozu ho nikdo neuvidí, protože program je ve stránce hned. Zůstává pro
+tři selhání: vypnutý JavaScript, chybu ve skriptu a nedostupná data. **Proto v něm pořád
+stojí „Program se načítá", a ne „Program se nenačetl"** — ta věta musí dávat smysl, ať se
+program nakonec vykreslí, nebo ne.
 
 ## Jak to ověřit, když je na webu málo dat
 
