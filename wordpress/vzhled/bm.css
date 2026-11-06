@@ -319,10 +319,27 @@ body.home .bm-pas-hlavni {
 }
 
 /* ── Hlavička ─────────────────────────────────────────────────── */
+/* Od 6. 11. 2026 je hlavička papírová a ohraničená — stejně vystřižená jako
+   kartičky a běžící pás. Pozadí, barvu písma a výšku nese Customizer
+   (nastaveni.py), tady je jen to, na co Customizer nedosáhne.
+   Rozhodnutí i měření kontrastu: docs/wordpress/18-hlavicka.md
+
+   Barvu jednotlivých položek sem posílá doplněk bm-barva-sekce.php
+   v proměnné --bm-polozka. CSS o pořadí položek nic neví schválně:
+   pořadí je jen v menu, kde ho tým přetahuje myší. */
+
+body:not(.transparent-header) .site-header { border-bottom: var(--bm-ramecek); }
+
+/* Logo je bílá kapka v průhledném PNG, na papíře by zmizelo. Invert je
+   berlička do doby, než tým dodá tmavou variantu souboru — jakmile logo
+   dostane barvu nebo nápis, invert ho rozbije. Nad fotkou na úvodu
+   (průhledná hlavička) zůstává bílé. */
+body:not(.transparent-header) .site-branding .custom-logo { filter: brightness(0); }
+
 /* Tlačítko v hlavičce má vypadat stejně jako „Podpořit →" v heru.
-   Barvu, text a cíl řeší Customizer (nastaveni.py), tady zbývá šipka
-   a rámeček: popisek tlačítka Kadence prohání přes esc_html(), takže
-   do něj HTML dát nejde, a rámeček Kadence u tohohle tlačítka nemá. */
+   Barvu, text a cíl řeší Customizer, tady zbývá šipka a rámeček: popisek
+   tlačítka Kadence prohání přes esc_html(), takže do něj HTML dát nejde,
+   a rámeček Kadence u tohohle tlačítka nemá. */
 .header-button,
 .mobile-header-button {
   border: 2px solid var(--global-palette3);
@@ -342,6 +359,7 @@ body.home .bm-pas-hlavni {
   .header-button:hover::after,
   .mobile-header-button:hover::after { transform: none; }
 }
+
 /* V hlavičce je jen logo, bez názvu webu. Tým dodává logo na šířku
    i s nápisem, takže se omezuje výškou — u loga na šířku je výška to,
    co musí sednout na hlavičku, a šířka se dopočítá sama. Kdyby se
@@ -355,10 +373,144 @@ body.home .bm-pas-hlavni {
 }
 @media (max-width: 1024px) { .site-branding .custom-logo { max-height: 44px; } }
 @media (max-width: 767px)  { .site-branding .custom-logo { max-height: 38px; } }
-/* Aktivní položka menu dostane žluté podtržení místo barvy textu. */
-.site-header .primary-menu-container .menu-item.current-menu-item > a {
-  box-shadow: inset 0 -3px 0 0 var(--global-palette15);
+
+/* ── Položky menu jako štítky ─────────────────────────────────── */
+/* POZOR: záloha se píše až do var() na místě použití, ne jako deklarace
+   --bm-polozka tady. Deklarace na odkazu je totiž pro ten prvek silnější
+   než hodnota zděděná z položky, takže by barvu z doplňku vždycky přebila
+   a menu by zůstalo jednobarevné. Narazilo se na to 6. 11. 2026. */
+.site-header .primary-menu-container .menu > li > a,
+#mobile-drawer .mobile-navigation .menu > li > a {
+  border: 2px solid var(--global-palette3);
+  font-weight: 800;
 }
+
+.site-header .primary-menu-container .menu { gap: 6px; }
+.site-header .primary-menu-container .menu > li > a {
+  border-radius: 999px;
+  padding: 8px 15px;
+  line-height: 1.15;
+}
+.site-header .primary-menu-container .menu > li > a:hover {
+  background: var(--bm-polozka, var(--global-palette15));
+}
+/* Stránka, na které návštěvník je. Plakátový stín stejný jako u kartiček. */
+.site-header .primary-menu-container .menu > li.current-menu-item > a,
+.site-header .primary-menu-container .menu > li.current-menu-ancestor > a,
+.site-header .primary-menu-container .menu > li.current-page-ancestor > a {
+  background: var(--bm-polozka, var(--global-palette15));
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+
+/* Nad fotkou na úvodu je hlavička průhledná. Prázdný obrys by se na fotce
+   ztratil, proto tam mají štítky bílou výplň. */
+body.transparent-header .site-header .primary-menu-container .menu > li > a {
+  background: var(--global-palette9);
+}
+
+/* ── Rozbalovátko jako kartička ───────────────────────────────── */
+/* Selektory schválně kopírují tvar těch, které píše Kadence
+   (.header-navigation .header-menu-container ul ul…), jen s .site-header
+   navíc. Kratší zápis přes .sub-menu má totiž míň prvků v selektoru,
+   takže prohrává na váze a barvy se neprojeví — vypadá to, jako by
+   pravidlo chybělo. Narazilo se na to 6. 11. 2026. */
+.site-header .header-navigation .header-menu-container ul ul.sub-menu {
+  background: var(--global-palette9);
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  box-shadow: 6px 6px 0 var(--global-palette3);
+  padding: 8px;
+  /* Kadence kreslí rozbalovátko od spodní hrany položky, ne hlavičky,
+     a položka je o 26 px kratší. Tohle číslo je těch 26 px plus mezera,
+     aby kartička pod černou linkou hlavičky volně visela. */
+  margin-top: 36px;
+}
+.site-header .header-navigation .header-menu-container ul ul li.menu-item > a {
+  width: auto;
+  min-width: 190px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--global-palette3);
+}
+.site-header .header-navigation .header-menu-container ul ul li.menu-item > a:hover {
+  background: var(--global-palette7);
+  color: var(--global-palette3);
+}
+/* První položka je Praktické info — jediná v tom seznamu, která je pro
+   návštěvníka, zbytek je o organizaci. Proto výplň a linka pod ní. */
+.site-header .header-navigation .header-menu-container ul ul li.menu-item:first-child > a {
+  background: var(--bm-polozka, var(--global-palette15));
+}
+.site-header .header-navigation .header-menu-container ul ul li.menu-item:first-child {
+  border-bottom: 2px solid var(--global-palette3);
+  margin-bottom: 7px;
+  padding-bottom: 7px;
+}
+
+/* ── Mobilní panel ────────────────────────────────────────────── */
+#mobile-drawer .mobile-navigation .menu > li > a {
+  background: var(--global-palette9);
+  border-radius: 14px;
+  padding: 13px 16px;
+}
+#mobile-drawer .mobile-navigation .menu > li + li { margin-top: 10px; }
+#mobile-drawer .mobile-navigation .menu > li.current-menu-item > a,
+#mobile-drawer .mobile-navigation .menu > li.current-menu-ancestor > a {
+  background: var(--bm-polozka, var(--global-palette15));
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+/* Položka s rozbalovátkem má v panelu navíc obal .drawer-nav-drop-wrap
+   (odkaz a šipka vedle sebe), takže odkaz v ní není přímým potomkem
+   položky a pravidla výš ho minou. Štítek proto dostává ten obal. */
+#mobile-drawer .mobile-navigation .menu > li > .drawer-nav-drop-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--global-palette9);
+  border: 2px solid var(--global-palette3);
+  border-radius: 14px;
+}
+#mobile-drawer .mobile-navigation .menu > li > .drawer-nav-drop-wrap > a {
+  padding: 13px 16px;
+  font-weight: 800;
+}
+#mobile-drawer .mobile-navigation .menu > li.current-menu-ancestor > .drawer-nav-drop-wrap {
+  background: var(--bm-polozka, var(--global-palette15));
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+
+/* Podpoložky nemají rámeček — jsou uvnitř rozbaleného štítku. */
+#mobile-drawer .mobile-navigation .sub-menu > li > a {
+  border: 0;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+/* ── Nadpis stránky podtržený barvou sekce ────────────────────── */
+/* Barva je ZA textem, ne v něm. Paleta ročníku je stavěná na podklad:
+   jako písmo má žlutá na papíře kontrast 1,1:1 a levandulová 1,8:1,
+   přečíst by to nešlo. Jako podklad pod černým písmem mají 14,9:1
+   a 9,4:1. Měření je v docs/wordpress/18-hlavicka.md.
+
+   Nadpis je `inline`, aby podtržení sedělo pod každým řádkem zvlášť —
+   u bloku by jeden pruh přeťal dvouřádkový nadpis v půlce.
+   Stránka mimo menu barvu nedostane a podtržení se nevykreslí. */
+.entry-content h1.wp-block-heading {
+  display: inline;
+  padding: 0 2px;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 56%,
+    var(--bm-sekce, transparent) 56%,
+    var(--bm-sekce, transparent) 95%,
+    transparent 95%);
+  -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
+}
+/* Nadpis je inline, takže svislé okraje na něm neplatí; mezeru pod ním
+   drží odstavec. */
+.bm-lead { margin-top: 20px; }
 
 /* ── Kalendář akcí (The Events Calendar) ─────────────────────── */
 /* Vzhled kalendáře bydlí v samostatném bm-akce.css, který se

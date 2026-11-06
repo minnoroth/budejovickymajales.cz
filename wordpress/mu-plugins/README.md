@@ -207,6 +207,30 @@ Když ho odebereš, pás se vrátí k zelené.
 
 ---
 
+## bm-barva-sekce.php — barva sekce podle menu
+
+Každá položka hlavní úrovně menu má svou barvu z palety a stránka pod ní ji zdědí:
+Program žlutý, Králové korálový, Osvěžovny levandulové, O festivalu a vše pod ním
+zelenomodré. Barva se projeví jako výplň štítku v menu a jako podtržení nadpisu
+stránky.
+
+Doplněk vypíše do hlavičky stránky jeden `<style>`:
+
+- `.menu-item-<ID> { --bm-polozka: … }` pro každou položku hlavní úrovně,
+- `body { --bm-sekce: … }` pro aktuální stránku.
+
+CSS v `bm.css` tedy o pořadí ani o ID stránek nic neví a barvy jen používá.
+
+**Pořadí v menu je jediný zdroj pravdy.** Tabulka barev je v konstantě
+`BM_BARVY_SEKCI` a jsou to čísla slotů palety, ne hexy — rebranding zůstává
+přepsáním patnácti polí v Customizeru. Když položek v menu přibude, barvy se
+opakují dokola.
+
+Stránka, která v menu není, barvu nedostane a nadpis zůstane černý. Počítá se
+s jednou úrovní zanoření, což je přesně to, co menu má.
+
+Celé rozhodnutí i měření kontrastů: [docs/wordpress/18-hlavicka.md](../../docs/wordpress/18-hlavicka.md).
+
 ## bm-osvezovny/ — podniky se zvýhodněnou nabídkou
 
 **Problém.** Osvěžovny byly ručně psaná stránka: devět nadpisů, pod každým odrážky

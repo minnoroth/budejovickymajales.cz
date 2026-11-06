@@ -72,7 +72,11 @@ NASTAVENI = {
     "h4_font": pismo(19, vyska=1.3, vaha="700"),
 
     # ── Hlavička ─────────────────────────────────────────────────────
-    "header_main_background": {"desktop": {"color": "palette1"}},
+    # Papírová hlavička, ne zelená. Barvy položek menu (žlutá, korálová,
+    # levandulová, zelenomodrá) potřebují tichý podklad — na zelené by se
+    # zelenomodrý štítek ztratil. Rozhodnuto 6. 11. 2026,
+    # viz docs/wordpress/18-hlavicka.md.
+    "header_main_background": {"desktop": {"color": "palette7"}},
     "header_main_height": {"size": {"mobile": "", "tablet": "", "desktop": 88},
                            "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
     # Šířka loga. Tým dodává logo na šířku, takže se omezuje VÝŠKOU v bm.css
@@ -89,14 +93,18 @@ NASTAVENI = {
                                 "desktop": "logo"},
                     "layout": {"mobile": "standard", "tablet": "standard",
                                "desktop": "standard"}},
-    "primary_navigation_color": {"color": "palette9", "hover": "palette15", "active": "palette15"},
+    # Písmo menu je černé ve všech stavech — barvu nese výplň štítku,
+    # ne text. Kdyby se při najetí měnila i barva písma, přestal by být
+    # čitelný na žluté.
+    "primary_navigation_color": {"color": "palette3", "hover": "palette3", "active": "palette3"},
     "primary_navigation_typography": {"size": {"desktop": 16}, "lineHeight": {"desktop": ""},
                                       "family": "inherit", "google": False,
-                                      "weight": "700", "variant": "700"},
-    "mobile_trigger_color": {"color": "palette9", "hover": "palette15"},
-    "header_popup_background": {"desktop": {"color": "palette3"}},
-    "header_popup_close_color": {"color": "palette9", "hover": "palette15"},
-    "mobile_navigation_color": {"color": "palette9", "hover": "palette15", "active": "palette15"},
+                                      "weight": "800", "variant": "800"},
+    "mobile_trigger_color": {"color": "palette3", "hover": "palette3"},
+    # Mobilní panel je papírový ze stejného důvodu jako hlavička.
+    "header_popup_background": {"desktop": {"color": "palette7"}},
+    "header_popup_close_color": {"color": "palette3", "hover": "palette3"},
+    "mobile_navigation_color": {"color": "palette3", "hover": "palette3", "active": "palette3"},
 
     # Žluté tlačítko na e-shop vpravo v hlavičce i v mobilním panelu.
     "header_desktop_items": {
@@ -155,7 +163,9 @@ NASTAVENI = {
     # Menu a název webu zůstávají bílé jako na zelené hlavičce. Přes fotku
     # je drží čitelné tmavý závoj, který dosazuje doplněk bm-pozadi.php.
     "transparent_header_site_title_color": {"color": "palette9", "hover": "palette15"},
-    "transparent_header_navigation_color": {"color": "palette9", "hover": "palette15"},
+    # Nad fotkou mají štítky bílou výplň (bm.css), takže i tam je písmo
+    # černé. Bílé písmo na bílém štítku by zmizelo.
+    "transparent_header_navigation_color": {"color": "palette3", "hover": "palette3"},
     "transparent_header_button_color": {"color": "palette3", "hover": "palette3"},
     "transparent_header_background": {"desktop": {"color": "transparent"}},
     "transparent_header_bottom_border": {"desktop": {"width": 0, "unit": "px", "style": "none"}},

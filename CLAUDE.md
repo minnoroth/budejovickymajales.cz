@@ -119,6 +119,15 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   `display: flex`. Prvek je v DOM `hidden = true` a na obrazovce se nic nestane —
   vypadá to, jako by skript nefungoval. Potřebuje vlastní pravidlo se stejným prefixem.
 
+- **Kadence přepisuje hlavičku selektory s víc prvky.** Rozbalovátko si drží
+  `.header-navigation .header-menu-container ul ul.sub-menu` — tři třídy a dva prvky.
+  Kratší zápis `.site-header .primary-menu-container .sub-menu` má tříd stejně, ale
+  prvků míň, takže prohraje a pravidlo se neprojeví. Na hlavičku kopíruj tvar
+  selektoru od Kadence a přidej `.site-header` navíc.
+- **Zálohu proměnné piš do `var()`, ne jako vlastní deklaraci.** Když má prvek sám
+  `--x: záloha`, je to pro něj silnější než hodnota zděděná od rodiče, takže
+  zděděná barva nikdy nedorazí. Správně je `var(--x, záloha)` na místě použití.
+
 ### Doplňky a vývoj
 
 - **mu-plugins se nenačítají z podsložek.** WordPress bere z `wp-content/mu-plugins/`

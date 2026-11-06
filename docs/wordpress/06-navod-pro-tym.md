@@ -804,6 +804,12 @@ Stránky jsou pevné části webu: Program, Králové, Osvěžovny, Praktické i
 Kontakt a další. **Strukturu nemáš měnit** — jen texty uvnitř. Menu se podle stránek
 neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 
+> **Pořadí v menu určuje i barvy.** Od 6. 11. 2026 má každá položka hlavní úrovně
+> svou barvu — Program žlutou, Králové korálovou, Osvěžovny levandulovou,
+> O festivalu zelenomodrou. Tatáž barva podtrhává nadpis stránky a dědí ji
+> i podstránky. Když se pořadí položek v menu změní, barvy se posunou s nimi.
+> Stránka, která v menu není, zůstane černobílá.
+
 ### 9.1 Otevřít stránku
 
 1. V levém menu **Stránky (Pages)** → **Všechny stránky (All Pages)**.
