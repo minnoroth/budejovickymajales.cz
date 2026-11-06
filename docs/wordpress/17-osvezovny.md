@@ -68,6 +68,13 @@ přepíše; historii nabídek nikdo nechce.
 **Podniky nemají vlastní stránku** (`public: false`), ze stejného důvodu jako králové:
 devět prázdných adres `/osvezovna/<nazev>/` se jmény podniků v Googlu nikdo nechce.
 
+**Podniky stojí ve sloupcích, ne v mřížce** (6. 11. 2026). Mřížka srovnává kartičky
+do řad, takže pod tou nejkratší zůstane prázdno až do konce řady — Masné krámy s jednou
+položkou vedle Široka se sedmi nechaly přes půl obrazovky bílou. Sloupce (CSS multicol)
+pouštějí kartičku rovnou pod předchozí. Daň je pořadí čtení: shora dolů prvním sloupcem,
+pak druhým, ne po řadách. Napsané je to i v návodu u pole *Pořadí*. Skutečná mřížka bez
+děr (`masonry`) by zachovala čtení po řadách, ale dnes ji drží jen část prohlížečů.
+
 **Filtr je jen vylepšení.** Tlačítka staví JavaScript. Když se nenačte, je vidět celá
 nabídka — a žádná mrtvá tlačítka, protože bez skriptu nevzniknou vůbec.
 

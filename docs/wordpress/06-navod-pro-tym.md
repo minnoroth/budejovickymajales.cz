@@ -690,9 +690,13 @@ Každý podnik je samostatný záznam s adresou a seznamem položek. Vypisují s
 > jako králové. Tlačítko **Zobrazit** v editoru proto nikam nevede.
 
 > V boxu **Pořadí osvěžovny** je pole **Order** s číslem. **Nižší číslo je na webu
-> výš.** Tím se dá dát dopředu podnik, na kterém vám záleží nejvíc. Když tam necháš
+> dřív.** Tím se dá dát dopředu podnik, na kterém vám záleží nejvíc. Když tam necháš
 > nulu u všech, seřadí se podniky podle abecedy. Tip: čísluj po desítkách (10, 20,
 > 30…), ať jde mezi ně později něco vložit bez přepisování zbytku.
+>
+> Na počítači stojí podniky ve třech sloupcích a **čtou se shora dolů, ne po
+> řadách** — první tři tedy skončí pod sebou v levém sloupci, ne vedle sebe
+> nahoře. Je to proto, aby pod krátkou nabídkou nezůstala prázdná díra.
 
 ### 7.2 Vyplnit nabídku
 

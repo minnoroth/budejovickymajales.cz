@@ -91,25 +91,40 @@
 :is(#primary, body) .bmo [hidden] { display: none; }
 
 
-/* ── Mřížka podniků ──────────────────────────────────────────────────── */
+/* ── Sloupce podniků ─────────────────────────────────────────────────── */
 
+/* Sloupce, ne mřížka. Mřížka srovnává kartičky do řad, takže pod krátkou
+   nabídkou zůstane díra až do konce řady — Masné krámy s jednou položkou
+   nechaly vedle Široka se sedmi přes půl obrazovky prázdno. Ve sloupcích
+   padá kartička rovnou pod předchozí a díra nevznikne. (6. 11. 2026)
+
+   Daň za to: čte se shora dolů prvním sloupcem, pak druhým, ne po řadách.
+   Pole „Pořadí“ platí dál, jen první tři podniky skončí nad sebou.
+
+   column-width a column-count dohromady znamenají „nejvýš tři sloupce,
+   každý aspoň 330 px“. Na užším okně proto vyjdou dva a na mobilu jeden,
+   stejně jako to dřív dělalo auto-fill. */
 :is(#primary, body) .bmo__seznam {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 20px;
+  display: block;
+  column-width: 330px;
+  column-count: 3;
+  column-gap: 20px;
   margin: 0;
   padding: 0;
   list-style: none;
-
-  /* Bez tohohle řádku natáhne mřížka všechny kartičky v řadě na výšku té
-     nejvyšší. Podnik s jednou položkou pak vedle Široka se sedmi vypadá
-     jako rozdělaný — dvě třetiny rámečku prázdné. */
-  align-items: start;
 }
 
 :is(#primary, body) .bmo-karta {
-  display: flex;
-  flex-direction: column;
+  /* Bez break-inside se kartička rozlomí na hranici sloupce: půlka nabídky
+     dole v jednom, zbytek nahoře v druhém a rámeček uprostřed useknutý.
+     Je to jediná řádka, která drží kartičku vcelku — nemazat. */
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+
+  /* Sloupce neumějí row-gap, svislou mezeru dělá okraj. Na konci sloupce
+     se okraj zahodí, takže další sloupec nezačne odsazený. */
+  margin: 0 0 20px;
+
   border: var(--bmo-ramecek);
   border-radius: var(--bmo-radius);
   background: var(--bmo-bila);
@@ -123,6 +138,10 @@
    v administraci, takže si barvy tým přeskládá bez sahání do kódu.
    Hodnoty vedou do palety, takže je rebranding přebarví sám. */
 :is(#primary, body) .bmo-karta__pruh {
+  /* Proužek je <span>. Dokud byla kartička flexem, udělal z něj prohlížeč
+     blok sám; v běžném toku by zůstal řádkový a výška 8px by se zahodila —
+     proužek by zmizel a nikde by nebyla chyba. */
+  display: block;
   height: 8px;
   background: var(--bmo-hlavni);
 }
@@ -176,7 +195,6 @@
 /* ── Nabídka ─────────────────────────────────────────────────────────── */
 
 :is(#primary, body) .bmo-karta__telo {
-  flex: 1 1 auto;
   padding: 6px 20px 18px;
 }
 
@@ -263,13 +281,11 @@
 /* ── Mobil ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 599px) {
-  :is(#primary, body) .bmo__seznam {
-    /* Pevná jedna sloupec, ne minmax — na úzkém displeji by se sloupec
-       se 330px minimem rozšířil přes okraj a stránka by jela do strany. */
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
+  /* Jeden sloupec natvrdo. Z column-width by vyšel taky, ale 330px minimum
+     je na 320px displeji širší než okno a stránka by jela do strany. */
+  :is(#primary, body) .bmo__seznam     { column-count: 1; }
 
+  :is(#primary, body) .bmo-karta       { margin-bottom: 14px; }
   :is(#primary, body) .bmo-karta__nazev { font-size: 19px; }
   :is(#primary, body) .bmo-karta__hlava { padding: 15px 16px 11px; }
   :is(#primary, body) .bmo-karta__telo  { padding: 4px 16px 15px; }
