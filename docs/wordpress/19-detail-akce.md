@@ -120,9 +120,21 @@ Zavření detailu parametr zase uklidí.
 vyhledávače — Google chce pro každou akci vlastní adresu a `?akce=437` je z jeho
 pohledu pořád jedna a tatáž stránka — a drží odkazy, které už někde kolují.
 Návštěvník na ně ale nenarazí: kartičky v „Nepřehlédni" na úvodu od 7. 11. 2026
-míří na `/program/?akce=<id>`, do menu stránky akcí nikdy nepatřily a v modálu
-na ně vede jen drobný odkaz dole. Výjimka trvá do části B: tlačítko „Rezervovat
-místo" tam posílá, protože formulář zatím žije jen tam.
+míří na `/program/?akce=<id>` a do menu stránky akcí nikdy nepatřily. Odkaz
+„Samostatná stránka akce" v patičce modálu téhož dne zmizel — byl tam „pro
+úplnost", což je přesně ten důvod, kvůli kterému se nedůslednosti drží; detail
+je úplnější a nabízet vedle něj horší verzi téhož nedává smysl.
+
+**Jediná výjimka trvá do části B:** tlačítko „Rezervovat místo" na stránku akce
+posílá, protože formulář zatím žije jen tam.
+
+**Důsledek, který je potřeba vědět:** na stránky akcí tím nevede ze samotného
+webu žádný odkaz. Vyhledávač je najde přes mapu webu a přes `schema.org/Event`,
+který si každá z nich vypisuje sama, ale nemá k nim cestu po odkazech. Jestli se
+to někdy projeví na návštěvnosti, čistá náprava není vrátit odkaz do modálu, ale
+vypsat `schema.org/Event` i na stránku programu — data už tam od 7. 11. 2026
+jsou, takže je to práce na pár desítek řádků. Ověřit se to dá až po spuštění
+naostro; dokud má web zaškrtnuté odrazování vyhledávačů, nemá to smysl měřit.
 
 `/events/list|month|today/` zůstávají jako záchranná brzda — jsou to ty odkazy
 v bloku, který se ukáže, když se program nevykreslí. **Dostaly ale `noindex`**

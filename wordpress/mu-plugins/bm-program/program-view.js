@@ -1091,8 +1091,12 @@
       '" data-hvezda="' + a.id + '" aria-pressed="' + moje + '">' +
       '★ ' + (moje ? 'V mém programu' : 'Přidat do mého programu') + '</button>' +
       '<button type="button" class="bmp-btn" data-ics="' + a.id + '">Do kalendáře</button>' +
-      (a.url ? '<a class="bmp-detail__samostatne" href="' + esc(a.url) +
-        '">Samostatná stránka akce</a>' : '') +
+      /* Odkaz na samostatnou stránku akce tu býval a 7. 11. 2026 zmizel.
+         Detail je tady úplnější a stránka akce je horší verze téhož;
+         nabízet ji znamenalo posílat návštěvníka pryč z lepšího místa.
+         Stránky akcí žijí dál kvůli vyhledávačům a odkazům, které už
+         kolují, ale z webu na ně nic nevede. Jediná výjimka je tlačítko
+         „Rezervovat místo" — formulář zatím žije jen tam. */
       '</div></div>';
 
     /* Když se obrázek nenačte, ať po něm nezbyde prázdná díra. Obsluha

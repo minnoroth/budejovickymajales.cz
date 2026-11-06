@@ -681,13 +681,6 @@
   align-self: flex-start; background: var(--bmp-bila);
 }
 
-/* Odkaz na samostatnou stránku je dovětek, ne tlačítko — po doplnění
-   celého detailu na ni skoro nikdo nemusí. */
-:is(#primary, body) .bmp .bmp-detail__samostatne {
-  margin-left: auto; align-self: center;
-  font-size: 12.5px; color: var(--bmp-seda);
-  text-decoration: underline; text-underline-offset: 3px;
-}
 :is(#primary, body) .bmp .bmp-detail__zaroven {
   margin: 0; border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
 }
@@ -836,7 +829,6 @@
   :is(#primary, body) .bmp .bmp-detail__rez .bmp-btn--hlavni {
     align-self: stretch; text-align: center;
   }
-  :is(#primary, body) .bmp .bmp-detail__samostatne { margin: 4px auto 0; }
 }
 
 
