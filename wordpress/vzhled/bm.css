@@ -330,6 +330,14 @@ body.home .bm-pas-hlavni {
 
 body:not(.transparent-header) .site-header { border-bottom: var(--bm-ramecek); }
 
+/* Hlavička musí být nad obsahem stránky. Kadence jí dává z-index 11
+   a protože je zároveň `position: relative`, je to samostatná vrstva —
+   těch 1000 u rozbalovátka se počítá jen uvnitř ní, ven se ukáže jako 11.
+   Lepkavá lišta Programu má 60, takže rozbalovátko mizelo pod ní.
+   Sto je nad vším, co stránka používá, a pod mobilním panelem (99999).
+   Selektor je na id, protože Kadence píše z-index taky na #masthead. */
+#masthead { z-index: 100; }
+
 /* Kadence dává obalu loga odsazení 16 px shora a 0 zdola, takže kapka
    sedí o 8 px níž než štítky v menu. Hlavička se na střed zarovnává sama,
    jen jí to odsazení nesmí nic rozhodit. */
@@ -580,21 +588,21 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
    drží odstavec. */
 .bm-lead { margin-top: 20px; }
 
-/* Titulkový pás má u Kadence 200 px na výšku a nadpis je v něm na střed,
-   pod pásem je navíc 80 px mezery před obsahem. Nadpis pak plaval uprostřed
-   prázdna, kdežto na stránkách stavěných skriptem (Program, Praktické info)
-   text začíná hned pod nadpisem. Pás proto dostane odsazení jen shora
-   a obsah se k němu přisune — obě skupiny stránek pak vypadají stejně.
+/* Mezera mezi hlavičkou webu a nadpisem stránky. Kadence sem dává 5 rem
+   (80 px) a titulkový pás k tomu ještě 200 px na výšku s nadpisem na střed —
+   dohromady nadpis plaval uprostřed prázdna. Zadavatel 6. 11. 2026:
+   „tyhle paddingy jsou obrovský úplně zbytečně, dal bych tam maximálně
+   24 px." Tohle je to jedno místo, kde se ta mezera drží, ať nadpis kreslí
+   skript (Program, Praktické info) nebo Kadence (O nás, Historie, Kontakt).
+   Spodní mezera před patičkou zůstává Kadence.
 
-   Obsah se vybírá sousedním selektorem, ne třídou na <body>: výpis
+   Pás a obsah se vybírají sousedním selektorem, ne třídou na <body>: výpis
    příspěvků (Aktuality) má tutéž třídu, ale pás nekreslí, a přisunutím
-   by se nalepil na hlavičku. */
+   by se nalepil na hlavičku. Úvodní stránka má svoje pravidlo níž. */
+.content-area { margin-top: 24px; }
 .entry-hero .entry-header { min-height: 0; }
-.entry-hero { padding-top: 96px; }
+.entry-hero { padding-top: 24px; }
 .entry-hero + .content-area { margin-top: 20px; }
-@media (max-width: 767px) {
-  .entry-hero { padding-top: 48px; }
-}
 
 /* Obsah podstránky stojí na stejné svislici jako nadpis a logo.
    Skupiny mají contentSize 1160 px, jenže obal stránky je širší (1242 px

@@ -197,6 +197,35 @@ Obsah se vybírá sousedním selektorem `.entry-hero + .content-area`, ne tříd
 `<body>`: výpis příspěvků (Aktuality) má tutéž třídu `content-title-style-above`,
 ale pás nekreslí, a přisunutím by se nalepil na hlavičku.
 
+## Čtvrté kolo: rozbalovátko mizelo pod Programem a mezery se zkrátily
+
+**Rozbalovátko se na stránce Program ořezávalo.** Kadence dává hlavičce
+`z-index: 11` a zároveň `position: relative`, takže je to **samostatná vrstva**:
+`z-index: 1000` u rozbalovátka se počítá jen uvnitř ní a navenek se celá hlavička
+chová jako jedenáctka. Lepkavá lišta Programu má 60, takže kartička mizela pod ní.
+Hlavička má teď `z-index: 100` — nad vším, co stránka používá, a pod mobilním
+panelem (99999). Selektor musí být na `#masthead`, protože Kadence píše svoji
+jedenáctku taky na id.
+
+**Mezery kolem nadpisu se zkrátily na 24 px.** Zadavatel: *„tyhle paddingy jsou
+za mě pořád obrovský úplně zbytečně, dal bych tam maximálně 24 px."* Sčítaly se
+tři věci najednou — `.content-area` má od Kadence 5 rem (80 px), skupina s nadpisem
+měla 28 px shora a 8 px zdola, skupina s obsahem dalších 40 px shora a mezi nimi
+ještě 32 px standardní mezery mezi bloky. Nad nadpisem to dělalo 106 px a pod
+podtitulkem 80 px.
+
+Teď to drží dvě čísla: `.content-area { margin-top: 24px }` v `bm.css` a
+`padding-top: 24px` u skupiny s obsahem v `bloky.py`. Skupina s nadpisem nemá
+odsazení ani spodní okraj žádné. Titulkový pás od Kadence dostává stejných 24 px,
+takže obě skupiny stránek sedí stejně. Naměřeno: 22–23 px nad nadpisem a 24 px pod
+podtitulkem, na počítači i na mobilu.
+
+Spodní mezera před patičkou zůstala, jak byla — ta nikomu nevadila.
+
+Změna v `bloky.py` je v obsahu stránek zapečená jako inline styl, takže se po ní
+musí znovu spustit skripty stránek (`program.py`, `kralove.py`, `osvezovny.py`,
+`prakticke-info.py`).
+
 ## Aktuality dostaly barvu dodatečně
 
 Výpis příspěvků není stránka a jednotlivý článek v menu vůbec není, takže
