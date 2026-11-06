@@ -82,6 +82,8 @@ const BM_PROGRAM_POLE_AKCE = array(
 	'ticketed',
 );
 
+add_filter( 'wp_robots', 'bm_program_skryj_nativni_pohledy' );
+
 add_action( 'save_post_page', 'bm_program_zapomen_stranku' );
 add_action( 'save_post_tribe_events', 'bm_program_zapomen' );
 add_action( 'save_post_tribe_venue', 'bm_program_zapomen' );
@@ -98,6 +100,36 @@ add_action( 'delete_term', 'bm_program_zapomen' );
  */
 function bm_program_zapomen() {
 	delete_transient( BM_PROGRAM_CACHE );
+}
+
+/**
+ * Schová nativní pohledy kalendáře před vyhledávači.
+ *
+ * Vypnout se nesmí — jsou to ty odkazy v záchranném bloku. Ve vyhledávání
+ * ale nemají co dělat: `/events/list/` je druhý, horší program („Akce
+ * na 11 května, 2027 – 14 května, 2027") a přetahoval by si návštěvníky
+ * s tím naším. Zůstávají tedy dostupné, jen se na ně neodkazuje a nejsou
+ * k nalezení.
+ *
+ * Stránky jednotlivých akcí se NESCHOVÁVAJÍ. Ty jsou naopak jediné, co
+ * o programu ve vyhledávání vypovídá — mají vlastní adresu, kanonický
+ * odkaz a schema.org/Event. Kdyby se noindex rozlil i na ně, přišel by
+ * festival o akce ve vyhledávání.
+ *
+ * Dává se jen „noindex", ne „noindex, follow". Procházet odkazy je výchozí
+ * chování, takže „follow" nic nepřidá — a dokud má celý web zaškrtnuté
+ * odrazování vyhledávačů, přimíchalo by se k jeho „nofollow" a vzniklo by
+ * protiřečící si „nofollow, follow".
+ *
+ * @param array<string,mixed> $pravidla Pravidla pro meta robots.
+ * @return array<string,mixed>
+ */
+function bm_program_skryj_nativni_pohledy( $pravidla ) {
+	if ( is_post_type_archive( 'tribe_events' ) || is_tax( 'tribe_events_cat' ) ) {
+		$pravidla['noindex'] = true;
+	}
+
+	return $pravidla;
 }
 
 /**

@@ -125,7 +125,19 @@ na ně vede jen drobný odkaz dole. Výjimka trvá do části B: tlačítko „R
 místo" tam posílá, protože formulář zatím žije jen tam.
 
 `/events/list|month|today/` zůstávají jako záchranná brzda — jsou to ty odkazy
-v bloku, který se ukáže, když se program nevykreslí.
+v bloku, který se ukáže, když se program nevykreslí. **Dostaly ale `noindex`**
+(`bm_program_skryj_nativni_pohledy()`): `/events/list/` je druhý, horší program
+— jmenuje se „Akce na 11 května, 2027 – 14 května, 2027" — a ve vyhledávání by
+si přetahoval návštěvníky s tím naším. Zůstávají dostupné, jen se na ně
+neodkazuje a nejsou k nalezení.
+
+Stránky jednotlivých akcí `noindex` **nedostávají**. Ty jsou naopak to jediné,
+co o programu ve vyhledávání vypovídá.
+
+> Na stagingu to není vidět, protože celý web má zaškrtnuté odrazování
+> vyhledávačů a `noindex, nofollow` je úplně všude. Že pravidlo míří jen na
+> výpisy kalendáře, se ověřilo tak, že před úpravou přidávalo navíc „follow"
+> — a to se objevilo jen na `/events/…`, ne na `/program/` ani na stránce akce.
 
 ## Mobil
 

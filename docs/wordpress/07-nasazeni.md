@@ -19,6 +19,13 @@ Na novém webu: 22 stránek, 27 míst, 51 žánrů a kategorií, datový model
 (typ Králové, taxonomie Ročník, pole u míst a akcí), role Dramaturgie,
 šest pluginů. Indexování vyhledávači vypnuté.
 
+> **Až se web pustí naostro, musí se indexování zapnout.** Dnes má celý web
+> `noindex, nofollow` — v **Nastavení → Zobrazování** je zaškrtnuté „Požádat
+> vyhledávače, aby web neindexovaly". Dokud to tam je, nenajde festival ve
+> vyhledávání nikdo a nefunguje ani mapa webu (`/wp-sitemap.xml` vrací 404).
+> Je to pro staging správně; na ostrém webu je to ta nejdražší zapomenutá
+> zaškrtávátko, jaké existuje.
+
 ## Postup
 
 1. **Subdomény k certifikátu** — Hostingové služby → Webhosting → HTTPS →
