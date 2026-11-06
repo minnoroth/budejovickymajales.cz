@@ -1,0 +1,293 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Budějovický Majáles — osvěžovny
+
+   Vzhled zkratky [bm_osvezovny]. Platí tu stejná čtyři pravidla jako
+   v bm-kralove/kralove.css a bm-program/program.css, jen s vlastním
+   prefixem:
+
+   1. Barvy nikdy natvrdo — všechno přes var(--global-paletteN, #záloha).
+      Rebranding na nový ročník je přepsání patnácti polí v Customizeru.
+      Záložní hexy jsou paleta ročníku 2024 a použijí se, jen když paleta
+      chybí (jiné téma, výpadek).
+   2. Každé pravidlo začíná :is(#primary, body) kvůli váze — Kadence píše
+      barvy obsahu selektory s ID a ID přebije libovolný počet tříd.
+   3. Prefix tříd je bmo-, protože bm- patří bm.css, bmp- programu
+      a bmk- králům.
+   4. Nic globálního. Všechno visí pod .bmo, což je kořen zkratky.
+
+   Proč tenhle soubor vznikl: dnešní stránka Osvěžovny má vzhled zadrátovaný
+   ve <style> bloku uvnitř obsahu stránky, i s loňskou modrou #0000ff
+   osmkrát za sebou. Při rebrandingu by se přebarvil celý web kromě ní.
+   ══════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Tokeny ──────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmo {
+  --bmo-hlavni:  var(--global-palette1,  #1EA198);
+  --bmo-cerna:   var(--global-palette3,  #121212);
+  --bmo-seda:    var(--global-palette5,  #4A4A4A);
+  --bmo-svetla:  var(--global-palette7,  #F2F2F0);
+  --bmo-bila:    var(--global-palette9,  #FFFFFF);
+  --bmo-koral:   var(--global-palette10, #EE7270);
+  --bmo-levand:  var(--global-palette14, #B6B4DA);
+  --bmo-zluta:   var(--global-palette15, #F8E862);
+
+  --bmo-ramecek: var(--bm-ramecek, 3px solid var(--global-palette3, #121212));
+  --bmo-radius:  var(--bm-radius, 18px);
+
+  /* Plakátový stín bez rozostření, stejná hodnota jako v Lineupu
+     (--bmp-stin-s). Kartičky po webu musí reagovat stejně. */
+  --bmo-stin: 3px 3px 0 var(--bmo-cerna);
+
+  /* Špendlík u adresy. Je to maska, ne obrázek — barvu bere z textu,
+     takže projde rebrandingem i tmavým režimem. V SVG proto není
+     jediná barva ani znak #, který by v data URI musel být escapovaný. */
+  --bmo-spendlik: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z'/%3E%3C/svg%3E");
+}
+
+
+/* ── Filtr ───────────────────────────────────────────────────────────── */
+
+/* Celý filtr dokresluje osvezovny.js. Bez JavaScriptu tady nic není
+   a je vidět všechno — to je správné chování, ne ochuzené. */
+
+:is(#primary, body) .bmo__filtr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+:is(#primary, body) .bmo__chip {
+  border: 2px solid var(--bmo-cerna);
+  border-radius: 999px;
+  background: var(--bmo-bila);
+  color: var(--bmo-cerna);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+:is(#primary, body) .bmo__chip:hover { background: var(--bmo-svetla); }
+
+:is(#primary, body) .bmo__chip[aria-pressed="true"] {
+  background: var(--bmo-zluta);
+  box-shadow: var(--bmo-stin);
+}
+
+/* Filtr schovává položky a kartičky přes vlastnost `hidden`. Prohlížeč na ni
+   má pravidlo [hidden] { display: none }, jenže to má váhu jedné třídy —
+   a každý selektor tady začíná :is(#primary, body), takže `display: flex`
+   níž ho přebije a schované prvky zůstanou vidět. Vypadá to, jako by filtr
+   nefungoval, přitom běží správně. Proto tohle pravidlo, a se stejným
+   prefixem, aby vyhrálo.
+   Objeveno 5. 11. 2026 na stagingu — DOM hlásil hidden = true a položky
+   se dál vykreslovaly. */
+:is(#primary, body) .bmo [hidden] { display: none; }
+
+
+/* ── Sloupce podniků ─────────────────────────────────────────────────── */
+
+/* Sloupce, ne mřížka. Mřížka srovnává kartičky do řad, takže pod krátkou
+   nabídkou zůstane díra až do konce řady — Masné krámy s jednou položkou
+   nechaly vedle Široka se sedmi přes půl obrazovky prázdno. Ve sloupcích
+   padá kartička rovnou pod předchozí a díra nevznikne. (6. 11. 2026)
+
+   Daň za to: čte se shora dolů prvním sloupcem, pak druhým, ne po řadách.
+   Pole „Pořadí“ platí dál, jen první tři podniky skončí nad sebou.
+
+   column-width a column-count dohromady znamenají „nejvýš tři sloupce,
+   každý aspoň 330 px“. Na užším okně proto vyjdou dva a na mobilu jeden,
+   stejně jako to dřív dělalo auto-fill. */
+:is(#primary, body) .bmo__seznam {
+  display: block;
+  column-width: 330px;
+  column-count: 3;
+  column-gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(#primary, body) .bmo-karta {
+  /* Bez break-inside se kartička rozlomí na hranici sloupce: půlka nabídky
+     dole v jednom, zbytek nahoře v druhém a rámeček uprostřed useknutý.
+     Je to jediná řádka, která drží kartičku vcelku — nemazat. */
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+
+  /* Sloupce neumějí row-gap, svislou mezeru dělá okraj. Na konci sloupce
+     se okraj zahodí, takže další sloupec nezačne odsazený. */
+  margin: 0 0 20px;
+
+  border: var(--bmo-ramecek);
+  border-radius: var(--bmo-radius);
+  background: var(--bmo-bila);
+  overflow: hidden;
+  transition: box-shadow 0.12s ease;
+}
+
+:is(#primary, body) .bmo-karta:hover { box-shadow: var(--bmo-stin); }
+
+/* Barevný proužek se střídá po třech. Pořadí kartiček určuje „Pořadí"
+   v administraci, takže si barvy tým přeskládá bez sahání do kódu.
+   Hodnoty vedou do palety, takže je rebranding přebarví sám. */
+:is(#primary, body) .bmo-karta__pruh {
+  /* Proužek je <span>. Dokud byla kartička flexem, udělal z něj prohlížeč
+     blok sám; v běžném toku by zůstal řádkový a výška 8px by se zahodila —
+     proužek by zmizel a nikde by nebyla chyba. */
+  display: block;
+  height: 8px;
+  background: var(--bmo-hlavni);
+}
+:is(#primary, body) .bmo-karta:nth-child(3n + 2) .bmo-karta__pruh { background: var(--bmo-koral); }
+:is(#primary, body) .bmo-karta:nth-child(3n + 3) .bmo-karta__pruh { background: var(--bmo-levand); }
+
+
+/* ── Hlavička kartičky ───────────────────────────────────────────────── */
+
+:is(#primary, body) .bmo-karta__hlava {
+  padding: 18px 20px 13px;
+  border-bottom: 2px solid var(--bmo-svetla);
+}
+
+/* Nadpis se nastavuje celý, včetně velikosti a odsazení. Kadence dává
+   h2 vlastní velikost z Customizeru a ta je stavěná na nadpis sekce,
+   ne na název v kartičce. */
+:is(#primary, body) .bmo-karta__nazev {
+  margin: 0 0 7px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--bmo-cerna);
+}
+
+:is(#primary, body) .bmo-karta__adresa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bmo-seda);
+  text-decoration: none;
+}
+
+:is(#primary, body) .bmo-karta__adresa:hover {
+  color: var(--bmo-cerna);
+  text-decoration: underline;
+}
+
+:is(#primary, body) .bmo-karta__spendlik {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: var(--bmo-spendlik) center / contain no-repeat;
+          mask: var(--bmo-spendlik) center / contain no-repeat;
+}
+
+
+/* ── Nabídka ─────────────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmo-karta__telo {
+  padding: 6px 20px 18px;
+}
+
+/* Nadpis skupiny se vypisuje jen u podniků, které nabídku opravdu dělí
+   na alko a nealko. PHP ho jinak vůbec nepošle. */
+:is(#primary, body) .bmo-karta__skupina {
+  margin: 15px 0 2px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bmo-seda);
+}
+
+:is(#primary, body) .bmo-karta__telo > .bmo-karta__skupina:first-child { margin-top: 5px; }
+
+:is(#primary, body) .bmo-karta__chybi {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--bmo-seda);
+}
+
+:is(#primary, body) .bmo-karta__polozky {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(#primary, body) .bmo-polozka {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--bmo-svetla);
+}
+
+:is(#primary, body) .bmo-karta__telo > .bmo-karta__polozky:last-child > .bmo-polozka:last-child {
+  border-bottom: none;
+}
+
+:is(#primary, body) .bmo-polozka__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+:is(#primary, body) .bmo-polozka__nazev { font-weight: 800; }
+
+/* Složení drinku je na samostatném řádku. Ve větě za názvem („Pír:
+   Aquavit vol.2, hruškové pyré a prosecco") se nedá přejet očima
+   a na mobilu to zalomí cenu o dva řádky níž. */
+:is(#primary, body) .bmo-polozka__popis {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--bmo-seda);
+}
+
+/* Ceny musí stát pod sebou, aby se daly porovnat. tabular-nums k tomu
+   drží stejně široké číslice, takže „95 Kč" a „155 Kč" nehrají doleva
+   a doprava. */
+:is(#primary, body) .bmo-polozka__cena {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ── Prázdný výpis ───────────────────────────────────────────────────── */
+
+:is(#primary, body) .bmo--prazdno p {
+  margin: 0;
+  padding: 26px;
+  border: var(--bmo-ramecek);
+  border-radius: var(--bmo-radius);
+  background: var(--bmo-svetla);
+  font-weight: 700;
+}
+
+
+/* ── Mobil ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 599px) {
+  /* Jeden sloupec natvrdo. Z column-width by vyšel taky, ale 330px minimum
+     je na 320px displeji širší než okno a stránka by jela do strany. */
+  :is(#primary, body) .bmo__seznam     { column-count: 1; }
+
+  :is(#primary, body) .bmo-karta       { margin-bottom: 14px; }
+  :is(#primary, body) .bmo-karta__nazev { font-size: 19px; }
+  :is(#primary, body) .bmo-karta__hlava { padding: 15px 16px 11px; }
+  :is(#primary, body) .bmo-karta__telo  { padding: 4px 16px 15px; }
+  :is(#primary, body) .bmo__chip        { padding: 7px 13px; font-size: 13px; }
+}

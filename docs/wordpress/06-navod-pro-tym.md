@@ -25,10 +25,11 @@ poskládá stránky. Nic se nepřepisuje v kódu.
 - [4. Žánry a kategorie](#4-žánry-a-kategorie)
 - [5. Zapnout rezervace na akci](#5-zapnout-rezervace-na-akci)
 - [6. Přidat krále a zapsat body](#6-přidat-krále-a-zapsat-body)
-- [7. Napsat aktualitu](#7-napsat-aktualitu)
-- [8. Upravit text stránky](#8-upravit-text-stránky)
-- [9. Nahrát obrázky](#9-nahrát-obrázky)
-- [10. Nastavit nový ročník](#10-nastavit-nový-ročník)
+- [7. Přidat osvěžovnu](#7-přidat-osvěžovnu)
+- [8. Napsat aktualitu](#8-napsat-aktualitu)
+- [9. Upravit text stránky](#9-upravit-text-stránky)
+- [10. Nahrát obrázky](#10-nahrát-obrázky)
+- [11. Nastavit nový ročník](#11-nastavit-nový-ročník)
 - [Co nedělat](#co-nedělat)
 - [Když něco nefunguje](#když-něco-nefunguje)
 
@@ -48,10 +49,12 @@ poskládá stránky. Nic se nepřepisuje v kódu.
 | přidat kandidáta na krále | Králové → Přidat krále | [6](#6-přidat-krále-a-zapsat-body) |
 | zapsat body králi | Králové → Všichni králové → klik na jméno | [6.3](#63-zapsat-body) |
 | zjistit, kdo vede | Králové → Všichni králové, sloupec **Body celkem** | [6.5](#65-kde-se-pořadí-ukáže) |
-| napsat novinku | Příspěvky (Posts) → Přidat příspěvek (Add Post) | [7](#7-napsat-aktualitu) |
-| opravit text na stránce | Stránky (Pages) → Všechny stránky (All Pages) | [8](#8-upravit-text-stránky) |
-| nahrát fotky | Média (Media) → Přidat soubor (Add Media File) | [9](#9-nahrát-obrázky) |
-| nastavit datumy nového ročníku | Akce (Events) → Ročníky | [10](#10-nastavit-nový-ročník) |
+| přidat podnik do osvěžoven | Osvěžovny → Přidat osvěžovnu | [7](#7-přidat-osvěžovnu) |
+| opravit cenu v osvěžovnách | Osvěžovny → klik na název podniku | [7.3](#73-upravit-nebo-smazat-podnik) |
+| napsat novinku | Příspěvky (Posts) → Přidat příspěvek (Add Post) | [8](#8-napsat-aktualitu) |
+| opravit text na stránce | Stránky (Pages) → Všechny stránky (All Pages) | [9](#9-upravit-text-stránky) |
+| nahrát fotky | Média (Media) → Přidat soubor (Add Media File) | [10](#10-nahrát-obrázky) |
+| nastavit datumy nového ročníku | Akce (Events) → Ročníky | [11](#11-nastavit-nový-ročník) |
 
 ---
 
@@ -225,7 +228,7 @@ nemusí ukázat v programu aktuálního ročníku.
 14. Najdi box **Náhledový obrázek (Featured image)** vpravo.
 15. Klikni na **Nastavit náhledový obrázek (Set featured image)**.
 16. Buď vyber obrázek z knihovny, nebo přetáhni nový. Pokud je fotka velká a nenahraje
-    se, přečti si [sekci 9](#9-nahrát-obrázky).
+    se, přečti si [sekci 10](#10-nahrát-obrázky).
 17. Klikni na **Nastavit náhledový obrázek (Set featured image)** v pravém dolním rohu okna.
 
 > Pod tlačítkem je poznámka **„We recommend a 16:9 aspect ratio for featured images."**
@@ -660,7 +663,95 @@ něj kliknutím seřadit, takže je hned vidět, kdo vede.
 
 ---
 
-## 7. Napsat aktualitu
+## 7. Přidat osvěžovnu
+
+Osvěžovny jsou budějovické podniky, které na týden festivalu nabízejí zvýhodněné menu.
+Každý podnik je samostatný záznam s adresou a seznamem položek. Vypisují se na stránce
+[/osvezovny/](https://novy.budejovickymajales.cz/osvezovny/) jako kartičky.
+
+> **Nepiš nabídku přímo do stránky.** Stránka Osvěžovny je skoro prázdná — je na ní
+> jen nadpis, úvodní věta a značka `[bm_osvezovny]`. Tu značku nesmaž, tím zmizí
+> všechny podniky. Texty se mění tady v Osvěžovnách, ne v té stránce.
+
+### 7.1 Založit podnik
+
+1. V levém menu **Osvěžovny** → **Přidat osvěžovnu**.
+2. Do velkého pole nahoře napiš **název podniku** tak, jak ho lidé znají — „Široko",
+   ne „Kavárna Široko s.r.o.".
+3. V boxu **Osvěžovna – adresa a nabídka** vyplň:
+   - **Adresa** — ulice a číslo, třeba `Široká 443/19`. Když ji necháš prázdnou,
+     napíše se na webu jen „Zobrazit na mapě".
+   - **Odkaz na mapu** — zkrácený odkaz z Map Google (v mapě **Sdílet → Kopírovat
+     odkaz**). **Nepovinné**: bez něj se podnik na mapě vyhledá podle názvu.
+4. Přidej položky (viz [7.2](#72-vyplnit-nabídku)).
+5. Klikni na **Publikovat (Publish)**.
+
+> **Podnik nemá vlastní stránku.** Ukazuje se jen ve výpisu na `/osvezovny/`, stejně
+> jako králové. Tlačítko **Zobrazit** v editoru proto nikam nevede.
+
+> V boxu **Pořadí osvěžovny** je pole **Order** s číslem. **Nižší číslo je na webu
+> dřív.** Tím se dá dát dopředu podnik, na kterém vám záleží nejvíc. Když tam necháš
+> nulu u všech, seřadí se podniky podle abecedy. Tip: čísluj po desítkách (10, 20,
+> 30…), ať jde mezi ně později něco vložit bez přepisování zbytku.
+>
+> Na počítači stojí podniky ve třech sloupcích a **čtou se shora dolů, ne po
+> řadách** — první tři tedy skončí pod sebou v levém sloupci, ne vedle sebe
+> nahoře. Je to proto, aby pod krátkou nabídkou nezůstala prázdná díra.
+
+### 7.2 Vyplnit nabídku
+
+V boxu **Nabídka** klikni na **Přidat položku**. Každý řádek je jedna položka menu
+a má čtyři pole:
+
+| Pole | Co do něj | Povinné |
+|---|---|---|
+| **Název** | Jak se položka jmenuje — `Okurkový Fizz`, `Majálesový Gyros` | ano |
+| **Popis** | Složení nebo doplněk — `Borovička s tonicem`. Na webu je menším písmem pod názvem. | ne |
+| **Cena** | Včetně „Kč" — `80 Kč`. Je to obyčejný text, takže sem jde napsat i `Sleva 20 %` nebo nechat prázdno. | ne |
+| **Druh** | `Nealko`, `Alko`, nebo `Jídlo` | ne |
+
+**Pořadí řádků je pořadí na webu.** Řádky se přetahují za tečkovaný úchyt vlevo.
+
+> **Název a cenu nepiš do jednoho pole.** Na starém webu byly ceny vlepené do věty
+> („…a prosecco 155 Kč") a nešly porovnat. Teď stojí v pravém sloupci pod sebou —
+> ale jen když je cena ve svém vlastním políčku.
+
+### 7.2b K čemu je „Druh"
+
+Druh dělá dvě věci a **obě fungují i bez něj**, takže se nemusíš trápit tím, co kam patří:
+
+1. **Rozdělí kartičku na skupiny.** Když má podnik aspoň dva různé vyplněné druhy,
+   objeví se nad položkami nadpisy **NEALKO** a **ALKO** — přesně jako je mělo Široko
+   na starém webu. Když má podnik jen jeden druh (nebo žádný), žádné nadpisy nejsou
+   a je to prostý seznam.
+2. **Pohání filtr** nad výpisem — tlačítka *Vše / Nealko / Alko / Jídlo*. Tlačítko
+   se objeví jen pro druh, který aspoň jedna položka opravdu má.
+
+> **Když nevíš, nech prázdno.** Položka se vypíše úplně normálně, jen se neukáže pod
+> filtrem. Je to lepší než ji zařadit špatně. U drinku jako „Květnový infarkt"
+> (yerba maté, mangový džus, espresso a trochu zlata) to stejně nikdo nepozná.
+
+### 7.3 Upravit nebo smazat podnik
+
+- **Opravit cenu nebo text:** **Osvěžovny** → **Všechny osvěžovny** → klik na název →
+  oprav → **Aktualizovat (Update)**.
+- **Smazat jeden řádek nabídky:** u řádku vpravo je **✕** (nebo *Odstranit řádek*).
+- **Podnik letos nebude:** otevři ho a dej **Přesunout do koše (Move to Trash)**.
+  Z webu zmizí hned. V koši zůstane třicet dní, takže se dá vrátit.
+
+### 7.4 Co dělat na začátku ročníku
+
+Nabídky se mění každý rok. Projdi **Všechny osvěžovny** a u každého podniku:
+
+1. Zkontroluj, že s vámi letos jde do spolupráce. Když ne → koš.
+2. Přepiš položky a ceny.
+3. Podniky, které přibyly, založ podle [7.1](#71-založit-podnik).
+
+Nic jiného se dělat nemusí — stránka Osvěžovny se o sebe postará sama.
+
+---
+
+## 8. Napsat aktualitu
 
 Aktualita = krátká novinka. „Přidali jsme do lineupu…", „Rezervace na workshopy jsou
 otevřené", „Kvůli dešti přesouváme…".
@@ -669,13 +760,13 @@ otevřené", „Kvůli dešti přesouváme…".
 > Seznam novinek není nutně v hlavním menu a může se k němu chodit jinudy. Potřebuješ
 > vědět, kam lidem poslat odkaz.
 
-### 7.1 Jak na to
+### 8.1 Jak na to
 
 1. V levém menu **Příspěvky (Posts)** → **Přidat příspěvek (Add Post)**.
 2. Nahoře napiš **nadpis**. Krátký a konkrétní. Ne „Novinky", ale
    „Rezervace na workshopy jsou otevřené".
 3. Klikni pod nadpis a piš text. Tenhle editor se skládá z **bloků** — jak to funguje,
-   je v [sekci 8](#8-upravit-text-stránky).
+   je v [sekci 9](#9-upravit-text-stránky).
 4. Vpravo je panel se záložkami **Příspěvek (Post)** a **Blok (Block)**. Zůstaň na
    **Příspěvek (Post)**.
 
@@ -689,14 +780,14 @@ otevřené", „Kvůli dešti přesouváme…".
    nech být, nepoužíváme je.
 8. Klikni na **Publikovat (Publish)** vpravo nahoře a potvrď.
 
-### 7.2 Pár rad k psaní
+### 8.2 Pár rad k psaní
 
 - Nejdůležitější informace dej do **první věty**. Většina lidí dál nečte.
 - **Konkrétní datum a čas**, ne „brzy" a „příští týden". Novinku si někdo přečte za měsíc.
-- Když odkazuješ na akci nebo stránku, **vlož odkaz** (postup v [sekci 8.6](#86-odkaz)).
+- Když odkazuješ na akci nebo stránku, **vlož odkaz** (postup v [sekci 9.6](#96-odkaz)).
 - Odstavce po třech až čtyřech řádcích. Zeď textu na mobilu nikdo nepřečte.
 
-### 7.3 Opravit nebo smazat
+### 8.3 Opravit nebo smazat
 
 1. **Příspěvky (Posts)** → **Všechny příspěvky (All Posts)**.
 2. Klikni na nadpis, oprav, klikni na **Aktualizovat (Update)**.
@@ -705,7 +796,7 @@ Chybnou novinku raději **oprav**, než smaž — někdo už na ni mohl poslat o
 
 ---
 
-## 8. Upravit text stránky
+## 9. Upravit text stránky
 
 **[jen Admin]** — role Dramaturgie na stránky nedosáhne.
 
@@ -713,13 +804,13 @@ Stránky jsou pevné části webu: Program, Králové, Osvěžovny, Praktické i
 Kontakt a další. **Strukturu nemáš měnit** — jen texty uvnitř. Menu se podle stránek
 neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 
-### 8.1 Otevřít stránku
+### 9.1 Otevřít stránku
 
 1. V levém menu **Stránky (Pages)** → **Všechny stránky (All Pages)**.
 2. Klikni na název stránky.
 3. Pokud vyskočí uvítací okénko **„Welcome to the editor"**, zavři ho křížkem.
 
-### 8.2 Jak editor funguje
+### 9.2 Jak editor funguje
 
 Text je poskládaný z **bloků**. Každý odstavec, nadpis, seznam nebo obrázek je
 samostatný blok. Kliknutím do bloku ho vybereš a nad ním se objeví malá lišta s nástroji.
@@ -730,7 +821,7 @@ zmáčkneš **Enter** a napíšeš `/` (lomítko) — vyskočí nabídka bloků.
 **Zpět** se vrátíš šipkou doleva vlevo nahoře, nebo klávesami **Ctrl+Z**
 (na Macu **Cmd+Z**). Platí to i na smazaný blok.
 
-### 8.3 Odstavec
+### 9.3 Odstavec
 
 Prostě klikni a piš. **Enter** udělá nový odstavec, **Shift+Enter** jen zalomí řádek
 uvnitř toho stávajícího.
@@ -738,7 +829,7 @@ uvnitř toho stávajícího.
 Tučné: označ text a zmáčkni **Ctrl+B** (**Cmd+B**). Kurzíva: **Ctrl+I** (**Cmd+I**).
 Nebo použij tlačítka **B** a **I** v liště nad blokem.
 
-### 8.4 Nadpis
+### 9.4 Nadpis
 
 1. Zmáčkni **Enter** na konci odstavce.
 2. Napiš `/nadpis` a vyber **Nadpis (Heading)**.
@@ -749,7 +840,7 @@ Nebo použij tlačítka **B** a **I** v liště nad blokem.
 dělej jako **H2**. Podsekci uvnitř sekce jako **H3**. Nepřeskakuj z H2 rovnou na H4 —
 lidi se čtečkou obrazovky se podle toho orientují.
 
-### 8.5 Seznam
+### 9.5 Seznam
 
 1. Zmáčkni **Enter**, napiš `/seznam` a vyber **Seznam (List)**.
 2. Napiš první položku, zmáčkni **Enter**, napiš druhou.
@@ -758,7 +849,7 @@ lidi se čtečkou obrazovky se podle toho orientují.
 
 **Tab** udělá odsazenou podpoložku, **Shift+Tab** ji vrátí zpátky.
 
-### 8.6 Odkaz
+### 9.6 Odkaz
 
 1. Označ text, ze kterého má být odkaz.
 2. Zmáčkni **Ctrl+K** (**Cmd+K**), nebo klikni na ikonku řetízku v liště.
@@ -772,7 +863,7 @@ stránky vypnuté.
 
 **Jako text odkazu napiš, kam vede.** Ne „klikni sem", ale „program festivalu".
 
-### 8.7 Obrázek
+### 9.7 Obrázek
 
 1. Zmáčkni **Enter**, napiš `/obrázek` a vyber **Obrázek (Image)**.
 2. Klikni na **Mediální knihovna (Media Library)** a vyber obrázek, nebo ho přetáhni
@@ -781,12 +872,12 @@ stránky vypnuté.
    na obrázku. Čtou to nevidomí návštěvníci a vyhledávače.
 4. Velikost a zarovnání se nastaví v liště nad blokem.
 
-### 8.8 Smazat blok
+### 9.8 Smazat blok
 
 Klikni do bloku, pak na **tři tečky** v liště nad ním a vyber **Odstranit (Delete)**.
 Nebo označ blok a zmáčkni **Delete**.
 
-### 8.9 Uložit
+### 9.9 Uložit
 
 1. Vpravo nahoře klikni na **Náhled (Preview)** a podívej se, jak to vypadá —
    ideálně i v mobilní variantě.
@@ -803,9 +894,9 @@ Nebo označ blok a zmáčkni **Delete**.
 
 ---
 
-## 9. Nahrát obrázky
+## 10. Nahrát obrázky
 
-### 9.1 Nejdůležitější věc: fotky z foťáku jsou moc velké
+### 10.1 Nejdůležitější věc: fotky z foťáku jsou moc velké
 
 Fotka z foťáku nebo nového telefonu má běžně **5 až 15 MB**. Web tak velké soubory
 **nepřijme** — nahrávání se zasekne nebo vypíše chybu o velikosti.
@@ -817,7 +908,7 @@ Kolik to přesně je, si ověříš takhle:
 1. **Média (Media)** → **Přidat soubor (Add Media File)**.
 2. Pod přetahovacím polem je věta **„Maximum upload file size: … MB"**. To je strop.
 
-### 9.2 Jak fotku zmenšit
+### 10.2 Jak fotku zmenšit
 
 **Na čem** nezáleží. Cíl je vždycky stejný:
 
@@ -836,7 +927,7 @@ Kolik to přesně je, si ověříš takhle:
 > Nezmenšené fotky nejsou jen technický problém. Stránka s nimi se na mobilu v davu
 > na festivalu načítá pomalu nebo vůbec — a to je přesně okamžik, kdy ji lidi potřebují.
 
-### 9.3 Fotka na úvodní stránce
+### 10.3 Fotka na úvodní stránce
 
 Velký pás nahoře na úvodu může mít místo zelené barvy fotku. Mění se jako kterákoli
 jiná fotka na webu:
@@ -850,12 +941,12 @@ Hotovo — fotka se objeví za nadpisem. Když ji odebereš, pás se vrátí k z
 > **Fotku vybírej na šířku a spíš tmavší.** Text přes ni jde bílý. Přes fotku se sice
 > automaticky překládá tmavý závoj, aby byl text čitelný, ale na úplně bílé obloze to
 > stejně nebude ono. Ideální šířka je kolem 2000 px — větší jen zpomalí načítání
-> (viz [9.1](#91-nejdůležitější-věc-fotky-z-foťáku-jsou-moc-velké)).
+> (viz [10.1](#101-nejdůležitější-věc-fotky-z-foťáku-jsou-moc-velké)).
 
 > **Důležité je, co je uprostřed.** Fotka se ořízne na výšku pásu a na mobilu je z ní
 > vidět užší výřez. Co je na kraji, nemusí být vidět.
 
-### 9.4 Nahrát do knihovny
+### 10.4 Nahrát do knihovny
 
 1. **Média (Media)** → **Přidat soubor (Add Media File)**.
 2. Přetáhni soubory do pole, nebo klikni na **Vybrat soubory (Select Files)**.
@@ -864,14 +955,14 @@ Hotovo — fotka se objeví za nadpisem. Když ji odebereš, pás se vrátí k z
 Obrázky se dají nahrát i rovnou při psaní — z boxu **Náhledový obrázek (Featured image)**
 nebo z bloku **Obrázek (Image)**. Skončí ve stejné knihovně.
 
-### 9.5 Pojmenuj soubory rozumně
+### 10.5 Pojmenuj soubory rozumně
 
 `IMG_4821.jpg` nikomu nic neřekne. Za rok nikdo nepozná, co to je.
 
 Pojmenuj je radši `kral-jan-novak-2027.jpg` nebo `zlaty-most-vecer.jpg`.
 Bez diakritiky, bez mezer, malá písmena, slova spojená pomlčkou.
 
-### 9.6 Alternativní text
+### 10.6 Alternativní text
 
 Po nahrání klikni na obrázek v knihovně a vyplň vpravo **Alternativní text (Alt text)**.
 Jedna věta o tom, co je na obrázku.
@@ -879,7 +970,7 @@ Jedna věta o tom, co je na obrázku.
 Čtou to lidé, kteří na obrázek nevidí, a vyhledávače. U fotek z festivalu to zabere
 pět vteřin a je to součást toho, co slibuje stránka o přístupnosti.
 
-### 9.7 Co nemazat
+### 10.7 Co nemazat
 
 **Nemaž obrázky z knihovny jen proto, že se ti nezdají.** Mohou být použité na stránce,
 o které nevíš — pak tam zůstane prázdné místo. Když něco opravdu překáží, zeptej se
@@ -887,7 +978,7 @@ správce.
 
 ---
 
-## 10. Nastavit nový ročník
+## 11. Nastavit nový ročník
 
 **[jen Admin]** — role Dramaturgie na ročníky nedosáhne.
 
@@ -896,7 +987,7 @@ A nese datumy festivalu pro úvodní stránku.
 
 **Tohle se dělá jednou za rok.** Je to první věc, kterou nová sestava na webu udělá.
 
-### 10.1 Založit ročník
+### 11.1 Založit ročník
 
 1. V levém menu **Akce (Events)** → **Ročníky**.
    (Stejná obrazovka je i pod **Příspěvky (Posts)** → **Ročníky** a pod
@@ -919,7 +1010,7 @@ A nese datumy festivalu pro úvodní stránku.
 > **Zakládej ročník jen jednou.** Když se překlepneš, **uprav existující** termín —
 > nedělej druhý. Dva ročníky „2028" by rozdělily program na dvě poloviny.
 
-### 10.2 Opravit datumy
+### 11.2 Opravit datumy
 
 1. **Akce (Events)** → **Ročníky**.
 2. Klikni na rok.
@@ -929,17 +1020,17 @@ A nese datumy festivalu pro úvodní stránku.
 Datum se tu zobrazuje česky (`30. 05. 2027`), ale i tak ho **vybírej z kalendáře**,
 nepiš ručně.
 
-### 10.3 Co udělat hned potom
+### 11.3 Co udělat hned potom
 
 Nový ročník sám o sobě nic neudělá. Potom je potřeba:
 
 1. **Zaškrtnout nový ročník u každé nové akce** ([sekce 2.5](#25-žánr-a-kategorie)).
 2. **Zaškrtnout ho u nových králů** ([sekce 6.1](#61-založit-kandidáta)).
-3. **Zaškrtnout ho u nových aktualit** ([sekce 7.1](#71-jak-na-to)).
+3. **Zaškrtnout ho u nových aktualit** ([sekce 8.1](#81-jak-na-to)).
 4. **Projít místa konání** — které scény letos nejsou, které přibyly
    ([sekce 3](#3-přidat-místo-konání)).
 5. **Aktualizovat úvodní stránku** — text a obrázky z loňska
-   ([sekce 8](#8-upravit-text-stránky)).
+   ([sekce 9](#9-upravit-text-stránky)).
 
 **Loňské akce a krále nemaž.** Mají svůj ročník, podle něj se odfiltrují. Archiv je
 hodnota, ne smetí — a smazat se dá vždycky, vrátit ne.
@@ -1038,10 +1129,10 @@ Zabere to minutu a vyřeší to většinu problémů.
 | Akce není v programu | Není zaškrtnutý **Ročník**, nebo je akce **koncept** |
 | Akce nemá barvu | Je zaškrtnutý jen žánr, ne **kategorie** nad ním ([4.2](#42-jak-akci-zařadit)) |
 | Datum je úplně jinde | Datum bylo **napsané ručně**; vyber ho z kalendáře ([2.3](#23-datum-a-čas)) |
-| Obrázek se nenahraje | Je **moc velký**, zmenši ho ([9.1](#91-nejdůležitější-věc-fotky-z-foťáku-jsou-moc-velké)) |
+| Obrázek se nenahraje | Je **moc velký**, zmenši ho ([10.1](#101-nejdůležitější-věc-fotky-z-foťáku-jsou-moc-velké)) |
 | Nikdo se nehlásí na rezervaci | Špatné **Start sale / End sale**; formulář si předvyplní zítřek ([5.2](#52-vyplnit)) |
 | Položka v menu mi chybí | Na tu část **nemáš práva** — je to **[jen Admin]** |
-| Smazal/a jsem text ve stránce | **Ctrl+Z**, nebo **Revize (Revisions)** ([8.9](#89-uložit)) |
+| Smazal/a jsem text ve stránce | **Ctrl+Z**, nebo **Revize (Revisions)** ([9.9](#99-uložit)) |
 
 ### Koho se zeptat
 

@@ -357,6 +357,12 @@ Aktuality jdou na nativní typ „Příspěvek" — nulový vlastní kód, každ
 
 ## Partneři, osvěžovny, fotogalerie, historie
 
+> **Osvěžovny se nakonec udělaly opačně, než tahle kapitola radí.** Od 5. 11. 2026
+> mají vlastní typ obsahu s opakovatelným polem, ne block pattern. Námitka níž
+> („data nejsou uniformní, repeater by to rozbil") platí a model ji musí unést —
+> jak, i proč rozhodnutí padlo jinak, je v [17-osvezovny.md](17-osvezovny.md).
+> Zbytek kapitoly (partneři, historie, fotogalerie) beze změny.
+
 **Odhad: 15–26 h**
 
 Celý tenhle modul řeš BEZ vlastních typů obsahu, BEZ ACF a BEZ PHP šablon — jsou to obyčejné WordPress stránky poskládané z core bloků. Partneři = stránka, kde každá sekce je nadpis H2 a pod ním blok Galerie (core Gallery umí u KAŽDÉHO obrázku vlastní odkaz — ověřeno v dokumentaci WP). Osvěžovny = stránka poskládaná z opakovaného block patternu "Karta osvěžovny" (Nadpis + adresa + tabulka položka/cena), vzhled kartiček je cca 100 řádků CSS v child tématu. Historie = stránka "Historie" a jejích 21 podstránek 2004–2024, takže URL /historie/2024 zůstávají beze změny; fotogalerie žije přímo v podstránce ročníku jako blok Galerie s nativním lightboxem. Jediný nutný plugin je Imsanity, který zmenšuje nahrávané fotky, aby originály 6720×4480 nezaplnily sdílený Wedos.

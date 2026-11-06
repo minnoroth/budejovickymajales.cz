@@ -11,6 +11,16 @@
  * pole, spadne právě ten test — a je to jediné včasné varování, které máme.
  */
 
+/*
+ * Jen z příkazové řádky. Soubor se nahrává na server spolu se zbytkem složky
+ * a bez téhle pojistky ho kdokoli spustí přes
+ * /wp-content/mu-plugins/<doplnek>/overeni.php a dostane výpis testů.
+ * Zjištěno 5. 11. 2026 na stagingu, kde to tak opravdu bylo.
+ */
+if ( 'cli' !== PHP_SAPI ) {
+	exit;
+}
+
 define( 'ABSPATH', __DIR__ );
 
 $GLOBALS['meta'] = array();

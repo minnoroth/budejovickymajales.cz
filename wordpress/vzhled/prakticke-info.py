@@ -126,7 +126,7 @@ OTAZKY = [
     ),
     (
         "Co jsou to osvěžovny?",
-        "Osvěžovny vznikají ve spolupráci s budějovickými <a href=\"/partneri/osvezovny/\">podniky</a> (většinou s kavárnami). Kavárny si pro návštěvníky festivalu připravují speciální majálesová menu a drinky za zvýhodněné ceny, které platí po celý týden festivalu.",
+        "Osvěžovny vznikají ve spolupráci s budějovickými <a href=\"/osvezovny/\">podniky</a> (většinou s kavárnami). Kavárny si pro návštěvníky festivalu připravují speciální majálesová menu a drinky za zvýhodněné ceny, které platí po celý týden festivalu.",
     ),
 ]
 

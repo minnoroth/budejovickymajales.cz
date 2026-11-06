@@ -7,6 +7,18 @@
 - 5 skupin polí — Králové, Ročník, barva u kategorie programu,
   bezbariérovost u místa, nastavení u akce
 
+## Co tady NENÍ: Osvěžovny
+
+Typ obsahu **Osvěžovna** a jeho pole v tomhle souboru nejsou a nebudou. Registrují
+se kódem v [`wordpress/mu-plugins/bm-osvezovny/bm-osvezovny.php`](../mu-plugins/bm-osvezovny/bm-osvezovny.php),
+takže se nahrají přes FTP spolu se zbytkem a nemůžou se rozejít s repozitářem.
+
+Prakticky: **v SCF → Post Types ani SCF → Field Groups je nehledej, nejsou tam.**
+Měnit se musí v tom PHP souboru.
+
+Je to nejednotnost — Králové importem, Osvěžovny kódem. Proč to tak dopadlo a proč
+by se to mělo jednou srovnat, je v [17-osvezovny.md](../../docs/wordpress/17-osvezovny.md).
+
 ## Proč Králové nejsou veřejný typ obsahu
 
 Typ `kral` má `public: false` a `publicly_queryable: false` **schválně**. WordPress
