@@ -47,6 +47,39 @@
   margin-right: auto !important;
 }
 
+/* Úvodní text podstránky. Podstránky nemají barevný pás, jen nadpis
+   a tenhle odstavec — viz vzhled/bloky.py. */
+.bm-lead {
+  font-size: 18px;
+  color: var(--global-palette5);
+  max-width: 660px;
+}
+
+/* Pás s fotkou na pozadí. Fotku dosazuje doplněk bm-pozadi.php z náhledového
+   obrázku úvodní stránky; tady je jen to, co platí pro oba případy. */
+body.home .bm-pas-hlavni {
+  background-color: var(--global-palette1);
+  /* Při fotce na pozadí je bílý text na tmavém přechodu; bez fotky na zelené.
+     Stín drží čitelnost i tam, kde přechod nestačí (světlá obloha nahoře). */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+/* Odsazení úvodního pásu. Je tady, a ne v bloku jako u ostatních pásů:
+   hlavička je na úvodu průhledná a leží přes pás, takže si pás musí nahoře
+   udělat místo na výšku menu — a ta je na telefonu jiná než na monitoru.
+   Odsazení zapsané v bloku je inline styl, který by se podle šířky okna
+   měnit nedal. Viz funkce hero() ve vzhled/uvod.py.
+
+   Horní číslo = výška hlavičky (88 px na monitoru) plus vzduch. Kdyby se
+   měnila velikost loga nebo odsazení hlavičky, mění se i tohle.
+
+   Vodorovné odsazení tady schválně není — to má blok v inline stylu, protože
+   Kadence u bloků přes celou šířku padding zleva i zprava nuluje a obyčejná
+   třída to nepřebije. */
+.bm-pas-uvod { padding-top: 150px; padding-bottom: 80px; }
+@media (max-width: 1024px) { .bm-pas-uvod { padding-top: 120px; padding-bottom: 64px; } }
+@media (max-width: 767px)  { .bm-pas-uvod { padding-top: 104px; padding-bottom: 56px; } }
+
 /* Datum nad nadpisem v hero sekci. */
 .bm-nadlinka {
   font-size: 15px;
@@ -57,7 +90,14 @@
 }
 
 /* ── Běžící pás ───────────────────────────────────────────────── */
-.bm-bezici { background: var(--global-palette15); border-top: var(--bm-ramecek); border-bottom: var(--bm-ramecek); overflow: hidden; padding: 14px 0; }
+/* Lepí se rovnou pod fotku a odděluje úvodní sekci od obsahu pod ní.
+   Blokový editor dává mezi bloky mezeru; ta se tu ruší, jinak by pás
+   plaval v bílém prostoru a vypadal jako samostatný prvek, ne jako šev. */
+.bm-bezici { background: var(--global-palette15); border-top: var(--bm-ramecek); border-bottom: var(--bm-ramecek); overflow: hidden; padding: 14px 0; margin-top: 0; }
+/* Mezeru dělá spodní okraj pásu s fotkou, ne horní okraj běžícího pásu —
+   proto se ruší tam. Selektor je přes rodiče: samotná třída má menší váhu
+   než pravidlo Kadence, které mezery mezi bloky rozdává. */
+.entry-content > .bm-pas-uvod { margin-bottom: 0; }
 .bm-bezici__draha { display: flex; width: max-content; animation: bm-beh 40s linear infinite; }
 .bm-bezici__text { flex: 0 0 auto; white-space: nowrap; font-weight: 800; font-size: clamp(17px, 2vw, 24px); color: var(--global-palette3); }
 @keyframes bm-beh {
@@ -159,6 +199,29 @@
 }
 .bm-tlacitko:hover { background: var(--global-palette9); color: var(--global-palette3); }
 
+/* Druhé tlačítko v heru. Korálová je v paletě barva, která volá po akci
+   (má ji i pruh vedoucího krále), takže se od žluté „Program" odliší,
+   aniž by se zaváděla nová barva mimo paletu. */
+.bm-tlacitko--podpor { background: var(--global-palette10); }
+.bm-tlacitko--podpor:hover { background: var(--global-palette9); }
+
+/* Tlačítka vedle sebe, a to i na telefonu — jsou krátká, vejdou se.
+   Dvě tlačítka přes celou šířku pod sebou zabírala půl obrazovky. */
+.bm-tlacitka { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* Šipka u „Podpořit". Posouvá se při najetí, aby bylo vidět, že to někam
+   vede. Je to ozdoba, takže v HTML je aria-hidden a čtečka ji přeskočí. */
+.bm-sipka {
+  display: inline-block;
+  margin-left: 10px;
+  transition: transform .12s ease;
+}
+.bm-tlacitko--podpor:hover .bm-sipka { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) {
+  .bm-sipka { transition: none; }
+  .bm-tlacitko--podpor:hover .bm-sipka { transform: none; }
+}
+
 /* ── Aktuality (blok Nejnovější příspěvky) ────────────────────── */
 .wp-block-latest-posts.is-grid { gap: 24px; }
 .wp-block-latest-posts.is-grid li {
@@ -256,6 +319,42 @@
 }
 
 /* ── Hlavička ─────────────────────────────────────────────────── */
+/* Tlačítko v hlavičce má vypadat stejně jako „Podpořit →" v heru.
+   Barvu, text a cíl řeší Customizer (nastaveni.py), tady zbývá šipka
+   a rámeček: popisek tlačítka Kadence prohání přes esc_html(), takže
+   do něj HTML dát nejde, a rámeček Kadence u tohohle tlačítka nemá. */
+.header-button,
+.mobile-header-button {
+  border: 2px solid var(--global-palette3);
+}
+.header-button::after,
+.mobile-header-button::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 8px;
+  transition: transform .12s ease;
+}
+.header-button:hover::after,
+.mobile-header-button:hover::after { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) {
+  .header-button::after,
+  .mobile-header-button::after { transition: none; }
+  .header-button:hover::after,
+  .mobile-header-button:hover::after { transform: none; }
+}
+/* V hlavičce je jen logo, bez názvu webu. Tým dodává logo na šířku
+   i s nápisem, takže se omezuje výškou — u loga na šířku je výška to,
+   co musí sednout na hlavičku, a šířka se dopočítá sama. Kdyby se
+   omezovala šířka, vysoké logo by hlavičku roztáhlo. */
+.site-branding .custom-logo {
+  height: auto;
+  max-height: 52px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+@media (max-width: 1024px) { .site-branding .custom-logo { max-height: 44px; } }
+@media (max-width: 767px)  { .site-branding .custom-logo { max-height: 38px; } }
 /* Aktivní položka menu dostane žluté podtržení místo barvy textu. */
 .site-header .primary-menu-container .menu-item.current-menu-item > a {
   box-shadow: inset 0 -3px 0 0 var(--global-palette15);
@@ -289,5 +388,15 @@ body.home .content-area { margin-top: 0; margin-bottom: 0; }
   .bm-karta__nazev { font-size: 19px; }
   .bm-dlazdice { font-size: 18px; min-height: 96px; padding: 18px 16px; }
   .bm-tlacitko { display: block; text-align: center; }
+  /* Dvojice v heru zůstává vedle sebe i na telefonu — texty jsou krátké.
+     Samostatné tlačítko jinde na webu dál roztahuje přes celou šířku. */
+  .bm-tlacitka .bm-tlacitko {
+    width: auto;
+    flex: 1 1 0;
+    padding: 13px 16px;
+    font-size: 16px;
+  }
+  .bm-tlacitka { gap: 10px; flex-wrap: nowrap; }
+  .bm-sipka { margin-left: 7px; }
   .bm-nadlinka { font-size: 13px; }
 }

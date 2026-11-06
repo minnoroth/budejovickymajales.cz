@@ -132,16 +132,31 @@ docker run --rm -v "$PWD":/t -w /t php:8.2-cli php overeni.php
 **Problém.** Sekce „Nepřehlédni" na úvodní stránce byly tři **natvrdo napsané
 kartičky** v `wordpress/vzhled/uvod.py`. Nebyla to data — byl to text, který někdo
 přepsal rukou z programu. Když se akce zrušila nebo přesunula, úvodní stránka o tom
-nevěděla. Totéž u dlaždic „Co tě zajímá?": počty akcí byly napsané `43 / 22 / 14 / 7`,
-zatímco skutečnost byla `42 / 18 / 7 / 7`.
+nevěděla.
 
 **Řešení.** Zkratka `[bm_carousel]` složí pruh kartiček z akcí označených **Top
-představení**, seřazených podle data, nejvýš osm. Zkratka
-`[bm_pocet_akci kategorie=hudba]` vypíše skutečný počet akcí v kategorii.
+představení**, seřazených podle data, nejvýš osm.
+
+> Doplněk měl i zkratku `[bm_pocet_akci]`, která vypisovala skutečný počet akcí
+> v kategorii — dlaždice „Co tě zajímá?" na úvodu totiž měly počty napsané natvrdo
+> a lhaly ve čtyřech číslech. Celá sekce z úvodu 5. 11. 2026 zmizela, protože všechny
+> čtyři dlaždice vedly stejně na `/program/`. Zkratku jsem tím pádem odstranil;
+> kdyby se počty někdy hodily jinde, jsou v historii gitu.
+
+**Jak se přepíná.** Na širokém okně jsou vidět tři kartičky vedle sebe, zbytek se
+přepíná **tečkami** pod pruhem. Na telefonu jedna a švihá se prstem. Najetí myší dělá
+stejný plakátový stín jako kartičky v Lineupu a Seznamu.
 
 **Proč PHP, a ne JavaScript jako program.** Carousel je první věc pod hlavičkou. Kdyby
 se dokresloval z REST API, byla by nejdůležitější část úvodu při načtení prázdná
 a vyhledávač by v ní neviděl nic.
+
+**Co přesto dělá JavaScript.** Jen ty tečky (`carousel.js`, ~90 řádků). Přepínání
+stránek je interakce a ta se bez kódu v prohlížeči neudělá. Je to ale **vylepšení,
+ne podmínka**: bez JavaScriptu zůstane pruh posuvný prstem i kolečkem, tak jak ho
+vykreslí PHP — jen zmizí tečky. Kolik kartiček je na stránce se počítá ze skutečné
+šířky, ne z čísla v kódu; ví to jedině prohlížeč, protože to mění šířka okna
+i velikost písma, kterou si návštěvník může zvětšit.
 
 Cena: kartička akce existuje dvakrát — jednou v PHP tady, jednou v JavaScriptu
 v `bm-program`. Je to vědomá duplicita. Značkování je proto schválně stejné
@@ -170,3 +185,22 @@ jen post meta přes jádro WordPressu: `_tribe_featured` (ověřeno ve zdrojáku
 **Jak ověřit, že žije.** Zaškrtni u akce v termínu ročníku **Top představení** a načti
 úvodní stránku — kartička se musí objevit. Když nemá žádná akce příznak, sekce
 „Nepřehlédni" na úvodu vůbec není, a je to tak správně.
+
+## bm-pozadi.php — fotka na pozadí úvodu
+
+**Problém.** Úvodní pás byl jednobarevně zelený. Zadavatel chtěl mít možnost dát za něj
+fotku přes celé pozadí (vzor: korzonarodni.cz), ale tak, aby ji šlo vyměnit bez sahání
+do kódu.
+
+**Řešení.** Náhledový obrázek stránky **Úvod** se použije jako pozadí pásu. Žádné nové
+políčko — je to stejné ovládání, jakým se dává fotka ke králi nebo k akci. Nahrát fotku
+znamená nastavit náhledový obrázek, zrušit ji znamená ho odebrat.
+
+**Proč přes tmavý přechod.** Text v pásu je bílý a dopředu se neví, jaká fotka tam bude.
+Přechod drží čitelnost u jakékoli fotky a horní část obrázku nechá skoro nedotčenou.
+
+**Proč zelená zůstává pod fotkou.** Než se obrázek stáhne — a když se nestáhne vůbec —
+musí být pás čitelný. Barva z palety je proto dál pozadím a fotka leží na ní.
+
+**Jak ověřit, že žije.** Nastav u stránky Úvod náhledový obrázek a načti úvodní stránku.
+Když ho odebereš, pás se vrátí k zelené.

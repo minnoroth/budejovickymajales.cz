@@ -42,7 +42,6 @@ const BM_CAROUSEL_META_TOP = '_tribe_featured';
 
 add_action( 'wp_enqueue_scripts', 'bm_carousel_zarad_predem' );
 add_shortcode( 'bm_carousel', 'bm_carousel_zkratka' );
-add_shortcode( 'bm_pocet_akci', 'bm_carousel_pocet_zkratka' );
 
 /**
  * Zařadí styl. Dvě volání ze stejného důvodu jako u programu: z hlavičky,
@@ -51,10 +50,23 @@ add_shortcode( 'bm_pocet_akci', 'bm_carousel_pocet_zkratka' );
  * @return void
  */
 function bm_carousel_zarad() {
-	$soubor = plugin_dir_path( __FILE__ ) . 'carousel.css';
-	$verze  = file_exists( $soubor ) ? (string) filemtime( $soubor ) : '1.0.0';
+	$slozka = plugin_dir_path( __FILE__ );
+	$verze  = static function ( $soubor ) use ( $slozka ) {
+		// Verze = čas změny souboru. Na Wedosu není nic, čím jinak shodit cache.
+		return file_exists( $slozka . $soubor ) ? (string) filemtime( $slozka . $soubor ) : '1.0.0';
+	};
 
-	wp_enqueue_style( 'bm-carousel', plugins_url( 'carousel.css', __FILE__ ), array(), $verze );
+	wp_enqueue_style( 'bm-carousel', plugins_url( 'carousel.css', __FILE__ ), array(), $verze( 'carousel.css' ) );
+
+	// Skript jen dokresluje tečky pod pruhem. Bez něj zůstane pruh posuvný
+	// prstem i kolečkem, takže se odkládá do patičky a nic nezdržuje.
+	wp_enqueue_script(
+		'bm-carousel',
+		plugins_url( 'carousel.js', __FILE__ ),
+		array(),
+		$verze( 'carousel.js' ),
+		array( 'in_footer' => true, 'strategy' => 'defer' )
+	);
 }
 
 /**
@@ -306,74 +318,4 @@ function bm_carousel_kdy( $id ) {
 	$den = wp_date( 'l', $ts );
 
 	return mb_strtolower( $den, 'UTF-8' ) . ' ' . wp_date( 'G:i', $ts );
-}
-
-/**
- * Počet akcí v kategorii, například „42 akcí".
- *
- * Proč to patří k carouselu: je to stejná věc ze stejného důvodu. Dlaždice
- * „Co tě zajímá?" na úvodu měly počty napsané natvrdo — 43 / 22 / 14 / 7 —
- * a skutečnost byla 42 / 18 / 7 / 7. Úvodní stránka lhala ve čtyřech číslech
- * a nikdo to nemohl poznat jinak než ručním přepočítáním programu.
- *
- * Počítají se akce téhož ročníku jako v carouselu, tedy i akce v žánrech pod
- * kategorií — ty do kategorie patří a bm-rubriky.php je tam doplňuje.
- *
- * Když kategorie nemá žádnou akci, nevypíše se nic. „0 akcí" na dlaždici,
- * která na program odkazuje, vypadá jako chyba.
- *
- * @param array $atributy Atributy zkratky.
- * @return string
- */
-function bm_carousel_pocet_zkratka( $atributy = array() ) {
-	$a = shortcode_atts( array( 'kategorie' => '' ), $atributy, 'bm_pocet_akci' );
-
-	$slug = sanitize_title( (string) $a['kategorie'] );
-	if ( '' === $slug ) {
-		return '';
-	}
-
-	$okno = bm_carousel_termin();
-	if ( ! $okno ) {
-		return '';
-	}
-
-	$pocet = count( get_posts( array(
-		'post_type'      => 'tribe_events',
-		'post_status'    => 'publish',
-		'numberposts'    => -1,
-		'fields'         => 'ids',
-		'no_found_rows'  => true,
-		'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			array(
-				'taxonomy'         => 'tribe_events_cat',
-				'field'            => 'slug',
-				'terms'            => $slug,
-				'include_children' => true,
-			),
-		),
-		'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			array(
-				'key'     => '_EventStartDate',
-				'value'   => array( $okno['od'], $okno['do'] ),
-				'compare' => 'BETWEEN',
-				'type'    => 'DATETIME',
-			),
-		),
-	) ) );
-
-	if ( ! $pocet ) {
-		return '';
-	}
-
-	// 1 akce / 2–4 akce / 5+ akcí — česká čísla se bez toho čtou špatně.
-	if ( 1 === $pocet ) {
-		$tvar = 'akce';
-	} elseif ( $pocet < 5 ) {
-		$tvar = 'akce';
-	} else {
-		$tvar = 'akcí';
-	}
-
-	return esc_html( number_format_i18n( $pocet ) . ' ' . $tvar );
 }

@@ -32,18 +32,17 @@
   overscroll-behavior-x: contain;
 }
 
-/* Na širokém okně se pruh mění v mřížku po čtyřech — bez posuvníku a bez
-   snapu. Vodorovné posouvání na myši nikdo nenajde, protože u něj nejsou
-   šipky; při osmi akcích se proto zalomí do druhé řady místo aby se čtyři
-   schovaly za okrajem. */
-@media (min-width: 1100px) {
-  :is(#primary, body) .bmc {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(4, 1fr);
-    overflow-x: visible;
-    scroll-snap-type: none;
-  }
+/* Na širokém okně tři kartičky vedle sebe. Zbytek se nelomí do druhé řady,
+   ale přepíná tečkami pod pruhem (carousel.js) — osm akcí ve dvou řadách
+   přestává být „nepřehlédni" a začíná být druhý program. */
+@media (min-width: 900px) {
+  :is(#primary, body) .bmc { grid-auto-columns: calc((100% - 40px) / 3); }
 }
+
+/* Posuvník se schovává. Posouvá se tečkami a na dotyku prstem; pruh pod
+   kartičkami by na monitoru jen hlásil, že tu něco přetéká. */
+:is(#primary, body) .bmc { scrollbar-width: none; }
+:is(#primary, body) .bmc::-webkit-scrollbar { display: none; }
 
 :is(#primary, body) .bmc:focus-visible {
   outline: 3px solid var(--global-palette3, #121212);
@@ -52,18 +51,62 @@
 
 :is(#primary, body) .bmc-karta {
   scroll-snap-align: start;
-  /* Kartička je celá odkaz, takže musí být vidět, že na ni jde kliknout. */
-  transition: transform .12s ease;
+  transition: box-shadow .12s ease;
 }
 
-/* Respektuje nastavení „omezit pohyb" v systému návštěvníka — stejně jako
-   běžící pás v bm.css. Carousel se nikdy neposouvá sám od sebe, hýbe se
-   jen na pokyn návštěvníka; tohle je jen o tom nadzvednutí při najetí. */
+/* Respektuje nastavení „omezit pohyb" v systému návštěvníka. Carousel se
+   nikdy neposouvá sám od sebe; tohle je jen o přechodu stínu při najetí. */
 @media (prefers-reduced-motion: reduce) {
   :is(#primary, body) .bmc-karta { transition: none; }
 }
 
-:is(#primary, body) .bmc-karta:hover { transform: translateY(-2px); }
+/* Stejný plakátový stín jako na kartičkách v Lineupu a Seznamu
+   (.bmp-karta:hover v bm-program/program.css), ať se web chová všude stejně. */
+:is(#primary, body) .bmc-karta:hover {
+  box-shadow: 3px 3px 0 var(--global-palette3, #121212);
+}
+
+
+/* ── Tečky ───────────────────────────────────────────────────────────── */
+
+/* Dokresluje je carousel.js. Bez JavaScriptu nejsou a pruh se posouvá
+   prstem — proto tu není nic, co by bez nich vypadalo rozbitě. */
+:is(#primary, body) .bmc-tecky {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+:is(#primary, body) .bmc-tecka {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 2px solid var(--global-palette3, #121212);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  /* Plocha na dotek musí být 44 px, i když kolečko je dvanáct.
+     Průhledný rámeček ji zvětší, aniž by se tečka opticky nafoukla. */
+  box-sizing: content-box;
+  outline-offset: 4px;
+}
+
+:is(#primary, body) .bmc-tecka::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: -18px 0 0 -18px;
+}
+
+:is(#primary, body) .bmc-tecka[aria-selected="true"] {
+  background: var(--global-palette3, #121212);
+}
+
+:is(#primary, body) .bmc-tecka:hover {
+  background: var(--global-palette15, #F8E862);
+}
 
 
 /* ── Kartička jako odkaz ─────────────────────────────────────────────── */
