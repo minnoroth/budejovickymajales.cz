@@ -372,6 +372,36 @@ body:not(.transparent-header) .site-branding .custom-logo { filter: brightness(0
 .mobile-header-button {
   border: 2px solid var(--global-palette3);
 }
+/* Mobilnímu tlačítku Kadence rámeček odebírá selektorem o dvou třídách
+   navíc, takže kratší zápis výš na něj nestačí a tlačítko zůstávalo
+   bez obrysu. Tenhle kopíruje jeho tvar. (Stejná past jako
+   u rozbalovátka, viz CLAUDE.md.) */
+.mobile-header-button-wrap .mobile-header-button-inner-wrap .mobile-header-button {
+  border: 2px solid var(--global-palette3);
+}
+
+/* ── Mobilní hlavička ─────────────────────────────────────────── */
+/* Nad fotkou na úvodu je hlavička průhledná a hamburger v ní byl černý
+   na tmavé fotce — prakticky neviditelný. Kadence pro průhlednou
+   hlavičku zvlášť barvu otvírátka nemá, jen jednu pro obě varianty. */
+body.mobile-transparent-header .mobile-toggle-open-container .menu-toggle-open,
+body.mobile-transparent-header .mobile-toggle-open-container .menu-toggle-open:hover,
+body.mobile-transparent-header .mobile-toggle-open-container .menu-toggle-open:focus {
+  color: var(--global-palette9);
+}
+
+/* Tlačítko v mobilní hlavičce je menší než v panelu — stojí vedle
+   hamburgeru a nesmí vytlačit logo. */
+#masthead .mobile-header-button-wrap .mobile-header-button {
+  padding: 7px 14px;
+  font-size: 14px;
+}
+/* Šipka se vejde do panelu, ne do hlavičky vedle hamburgeru. */
+#masthead .mobile-header-button::after { content: none; }
+
+/* Na úvodu se tlačítko v hlavičce skrývá: stejné „Podpořit" je hned
+   pod ním v obsahu a dvakrát po sobě nemá smysl. V panelu zůstává. */
+body.home #masthead .mobile-header-button-wrap { display: none; }
 .header-button::after,
 .mobile-header-button::after {
   content: "→";

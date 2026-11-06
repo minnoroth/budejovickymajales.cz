@@ -117,7 +117,12 @@ NASTAVENI = {
     "header_mobile_items": {
         "popup": {"popup_content": ["mobile-navigation", "mobile-button"]},
         "top": {"top_left": [], "top_center": [], "top_right": []},
-        "main": {"main_left": ["mobile-logo"], "main_center": [], "main_right": ["popup-toggle"]},
+        # „Podpořit" je vedle hamburgeru, ne jen schované v panelu — je to
+        # hlavní výzva webu a nemá čekat, až někdo otevře menu. Na úvodu
+        # se na mobilu skrývá, protože tam je stejné tlačítko rovnou
+        # v obsahu (viz bm.css, sekce Hlavička).
+        "main": {"main_left": ["mobile-logo"], "main_center": [],
+                 "main_right": ["mobile-button", "popup-toggle"]},
         "bottom": {"bottom_left": [], "bottom_center": [], "bottom_right": []}},
     # Pro neziskovku je „Podpoř nás" silnější výzva než e-shop. E-shop
     # z webu nemizí — je odkazem na té stránce, tedy o jeden klik dál.

@@ -226,6 +226,26 @@ Změna v `bloky.py` je v obsahu stránek zapečená jako inline styl, takže se 
 musí znovu spustit skripty stránek (`program.py`, `kralove.py`, `osvezovny.py`,
 `prakticke-info.py`).
 
+## Páté kolo: mobilní hlavička (7. 11. 2026)
+
+**Hamburger byl na úvodu černý na tmavé fotce** a prakticky nebyl vidět.
+Kadence má pro otvírátko menu jedinou barvu pro průhlednou i papírovou
+hlavičku — zvlášť se nastavit nedá. Na úvodu ho proto přebarvuje `bm.css`
+přes třídu `mobile-transparent-header`, kterou tam Kadence dává sama.
+
+**„Podpořit" nemělo v mobilním panelu rámeček.** Kadence mu ho odebírá
+selektorem `.mobile-header-button-wrap .mobile-header-button-inner-wrap
+.mobile-header-button` — o dvě třídy delším než ten náš, takže kratší zápis
+prohrával. Je to potřetí stejná past; opravuje se kopií jeho tvaru.
+
+**„Podpořit" se přestěhovalo vedle hamburgeru.** Je to hlavní výzva webu
+a nemá čekat, až někdo otevře menu. V hlavičce je menší než v panelu
+a bez šipky — vedle hamburgeru na 375 px by ji nebylo kam dát. V panelu
+zůstává i tak.
+
+**Na úvodu se v hlavičce skrývá.** Stejné tlačítko je hned pod ním v obsahu
+a dvakrát po sobě nedává smysl. Na monitoru zůstává všude — tam místo je.
+
 ## Aktuality dostaly barvu dodatečně
 
 Výpis příspěvků není stránka a jednotlivý článek v menu vůbec není, takže
