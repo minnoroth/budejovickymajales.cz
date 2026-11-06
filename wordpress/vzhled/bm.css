@@ -461,6 +461,18 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
   background: var(--global-palette7);
   color: var(--global-palette3);
 }
+/* Stránka, na které návštěvník je. Kadence jí dává tmavě šedou výplň
+   (palette4) a bílý text; bílý text ale přebíjí pravidlo výš, takže
+   z toho vycházelo černé na tmavě šedé a nešlo to přečíst. Tady se
+   nastavuje obojí najednou: černá výplň, bílé písmo. Záměrně ne barvou
+   sekce — tou je vybarvená první položka a dvě stejné výplně v jednom
+   seznamu by si lezly do zelí. */
+.site-header .header-navigation .header-menu-container ul ul li.menu-item.current-menu-item > a,
+.site-header .header-navigation .header-menu-container ul ul li.menu-item.current-menu-item > a:hover {
+  background: var(--global-palette3);
+  color: var(--global-palette9);
+}
+
 /* První položka je Praktické info — jediná v tom seznamu, která je pro
    návštěvníka, zbytek je o organizaci. Proto výplň a linka pod ní. */
 .site-header .header-navigation .header-menu-container ul ul li.menu-item:first-child > a {
@@ -531,6 +543,13 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
   padding: 10px 16px;
   font-weight: 700;
 }
+/* Stránka, na které návštěvník je — černě, stejně jako v rozbalovátku
+   na počítači. */
+#mobile-drawer .mobile-navigation .sub-menu > li.current-menu-item > a {
+  background: var(--global-palette3);
+  color: var(--global-palette9);
+  border-radius: 10px;
+}
 
 /* ── Nadpis stránky podtržený barvou sekce ────────────────────── */
 /* Barva je ZA textem, ne v něm. Paleta ročníku je stavěná na podklad:
@@ -560,6 +579,22 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
 /* Nadpis je inline, takže svislé okraje na něm neplatí; mezeru pod ním
    drží odstavec. */
 .bm-lead { margin-top: 20px; }
+
+/* Titulkový pás má u Kadence 200 px na výšku a nadpis je v něm na střed,
+   pod pásem je navíc 80 px mezery před obsahem. Nadpis pak plaval uprostřed
+   prázdna, kdežto na stránkách stavěných skriptem (Program, Praktické info)
+   text začíná hned pod nadpisem. Pás proto dostane odsazení jen shora
+   a obsah se k němu přisune — obě skupiny stránek pak vypadají stejně.
+
+   Obsah se vybírá sousedním selektorem, ne třídou na <body>: výpis
+   příspěvků (Aktuality) má tutéž třídu, ale pás nekreslí, a přisunutím
+   by se nalepil na hlavičku. */
+.entry-hero .entry-header { min-height: 0; }
+.entry-hero { padding-top: 96px; }
+.entry-hero + .content-area { margin-top: 20px; }
+@media (max-width: 767px) {
+  .entry-hero { padding-top: 48px; }
+}
 
 /* Obsah podstránky stojí na stejné svislici jako nadpis a logo.
    Skupiny mají contentSize 1160 px, jenže obal stránky je širší (1242 px

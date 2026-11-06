@@ -175,6 +175,28 @@ při konceptovém rodiči odpovídají dál 200; `/o-festivalu/` samo vrací 404
 Jednorázový skript `o-festivalu.py`, který předtím obsah přenášel, je smazaný —
 reprodukoval by stav, který padl.
 
+## Třetí kolo: stav „tady jsi“ a vzdušnost pásu
+
+**Položka, na jejíž stránce návštěvník je, byla v rozbalovátku nečitelná.**
+Kadence jí dává tmavě šedou výplň (`palette4`) a bílý text, jenže bílý text
+přebíjelo naše pravidlo o barvě položek — výsledkem bylo černé písmo na tmavě
+šedé. Teď se nastavuje obojí najednou: **černá výplň, bílé písmo**. Záměrně ne
+barvou sekce: tou je vybarvená první položka (*Praktické info*) a dvě stejné
+výplně v jednom seznamu by si lezly do zelí. Stejná značka je i v mobilním
+panelu, kde předtím nebyla žádná.
+
+**Nadpis plaval uprostřed prázdna.** Titulkový pás od Kadence má 200 px na výšku
+s nadpisem na střed a pod pásem je ještě 80 px před obsahem — mezi nadpisem
+a prvním odstavcem tedy bylo 154 px. Na stránkách stavěných skriptem je přitom
+nadpis v obsahu a text začíná hned pod ním. Pás proto dostal odsazení jen shora
+(96 px, na mobilu 48) a obsah se k němu přisunul na 20 px, tedy na stejnou
+vzdálenost, jakou drží `.bm-lead`. Nadpis *O nás* tím sedí na 187 px, nadpis
+*Program* na 197 — obě skupiny stránek vypadají stejně.
+
+Obsah se vybírá sousedním selektorem `.entry-hero + .content-area`, ne třídou na
+`<body>`: výpis příspěvků (Aktuality) má tutéž třídu `content-title-style-above`,
+ale pás nekreslí, a přisunutím by se nalepil na hlavičku.
+
 ## Aktuality dostaly barvu dodatečně
 
 Výpis příspěvků není stránka a jednotlivý článek v menu vůbec není, takže
@@ -188,3 +210,10 @@ Obojí teď v menu zastupuje stránka nastavená jako „stránka s příspěvky
   kategorie nemá — jenže všechny barvy palety už nějaká kategorie používá.
 - **Bílé štítky nad fotkou** jsou čitelné, ale bezbarvé. Až bude hotová finální fotka,
   stojí za to se podívat, jestli tam nemůže být barva sekce.
+- **Výpis Aktualit má nadpis na střed a bez podtržení.** Je to archivní nadpis
+  (`.archive-title`), ne titulkový pás, takže ho pravidla pro podtržení minou.
+  Proměnná `--bm-sekce` na té stránce nastavená je, jen ji nikdo nečte. Jednotlivý
+  článek podtržený je.
+- **Stránky, jejichž obsah nestavěl skript** (O nás, Historie, Kontakt…), mají
+  odstavce přes celou šířku obsahu — řádky jsou dlouhé přes 130 znaků. Stránky ze
+  skriptu drží šířku přes `.bm-lead`. Až tým texty projde, stojí za to sjednotit.
