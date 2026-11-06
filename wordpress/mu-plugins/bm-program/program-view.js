@@ -1061,6 +1061,11 @@
     el.detailObsah.innerHTML =
       (a.obraz ? '<img class="bmp-detail__obraz" src="' + esc(a.obraz) + '" alt="">' : '') +
       '<div class="bmp-detail__telo">' +
+      /* Čas, nadpis a štítky jsou jedna hlavička, proto mají vlastní obal:
+         drží se u sebe těsněji než zbytek, o kterém rozhoduje jedna mezera
+         v CSS. Bez toho se odstupy skládaly z pěti různých okrajů a štítky
+         skončily nalepené na bloku s místem. */
+      '<header class="bmp-detail__hlava">' +
       '<p class="bmp-detail__meta">' + d.nazev + ' ' + d.datum + ' · ' +
       hhmm(a.zac) + '–' + hhmm(a.kon) + '</p>' +
       '<h2>' + esc(a.nazev) + '</h2>' +
@@ -1070,7 +1075,7 @@
       (a.zanr ? '<span class="bmp-stitek">' + esc(a.zanr) + '</span>' : '') +
       (a.zeme ? '<span class="bmp-stitek">' + esc(a.zeme) + '</span>' : '') +
       (a.top ? '<span class="bmp-stitek bmp-stitek--top">Top představení</span>' : '') +
-      '</div>' +
+      '</div></header>' +
       /* Místo má vlastní blok, ne řádek v hlavičce: je to jediná věc
          v detailu, která vede ven z webu, a musí jít trefit palcem. */
       mistoHtml(a) +

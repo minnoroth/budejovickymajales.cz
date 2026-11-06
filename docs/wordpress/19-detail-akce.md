@@ -127,10 +127,29 @@ odkazy v záchranném bloku (doplněk programu je nesmí vypnout) a dokud není
 se detail otevírá, a palec na něj musí dosáhnout bez rolování. Pořadí v HTML
 zůstává logické kvůli čtečkám, přerovnává se `order` ve flexu.
 
+## Odstupy drží jedna mezera, ne okraje bloků
+
+Po prvním proklikání zadavatel upozornil, že v modálu něco chybí. Změřeno:
+odstupy se skládaly z pěti různých `margin`-ů (6, 10, 0, 14, 18 px) a nově
+přidaný blok s místem žádný neměl, takže **štítky na něm seděly bez mezery**.
+
+Teď je to jedna vlastnost: `.bmp-detail__telo` je svislý flex s `gap: 16px`
+a všechny bloky mají `margin: 0`. Čas, nadpis a štítky jsou jedna hlavička
+(`.bmp-detail__hlava`) s vlastní, těsnější mezerou 8 px — patří k sobě.
+Přidat do detailu další blok tím pádem nejde pokazit.
+
+**Plakát má strop výšky 240 px.** V poměru 16:9 zabral na širokém modálu
+přes polovinu jeho výšky a informace, kvůli kterým se detail otevírá, spadly
+pod okraj.
+
 ## Co zůstává otevřené
 
 - **Část B — formulář rezervace v modálu.** Čeká na SMTP (etapa 0).
 - **Adresy míst.** Dokud nejsou vyplněné, odkaz do map hledá podle jména.
+- **Plakát je přes celou šířku modálu**, až k jeho rámečku. U běžné fotky to
+  vypadá jako hlavička kartičky; u obrázku, který má vlastní bílé pozadí
+  (třeba snímek obrazovky), splyne s rámečkem. Jestli má mít odsazení,
+  je rozhodnutí pro zadavatele.
 - **Ověřovací skript.** `overeni.mjs` prohání datovou vrstvu zmrazenými daty
   prototypu; `nactiRezervaci()` v nich není, protože potřebuje síť. Ověřuje
   se zatím ručně proti stagingu.

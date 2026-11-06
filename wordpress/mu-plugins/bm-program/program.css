@@ -566,23 +566,38 @@
   background: var(--global-palette3, #121212);
   opacity: .66;
 }
+/* Strop výšky je tam proto, že plakát v 16:9 na širokém modálu zabral
+   přes půlku jeho výšky a informace, kvůli kterým se detail otevírá,
+   spadly pod okraj. */
 :is(#primary, body) .bmp .bmp-detail__obraz {
-  display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
+  display: block; width: 100%; aspect-ratio: 16/9; max-height: 240px;
+  object-fit: cover;
   border-bottom: var(--bmp-ramecek);
 }
-:is(#primary, body) .bmp .bmp-detail__telo { padding: 20px 22px 24px; }
+
+/* Odstupy v detailu drží jedna mezera, ne okraje jednotlivých bloků.
+   Dřív se skládaly z pěti různých margin-ů a stačilo přidat blok, který
+   žádný neměl (místo), aby se štítky nalepily rovnou na něj. */
+:is(#primary, body) .bmp .bmp-detail__telo {
+  padding: 20px 22px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+:is(#primary, body) .bmp .bmp-detail__hlava {
+  display: flex; flex-direction: column; gap: 8px;
+}
 :is(#primary, body) .bmp .bmp-detail__meta {
-  font-size: 13px; font-weight: 700; color: var(--bmp-seda); margin-bottom: 6px;
+  font-size: 13px; font-weight: 700; color: var(--bmp-seda); margin: 0;
 }
 :is(#primary, body) .bmp .bmp-detail h2 {
   font-size: clamp(24px, 5vw, 32px); letter-spacing: -.02em;
-  margin-bottom: 10px; padding-right: 42px;
+  margin: 0; padding-right: 42px;
 }
+:is(#primary, body) .bmp .bmp-detail__hlava .bmp-karta__stitky { margin: 0; }
 /* Popis je jediné místo v programu, kam se pouští HTML od týmu —
    prochází přes výčet povolených značek v program-view.js. Styluje se
    proto i to, co v něm může přijít. */
 :is(#primary, body) .bmp .bmp-detail__popis {
-  font-size: 14.5px; margin: 14px 0; color: var(--bmp-text);
+  font-size: 14.5px; margin: 0; color: var(--bmp-text);
   display: flex; flex-direction: column; gap: 9px;
 }
 :is(#primary, body) .bmp .bmp-detail__popis p { margin: 0; }
@@ -634,7 +649,7 @@
    akce, aby to návštěvník poznal na obou místech. */
 :is(#primary, body) .bmp .bmp-detail__rez {
   border: var(--bmp-ramecek); border-radius: 16px; background: var(--bmp-zluta);
-  padding: 13px 15px; margin-top: 14px;
+  padding: 13px 15px; margin: 0;
   box-shadow: var(--bmp-stin-s);
   display: flex; flex-direction: column; gap: 10px;
 }
@@ -674,7 +689,7 @@
   text-decoration: underline; text-underline-offset: 3px;
 }
 :is(#primary, body) .bmp .bmp-detail__zaroven {
-  margin-top: 16px; border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
+  margin: 0; border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
 }
 :is(#primary, body) .bmp .bmp-detail__zaroven h3 {
   font-size: 12px; text-transform: uppercase; letter-spacing: .1em;
@@ -684,7 +699,7 @@
 :is(#primary, body) .bmp .bmp-detail__zaroven li { padding: 3px 0; }
 :is(#primary, body) .bmp .bmp-detail__zaroven li b { display: inline-block; min-width: 46px; font-weight: 700; }
 :is(#primary, body) .bmp .bmp-detail__zaroven li span { color: var(--bmp-seda); }
-:is(#primary, body) .bmp .bmp-detail__akce { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+:is(#primary, body) .bmp .bmp-detail__akce { display: flex; flex-wrap: wrap; gap: 9px; margin: 0; }
 :is(#primary, body) .bmp .bmp-detail__akce .bmp-btn--hlavni {
   background: var(--bmp-zluta); font-weight: 800; box-shadow: var(--bmp-stin-s);
 }
@@ -813,9 +828,8 @@
   }
   /* Na telefonu je rezervace to jediné, kvůli čemu se detail otevírá,
      takže jde nad popis. Pořadí v HTML zůstává kvůli čtečkám logické. */
-  :is(#primary, body) .bmp .bmp-detail__telo { display: flex; flex-direction: column; }
   :is(#primary, body) .bmp .bmp-detail__misto { order: 1; }
-  :is(#primary, body) .bmp .bmp-detail__rez   { order: 2; margin-top: 12px; }
+  :is(#primary, body) .bmp .bmp-detail__rez   { order: 2; }
   :is(#primary, body) .bmp .bmp-detail__popis { order: 3; }
   :is(#primary, body) .bmp .bmp-detail__zaroven { order: 4; }
   :is(#primary, body) .bmp .bmp-detail__akce  { order: 5; }
