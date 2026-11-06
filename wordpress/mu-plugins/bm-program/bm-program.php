@@ -53,6 +53,10 @@ add_shortcode( 'bm_program', 'bm_program_zkratka' );
 
 const BM_PROGRAM_CACHE = 'bm_program_vlozena_data';
 
+// Která stránka nese zkratku. Hledá se podle obsahu, ne podle ID — ID
+// stránky je na každé instalaci jiné a za rok by nikdo nevěděl, co znamená.
+const BM_PROGRAM_STRANKA = 'bm_program_stranka';
+
 // Záloha pro případ, že by některá cesta úprav neodpálila zneplatnění níž.
 const BM_PROGRAM_PLATNOST = 15 * MINUTE_IN_SECONDS;
 
@@ -78,6 +82,7 @@ const BM_PROGRAM_POLE_AKCE = array(
 	'ticketed',
 );
 
+add_action( 'save_post_page', 'bm_program_zapomen_stranku' );
 add_action( 'save_post_tribe_events', 'bm_program_zapomen' );
 add_action( 'save_post_tribe_venue', 'bm_program_zapomen' );
 add_action( 'deleted_post', 'bm_program_zapomen' );
@@ -93,6 +98,72 @@ add_action( 'delete_term', 'bm_program_zapomen' );
  */
 function bm_program_zapomen() {
 	delete_transient( BM_PROGRAM_CACHE );
+}
+
+/**
+ * Zahodí uloženou stránku s programem. Visí na uložení stránky — kdyby
+ * někdo zkratku přesunul jinam, odkazy z úvodu by jinak vedly na starou.
+ *
+ * @return void
+ */
+function bm_program_zapomen_stranku() {
+	delete_transient( BM_PROGRAM_STRANKA );
+}
+
+/**
+ * ID stránky, která obsahuje zkratku [bm_program].
+ *
+ * @return int ID stránky, nebo 0, když žádná není.
+ */
+function bm_program_stranka() {
+	$ulozene = get_transient( BM_PROGRAM_STRANKA );
+	if ( false !== $ulozene ) {
+		return (int) $ulozene;
+	}
+
+	$nalezeno = 0;
+	$stranky  = get_posts( array(
+		'post_type'        => 'page',
+		'post_status'      => 'publish',
+		'numberposts'      => 200,
+		'suppress_filters' => false,
+	) );
+
+	foreach ( $stranky as $stranka ) {
+		if ( has_shortcode( $stranka->post_content, 'bm_program' ) ) {
+			$nalezeno = (int) $stranka->ID;
+			break;
+		}
+	}
+
+	set_transient( BM_PROGRAM_STRANKA, $nalezeno, DAY_IN_SECONDS );
+
+	return $nalezeno;
+}
+
+/**
+ * Adresa, na které se akce otevře — detail v programu, ne samostatná
+ * stránka akce.
+ *
+ * Do 7. 11. 2026 vedly kartičky na úvodu na /event/…, protože program se
+ * načítal kolem čtyř vteřin a posílat na něj někoho kvůli jedné akci bylo
+ * zpomalení. Teď je program ve stránce hned, takže detail je rychlejší
+ * i úplnější. Stránky akcí zůstávají — jsou kanonické pro vyhledávače
+ * a drží sdílené odkazy — jen na ně z webu nic nevede.
+ *
+ * Když se stránka s programem nenajde, vrací se adresa akce jako dřív.
+ *
+ * @param int $id_akce ID akce.
+ * @return string
+ */
+function bm_program_odkaz_na_akci( $id_akce ) {
+	$stranka = bm_program_stranka();
+
+	if ( ! $stranka ) {
+		return (string) get_permalink( $id_akce );
+	}
+
+	return add_query_arg( 'akce', (int) $id_akce, get_permalink( $stranka ) );
 }
 
 /**

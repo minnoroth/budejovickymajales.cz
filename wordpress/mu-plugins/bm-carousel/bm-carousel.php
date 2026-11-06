@@ -248,8 +248,16 @@ function bm_carousel_karta( $id ) {
 
 	$popisky = array_filter( array( $kdy, $misto ) );
 
+	/* Kartička vede do programu, ne na samostatnou stránku akce: detail
+	   se tam od 7. 11. 2026 otevře v modálu a je úplnější. Když se složka
+	   bm-program smaže, funkce zmizí s ní a kartičky povedou na akci jako
+	   dřív — proto ta podmínka, ne přímé volání. */
+	$odkaz = function_exists( 'bm_program_odkaz_na_akci' )
+		? bm_program_odkaz_na_akci( $id )
+		: get_permalink( $id );
+
 	return '<article class="bm-karta bmc-karta" data-kat="' . esc_attr( $kat['slug'] ) . '">'
-		. '<a class="bmc-karta__odkaz" href="' . esc_url( get_permalink( $id ) ) . '">'
+		. '<a class="bmc-karta__odkaz" href="' . esc_url( $odkaz ) . '">'
 		. '<div class="bm-karta__pruh"></div>'
 		. $obraz
 		. '<div class="bm-karta__telo">'

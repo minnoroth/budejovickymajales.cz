@@ -116,9 +116,16 @@ tlačítko zpět vedlo z programu pryč, ne postupně zavíralo detaily).
 Program takovou adresu uměl otevřít už předtím, jen ji nikdo neuměl získat.
 Zavření detailu parametr zase uklidí.
 
-**Stránky `/event/…` zůstávají.** Jsou kanonické pro vyhledávače, jsou to ty
-odkazy v záchranném bloku (doplněk programu je nesmí vypnout) a dokud není
-část B, vede na ně tlačítko rezervace. V modálu na ně vede drobný odkaz dole.
+**Stránky `/event/…` zůstávají, ale z webu na ně nic nevede.** Jsou kanonické pro
+vyhledávače — Google chce pro každou akci vlastní adresu a `?akce=437` je z jeho
+pohledu pořád jedna a tatáž stránka — a drží odkazy, které už někde kolují.
+Návštěvník na ně ale nenarazí: kartičky v „Nepřehlédni" na úvodu od 7. 11. 2026
+míří na `/program/?akce=<id>`, do menu stránky akcí nikdy nepatřily a v modálu
+na ně vede jen drobný odkaz dole. Výjimka trvá do části B: tlačítko „Rezervovat
+místo" tam posílá, protože formulář zatím žije jen tam.
+
+`/events/list|month|today/` zůstávají jako záchranná brzda — jsou to ty odkazy
+v bloku, který se ukáže, když se program nevykreslí.
 
 ## Mobil
 

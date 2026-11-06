@@ -469,7 +469,11 @@
       kategorie: new Set(),
       hledani: '',
       jenMoje: false,
-      moje: new Set()
+      moje: new Set(),
+      /* ID otevřeného detailu, nebo null. Drží ho stav, ne jen adresa —
+         vykresli() přepisuje adresu při každé změně a bez tohohle by
+         otevřený detail z adresy po první změně dne zmizel. */
+      akce: null
     };
 
     try {
@@ -516,15 +520,18 @@
   }
 
   function zapisAdresu() {
-    /* Adresa nese den a zobrazení, aby se dal poslat odkaz na konkrétní
-       pohled. Jednorázové parametry z příchozího odkazu se zahazují —
-       po přepnutí dne už neplatí. Cizí parametry (utm a podobně)
-       zůstávají, nejsou naše. */
+    /* Adresa nese den, zobrazení a otevřený detail, aby se dal poslat
+       odkaz na konkrétní pohled i na jednu kapelu. „moje" se zahazuje —
+       je to jednorázový parametr z příchozího odkazu, výběr už je uložený
+       v prohlížeči. Cizí parametry (utm a podobně) zůstávají, nejsou naše.
+
+       Schválně replaceState, ne pushState: tlačítko zpět má vést
+       z programu pryč, ne postupně zavírat otevřené detaily a dny. */
     var p = new URLSearchParams(location.search);
     p.delete('moje');
-    p.delete('akce');
     if (stav.den) p.set('den', stav.den); else p.delete('den');
     p.set('zobrazeni', stav.zobrazeni);
+    if (stav.akce) p.set('akce', String(stav.akce)); else p.delete('akce');
     var dotaz = p.toString();
     try {
       history.replaceState(null, '', location.pathname + (dotaz ? '?' + dotaz : '') + location.hash);
@@ -1035,18 +1042,6 @@
       tlacitko;
   }
 
-  /* Adresa s ?akce=<id> jde poslat odkazem a program ji po načtení sám
-     otevře (viz spust()). Schválně replaceState, ne pushState: tlačítko
-     zpět má vést z programu pryč, ne postupně zavírat otevřené detaily. */
-  function zapisAdresu(id) {
-    if (!window.history || !history.replaceState) return;
-    var p = new URLSearchParams(location.search);
-    if (id) p.set('akce', String(id)); else p.delete('akce');
-    var dotaz = p.toString();
-    history.replaceState(null, '',
-      location.pathname + (dotaz ? '?' + dotaz : '') + location.hash);
-  }
-
   function otevriDetail(id) {
     var a = najdi(id);
     if (!a) return;
@@ -1107,7 +1102,8 @@
     if (obraz) obraz.addEventListener('error', function () { this.remove(); });
 
     if (a.rezervace) dopisRezervaci(a.id);
-    zapisAdresu(a.id);
+    stav.akce = a.id;
+    zapisAdresu();
 
     /* showModal() na už otevřeném dialogu vyhodí výjimku, a to se stane
        pokaždé, když se hvězdička zmáčkne přímo v detailu. */
@@ -1239,7 +1235,7 @@
     });
     /* Na „close" schválně, ne na tlačítku: dialog se zavírá i Escapem
        a klepnutím vedle, a ?akce= musí z adresy zmizet pokaždé. */
-    el.detail.addEventListener('close', function () { zapisAdresu(null); });
+    el.detail.addEventListener('close', function () { stav.akce = null; zapisAdresu(); });
 
     window.addEventListener('resize', dopocitejRozmery);
   }
