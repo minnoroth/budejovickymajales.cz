@@ -119,6 +119,10 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   `display: flex`. Prvek je v DOM `hidden = true` a na obrazovce se nic nestane —
   vypadá to, jako by skript nefungoval. Potřebuje vlastní pravidlo se stejným prefixem.
 
+- **Seznam v obsahu má od Kadence `padding: 2em` zleva.** Pravidlo
+  `.single-content ul, .single-content ol` přebije samotnou třídu, takže vlastní
+  seznam (chipy, kotvy) začne o 34 px vpravo a vypadá, že je na střed. Ruší se
+  zápisem se stejnou vahou: `.single-content .bm-kotvy { padding: 0 }`.
 - **Kadence přepisuje hlavičku selektory s víc prvky.** Rozbalovátko si drží
   `.header-navigation .header-menu-container ul ul.sub-menu` — tři třídy a dva prvky.
   Kratší zápis `.site-header .primary-menu-container .sub-menu` má tříd stejně, ale

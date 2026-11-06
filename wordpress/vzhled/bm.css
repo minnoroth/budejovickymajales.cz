@@ -263,11 +263,16 @@ body.home .bm-pas-hlavni {
 .bm-kotvy {
   list-style: none;
   margin: 0 0 40px;
-  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
+/* Odsazení zleva musí přebít Kadence, která dává každému seznamu v obsahu
+   `.single-content ul { padding: 2em }` — o jeden prvek silnější než samotná
+   třída. Chipy kvůli tomu začínaly o 34 px vpravo a na mobilu to vypadalo,
+   že jsou na střed, i když jsou zarovnané doleva. Je to počtvrté stejná
+   past (viz CLAUDE.md): obsah má být na jedné svislici s nadpisem. */
+.single-content .bm-kotvy { padding: 0; }
 .bm-kotva {
   display: inline-block;
   padding: 9px 18px;
@@ -588,6 +593,11 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
   background: var(--bm-polozka, var(--global-palette15));
   box-shadow: 3px 3px 0 var(--global-palette3);
 }
+
+/* Rozbalený seznam začínal přesně tam, kde končil štítek nad ním, takže
+   první položka vypadala, jako by zpod něj vyjížděla. Stejná mezera jako
+   mezi štítky v hlavní úrovni. */
+#mobile-drawer .mobile-navigation .menu > li > .sub-menu { margin-top: 10px; }
 
 /* Podpoložky nemají rámeček — jsou uvnitř rozbaleného štítku. */
 #mobile-drawer .mobile-navigation .sub-menu > li > a {
