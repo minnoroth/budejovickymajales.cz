@@ -115,7 +115,10 @@ NASTAVENI = {
         "bottom": {"bottom_left": [], "bottom_left_center": [], "bottom_center": [],
                    "bottom_right_center": [], "bottom_right": []}},
     "header_mobile_items": {
-        "popup": {"popup_content": ["mobile-navigation", "mobile-button"]},
+        # V panelu „Podpořit" není: od 7. 11. 2026 stojí v hlavičce vedle
+        # hamburgeru, tedy vidět pořád. Mít ho na obou místech znamenalo
+        # dvě stejná tlačítka na dva doteky od sebe.
+        "popup": {"popup_content": ["mobile-navigation"]},
         "top": {"top_left": [], "top_center": [], "top_right": []},
         # „Podpořit" je vedle hamburgeru, ne jen schované v panelu — je to
         # hlavní výzva webu a nemá čekat, až někdo otevře menu. Na úvodu

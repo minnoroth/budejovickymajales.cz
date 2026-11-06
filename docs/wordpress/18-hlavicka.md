@@ -238,13 +238,18 @@ selektorem `.mobile-header-button-wrap .mobile-header-button-inner-wrap
 .mobile-header-button` — o dvě třídy delším než ten náš, takže kratší zápis
 prohrával. Je to potřetí stejná past; opravuje se kopií jeho tvaru.
 
-**„Podpořit" se přestěhovalo vedle hamburgeru.** Je to hlavní výzva webu
-a nemá čekat, až někdo otevře menu. V hlavičce je menší než v panelu
-a bez šipky — vedle hamburgeru na 375 px by ji nebylo kam dát. V panelu
-zůstává i tak.
+**„Podpořit" se přestěhovalo z panelu do hlavičky, vedle hamburgeru.** Je to
+hlavní výzva webu a nemá čekat, až někdo otevře menu. Z panelu zmizelo úplně —
+mít ho na obou místech znamenalo dvě stejná tlačítka na dva doteky od sebe.
+V hlavičce je o něco menší, aby vedle hamburgeru nevytlačilo logo; šipku si
+drží jako všude jinde. Naměřeno na 375 px: tlačítko 197–304, hamburger 314–351.
 
-**Na úvodu se v hlavičce skrývá.** Stejné tlačítko je hned pod ním v obsahu
-a dvakrát po sobě nedává smysl. Na monitoru zůstává všude — tam místo je.
+**Na úvodu v hlavičce není.** Stejné tlačítko je hned pod ním v heru a dvakrát
+po sobě nedává smysl. Na monitoru zůstává všude — tam místo je.
+
+> **Důsledek:** na úvodu a na telefonu není „Podpořit" nikde v hlavičce ani
+> v menu, jen v heru. Kdo odroluje dolů, už ho nemá po ruce. Je to vědomé
+> rozhodnutí zadavatele ze 7. 11. 2026, ne přehlédnutí.
 
 ## Aktuality dostaly barvu dodatečně
 
