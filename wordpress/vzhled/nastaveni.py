@@ -72,7 +72,11 @@ NASTAVENI = {
     "h4_font": pismo(19, vyska=1.3, vaha="700"),
 
     # ── Hlavička ─────────────────────────────────────────────────────
-    "header_main_background": {"desktop": {"color": "palette1"}},
+    # Papírová hlavička, ne zelená. Barvy položek menu (žlutá, korálová,
+    # levandulová, zelenomodrá) potřebují tichý podklad — na zelené by se
+    # zelenomodrý štítek ztratil. Rozhodnuto 6. 11. 2026,
+    # viz docs/wordpress/18-hlavicka.md.
+    "header_main_background": {"desktop": {"color": "palette7"}},
     "header_main_height": {"size": {"mobile": "", "tablet": "", "desktop": 88},
                            "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
     # Šířka loga. Tým dodává logo na šířku, takže se omezuje VÝŠKOU v bm.css
@@ -89,14 +93,18 @@ NASTAVENI = {
                                 "desktop": "logo"},
                     "layout": {"mobile": "standard", "tablet": "standard",
                                "desktop": "standard"}},
-    "primary_navigation_color": {"color": "palette9", "hover": "palette15", "active": "palette15"},
+    # Písmo menu je černé ve všech stavech — barvu nese výplň štítku,
+    # ne text. Kdyby se při najetí měnila i barva písma, přestal by být
+    # čitelný na žluté.
+    "primary_navigation_color": {"color": "palette3", "hover": "palette3", "active": "palette3"},
     "primary_navigation_typography": {"size": {"desktop": 16}, "lineHeight": {"desktop": ""},
                                       "family": "inherit", "google": False,
-                                      "weight": "700", "variant": "700"},
-    "mobile_trigger_color": {"color": "palette9", "hover": "palette15"},
-    "header_popup_background": {"desktop": {"color": "palette3"}},
-    "header_popup_close_color": {"color": "palette9", "hover": "palette15"},
-    "mobile_navigation_color": {"color": "palette9", "hover": "palette15", "active": "palette15"},
+                                      "weight": "800", "variant": "800"},
+    "mobile_trigger_color": {"color": "palette3", "hover": "palette3"},
+    # Mobilní panel je papírový ze stejného důvodu jako hlavička.
+    "header_popup_background": {"desktop": {"color": "palette7"}},
+    "header_popup_close_color": {"color": "palette3", "hover": "palette3"},
+    "mobile_navigation_color": {"color": "palette3", "hover": "palette3", "active": "palette3"},
 
     # Žluté tlačítko na e-shop vpravo v hlavičce i v mobilním panelu.
     "header_desktop_items": {
@@ -107,9 +115,17 @@ NASTAVENI = {
         "bottom": {"bottom_left": [], "bottom_left_center": [], "bottom_center": [],
                    "bottom_right_center": [], "bottom_right": []}},
     "header_mobile_items": {
-        "popup": {"popup_content": ["mobile-navigation", "mobile-button"]},
+        # V panelu „Podpořit" není: od 7. 11. 2026 stojí v hlavičce vedle
+        # hamburgeru, tedy vidět pořád. Mít ho na obou místech znamenalo
+        # dvě stejná tlačítka na dva doteky od sebe.
+        "popup": {"popup_content": ["mobile-navigation"]},
         "top": {"top_left": [], "top_center": [], "top_right": []},
-        "main": {"main_left": ["mobile-logo"], "main_center": [], "main_right": ["popup-toggle"]},
+        # „Podpořit" je vedle hamburgeru, ne jen schované v panelu — je to
+        # hlavní výzva webu a nemá čekat, až někdo otevře menu. Na úvodu
+        # se na mobilu skrývá, protože tam je stejné tlačítko rovnou
+        # v obsahu (viz bm.css, sekce Hlavička).
+        "main": {"main_left": ["mobile-logo"], "main_center": [],
+                 "main_right": ["mobile-button", "popup-toggle"]},
         "bottom": {"bottom_left": [], "bottom_center": [], "bottom_right": []}},
     # Pro neziskovku je „Podpoř nás" silnější výzva než e-shop. E-shop
     # z webu nemizí — je odkazem na té stránce, tedy o jeden klik dál.
@@ -155,7 +171,9 @@ NASTAVENI = {
     # Menu a název webu zůstávají bílé jako na zelené hlavičce. Přes fotku
     # je drží čitelné tmavý závoj, který dosazuje doplněk bm-pozadi.php.
     "transparent_header_site_title_color": {"color": "palette9", "hover": "palette15"},
-    "transparent_header_navigation_color": {"color": "palette9", "hover": "palette15"},
+    # Nad fotkou mají štítky bílou výplň (bm.css), takže i tam je písmo
+    # černé. Bílé písmo na bílém štítku by zmizelo.
+    "transparent_header_navigation_color": {"color": "palette3", "hover": "palette3"},
     "transparent_header_button_color": {"color": "palette3", "hover": "palette3"},
     "transparent_header_background": {"desktop": {"color": "transparent"}},
     "transparent_header_bottom_border": {"desktop": {"width": 0, "unit": "px", "style": "none"}},
@@ -169,16 +187,20 @@ NASTAVENI = {
     "page_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "page_title_height": {"size": {"mobile": "", "tablet": "", "desktop": ""},
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
-    "page_title_background": {"desktop": {"color": "palette1"}},
-    "page_title_font": pismo(48, 40, 34, 1.08, barva="palette9"),
+    # Titulkový pás kreslí Kadence u stránek, které si nadpis nedávají do
+    # obsahu (O festivalu, Historie, Kontakt). Od 6. 11. 2026 je bílý
+    # a nadpis černý, aby vypadal stejně jako na stránkách stavěných
+    # skriptem; podtržení barvou sekce mu dává bm.css.
+    "page_title_background": {"desktop": {"color": "palette9"}},
+    "page_title_font": pismo(48, 40, 34, 1.08, barva="palette3"),
     # Bez "above" Kadence pás nevykreslí a bílý titulek skončí na bílém pozadí.
     "post_title_layout": "above",
     "post_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "post_title_elements": ["categories", "title", "meta"],
-    "post_title_background": {"desktop": {"color": "palette1"}},
-    "post_title_font": pismo(44, 36, 32, 1.1, barva="palette9"),
-    "post_title_meta_color": {"color": "palette9", "hover": "palette15"},
-    "post_title_category_color": {"color": "palette15", "hover": "palette9"},
+    "post_title_background": {"desktop": {"color": "palette9"}},
+    "post_title_font": pismo(44, 36, 32, 1.1, barva="palette3"),
+    "post_title_meta_color": {"color": "palette5", "hover": "palette2"},
+    "post_title_category_color": {"color": "palette2", "hover": "palette3"},
     "post_title_height": {"size": {"mobile": "", "tablet": "", "desktop": ""},
                           "unit": {"mobile": "px", "tablet": "px", "desktop": "px"}},
 

@@ -804,6 +804,23 @@ Stránky jsou pevné části webu: Program, Králové, Osvěžovny, Praktické i
 Kontakt a další. **Strukturu nemáš měnit** — jen texty uvnitř. Menu se podle stránek
 neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 
+> **Pořadí v menu určuje i barvy.** Od 6. 11. 2026 má každá položka hlavní úrovně
+> svou barvu — Program žlutou, Králové korálovou, Osvěžovny levandulovou,
+> O festivalu zelenomodrou. Tatáž barva podtrhává nadpis stránky a dědí ji
+> i podstránky. Když se pořadí položek v menu změní, barvy se posunou s nimi.
+> Stránka, která v menu není, zůstane černobílá.
+
+> **Položka „O festivalu“ není odkaz**, jen rozbaluje seznam pod sebou. V menu
+> je zadaná jako **Vlastní odkaz** s adresou `#`. Kdybys ji někdy zakládal znovu,
+> musí to být zase `#` — stránka by z ní udělala odkaz a nebylo by poznat, jestli
+> se klepnutím rozbaluje, nebo někam odchází.
+
+> **Stránka „O festivalu“ je v konceptech — nemaž ji.** Je nadřazená stránkám
+> *O nás*, *Historie*, *Kontakt* a dalším a drží jim adresy `/o-festivalu/…`.
+> Smazáním by se jim adresy změnily. V menu na ni nic nevede, protože je na ní
+> jen „Úvodní text dodá zadavatel“; až tam nějaký text bude, stačí stránku vydat
+> a přidat do menu. Najdeš ji ve **Stránky (Pages) → Koncepty (Drafts)**.
+
 ### 9.1 Otevřít stránku
 
 1. V levém menu **Stránky (Pages)** → **Všechny stránky (All Pages)**.

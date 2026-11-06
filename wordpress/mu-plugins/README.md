@@ -207,6 +207,49 @@ Když ho odebereš, pás se vrátí k zelené.
 
 ---
 
+## bm-barva-sekce.php — barva sekce podle menu
+
+Každá položka hlavní úrovně menu má svou barvu z palety a stránka pod ní ji zdědí:
+Program žlutý, Králové korálový, Osvěžovny levandulové, O festivalu a vše pod ním
+zelenomodré. Barva se projeví jako výplň štítku v menu a jako podtržení nadpisu
+stránky.
+
+Doplněk vypíše do hlavičky stránky jeden `<style>`:
+
+- `.menu-item-<ID> { --bm-polozka: … }` pro každou položku hlavní úrovně,
+- `body { --bm-sekce: … }` pro aktuální stránku.
+
+CSS v `bm.css` tedy o pořadí ani o ID stránek nic neví a barvy jen používá.
+
+Položka hlavní úrovně nemusí vést na stránku — „O festivalu" je vlastní odkaz,
+který jen rozbaluje seznam. Barvu dostane stejně jako ostatní, do mapy stránek
+ale nic nezapíše.
+
+---
+
+## bm-menu-rozbalovatko.php — položka menu, která nikam nevede
+
+Položka hlavního menu s adresou `#` není odkaz: doplněk z ní sundá `href`.
+Myš nad ní nemá ruku, klepnutí nic neudělá a tabulátor ji přeskočí — klávesnice
+jde rovnou na tlačítko se šipkou, které Kadence kreslí vedle.
+
+Takhle je udělané „O festivalu“: je to jen záhlaví seznamu, ne stránka.
+Založí se ve **Vzhled → Menu** jako *Vlastní odkaz* s adresou `#`, nebo
+skriptem `vzhled/menu.py`, kde má v seznamu místo čísla stránky `None`.
+
+Rozbalování drží `bm.css`: na počítači najetím myší, na mobilu klepnutím
+kamkoli do řádku.
+
+**Pořadí v menu je jediný zdroj pravdy.** Tabulka barev je v konstantě
+`BM_BARVY_SEKCI` a jsou to čísla slotů palety, ne hexy — rebranding zůstává
+přepsáním patnácti polí v Customizeru. Když položek v menu přibude, barvy se
+opakují dokola.
+
+Stránka, která v menu není, barvu nedostane a nadpis zůstane černý. Počítá se
+s jednou úrovní zanoření, což je přesně to, co menu má.
+
+Celé rozhodnutí i měření kontrastů: [docs/wordpress/18-hlavicka.md](../../docs/wordpress/18-hlavicka.md).
+
 ## bm-osvezovny/ — podniky se zvýhodněnou nabídkou
 
 **Problém.** Osvěžovny byly ručně psaná stránka: devět nadpisů, pod každým odrážky

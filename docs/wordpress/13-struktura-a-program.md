@@ -18,6 +18,28 @@ na první verzi webu, moje námitky k ní a to, co z toho zbylo jako návrh.
 > Partneři, Podpoř nás, Kontakt a GDPR jsou **v patičce**; GDPR na webu do dneška
 > nemělo jediný odkaz odnikud.
 
+> **6. 11. 2026 — zadavatel menu ještě přeskládal.**
+> Nově: **Program · Králové · Osvěžovny · O festivalu ▾**, přičemž *Praktické info*
+> je **první položkou rozbalovátka**.
+>
+> Tím padá námitka níž v této kapitole („Praktické info nepatří pod O festivalu“).
+> Argument platí dál — je to informace pro návštěvníka, kdežto O festivalu je
+> o organizaci — ale zadavatel chce krátkou hlavní úroveň a na přesunu trvá.
+> První místo v seznamu je kompromis: nezahrabe se mezi osm položek o organizaci.
+> **Pozor na důsledek:** rozbalovátko je nejdelší seznam na webu. Starý text níž se nepřepisuje, platí tenhle odstavec.
+>
+> Zároveň padl **rozcestník `/o-festivalu/`**. Nejdřív se na něj přenesl text
+> z podstránky *O nás*, jenže položka menu tím pořád někam vedla. Zadavatel
+> ještě téhož dne: *„To ‚O festivalu‘ by mělo být jen rozbalit/zabalit a ‚O nás‘
+> tedy bude zpátky samostatná položka."* Takže:
+>
+> - položka **O festivalu** je vlastní odkaz s adresou `#` a nikam nevede,
+> - **O nás** je zpátky v rozbalovátku, s původní adresou `/o-festivalu/o-nas/`,
+> - stránka `/o-festivalu/` je v konceptech. Drží adresy podstránek, v menu
+>   na ni nic nevede.
+>
+> Rozbalovátko má devět položek. Viz [18-hlavicka.md](18-hlavicka.md).
+
 ### Původní zápis ze 4. 11.
 
 Dnešní menu zdědilo hierarchii starého webu: šest rozbalovátek, devatenáct položek.

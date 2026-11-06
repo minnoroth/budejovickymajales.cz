@@ -26,6 +26,10 @@ přepisování stylů. Když přijde nová grafika na konci roku 2026, tohle je 
 Levandulová `#B6B4DA` se do palety nevešla a bydlí jako proměnná `--bm-levandulova`
 v doplňkovém CSS. Je to jediná výjimka z pravidla a je tam napsaná proč.
 
+> **6. 11. 2026:** hlavička, menu a barvy sekcí mají vlastní dokument —
+> [18-hlavicka.md](18-hlavicka.md). Co je o nich napsané níž, platí jen potud,
+> pokud mu neodporuje.
+
 ## Kde se co nastavuje
 
 | Co | Kde v administraci |

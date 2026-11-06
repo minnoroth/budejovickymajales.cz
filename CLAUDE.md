@@ -119,6 +119,29 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   `display: flex`. Prvek je v DOM `hidden = true` a na obrazovce se nic nestane —
   vypadá to, jako by skript nefungoval. Potřebuje vlastní pravidlo se stejným prefixem.
 
+- **Seznam v obsahu má od Kadence `padding: 2em` zleva.** Pravidlo
+  `.single-content ul, .single-content ol` přebije samotnou třídu, takže vlastní
+  seznam (chipy, kotvy) začne o 34 px vpravo a vypadá, že je na střed. Ruší se
+  zápisem se stejnou vahou: `.single-content .bm-kotvy { padding: 0 }`.
+- **Kadence přepisuje hlavičku selektory s víc prvky.** Rozbalovátko si drží
+  `.header-navigation .header-menu-container ul ul.sub-menu` — tři třídy a dva prvky.
+  Kratší zápis `.site-header .primary-menu-container .sub-menu` má tříd stejně, ale
+  prvků míň, takže prohraje a pravidlo se neprojeví. Na hlavičku kopíruj tvar
+  selektoru od Kadence a přidej `.site-header` navíc.
+- **Zálohu proměnné piš do `var()`, ne jako vlastní deklaraci.** Když má prvek sám
+  `--x: záloha`, je to pro něj silnější než hodnota zděděná od rodiče, takže
+  zděděná barva nikdy nedorazí. Správně je `var(--x, záloha)` na místě použití.
+- **Hlavička je samostatná vrstva, takže `z-index` rozbalovátka platí jen uvnitř ní.**
+  Kadence jí dává `#masthead { z-index: 11 }` a `position: relative`; tisícovka
+  u `.sub-menu` se pak navenek chová jako jedenáctka a cokoli na stránce s vyšším
+  číslem (lepkavá lišta Programu má 60) rozbalovátko překryje. Řeší se zvednutím
+  hlavičky, ne rozbalovátka — a selektorem na `#masthead`, aby přebil ten od Kadence.
+- **Položka menu, která nemá být odkaz, se dělá sundáním `href`**, ne přes
+  `pointer-events` ani JavaScript. `<a>` bez adresy není odkaz: nemá ruku, klepnutí
+  nic neudělá, tabulátor ho přeskočí — a `li:hover` pořád funguje, takže
+  rozbalovátko Kadence se otevírá dál. V menu se taková položka zadá jako vlastní
+  odkaz `#` (prázdnou adresu REST odmítne) a `href` sundá `bm-menu-rozbalovatko.php`.
+
 ### Doplňky a vývoj
 
 - **mu-plugins se nenačítají z podsložek.** WordPress bere z `wp-content/mu-plugins/`

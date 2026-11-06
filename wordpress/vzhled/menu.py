@@ -12,25 +12,45 @@ v docs/wordpress/13-struktura-a-program.md:
   (prakticke-info.py). Rozbalovátko se čtyřmi položkami bylo na mobilu to,
   co na menu vadilo nejvíc.
 - Aktuality jdou pod O festivalu.
+
+Změna z 6. 11. 2026 (zadavatel):
+
+- Pořadí hlavní úrovně je Program, Králové, Osvěžovny — králové jsou to,
+  čím se festival liší od ostatních, osvěžovny jsou servis.
+- Položka „O festivalu" nikam nevede, jen rozbaluje seznam pod sebou.
+  V seznamu má místo čísla stránky None a skript z ní udělá vlastní odkaz
+  s adresou „#"; href z něj sundá doplněk bm-menu-rozbalovatko.php.
+  Dokud to byl odkaz, nešlo poznat, jestli se klepnutím rozbaluje, nebo
+  někam odchází.
+- Praktické info se stěhuje pod O festivalu, a to jako první položka.
+  Dokument 13-struktura-a-program.md to nedoporučoval (je to informace pro
+  návštěvníka, kdežto O festivalu je o organizaci); zadavatel na přesunu
+  trvá, hlavní úroveň má být krátká. První místo v seznamu je kompromis,
+  aby se nezahrabalo mezi osm položek o organizaci.
 - Program nemá podstránky: zkratka [bm_program] drží Lineup i Seznam na jedné
   stránce. Stránky /program/lineup/ a /program/prehled/ jsou v koši,
   znovu je sem nepřidávat.
 
-Zbylo jedno rozbalovátko místo šesti a pět položek místo devatenácti.
+Zbylo jedno rozbalovátko místo šesti a čtyři položky v hlavní úrovni
+místo devatenácti.
 """
 from pripojeni import rest
 
 NAZEV = "Hlavní menu"
 
+# (název, číslo stránky, podpoložky). None místo čísla stránky znamená
+# položku, která nikam nevede a jen rozbaluje seznam pod sebou.
 STROM = [
     ("Program", 83, []),
-    ("Osvěžovny", 90, []),
     ("Králové", 85, []),
-    ("Praktické info", 86, []),
-    ("O festivalu", 87, [
+    ("Osvěžovny", 90, []),
+    ("O festivalu", None, [
+        # Praktické info je pro návštěvníka, ne o organizaci — proto stojí
+        # nad vším ostatním, oddělené od zbytku seznamu.
+        ("Praktické info", 86),
         ("O nás", 97),
         ("Historie", 99),
-        # Aktuality jsou tu nejnavštěvovanější položka, proto hned nahoře.
+        # Aktuality jsou tu nejnavštěvovanější položka ze zbytku.
         ("Aktuality", 114),
         ("Dobrovolníci", 98),
         ("Fotogalerie", 100),
@@ -68,19 +88,30 @@ else:
     menu = rest("menus", "POST", {"name": NAZEV, "locations": ["primary"]})
     print("menu založeno:", menu.get("id"), menu.get("name"))
 
+def cil(page_id):
+    """Kam položka vede. None = nikam, jen rozbaluje.
+
+    Prázdnou adresu REST u vlastního odkazu odmítne, proto „#" — stejnou
+    adresu by tam zadal i člověk ve Vzhled → Menu. Na webu z ní href sundá
+    doplněk bm-menu-rozbalovatko.php, takže z položky není odkaz."""
+    if page_id is None:
+        return {"type": "custom", "url": "#"}
+    return {"type": "post_type", "object": "page", "object_id": page_id}
+
+
 mid = menu["id"]
 poradi = 0
 
 for nazev, page_id, deti in STROM:
     poradi += 1
-    rodic = rest("menu-items", "POST", {
-        "title": nazev, "menus": mid, "object": "page", "object_id": page_id,
-        "type": "post_type", "status": "publish", "menu_order": poradi})
+    telo = {"title": nazev, "menus": mid, "status": "publish", "menu_order": poradi}
+    telo.update(cil(page_id))
+    rodic = rest("menu-items", "POST", telo)
     print(" ", nazev, "→", rodic.get("id"))
     for d_nazev, d_id in deti:
         poradi += 1
-        d = rest("menu-items", "POST", {
-            "title": d_nazev, "menus": mid, "object": "page", "object_id": d_id,
-            "type": "post_type", "status": "publish", "parent": rodic.get("id"),
-            "menu_order": poradi})
+        telo = {"title": d_nazev, "menus": mid, "status": "publish",
+                "parent": rodic.get("id"), "menu_order": poradi}
+        telo.update(cil(d_id))
+        d = rest("menu-items", "POST", telo)
         print("     ", d_nazev, "→", d.get("id"))
