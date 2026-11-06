@@ -12,11 +12,22 @@ v docs/wordpress/13-struktura-a-program.md:
   (prakticke-info.py). Rozbalovátko se čtyřmi položkami bylo na mobilu to,
   co na menu vadilo nejvíc.
 - Aktuality jdou pod O festivalu.
+
+Změna z 6. 11. 2026 (zadavatel):
+
+- Pořadí hlavní úrovně je Program, Králové, Osvěžovny — králové jsou to,
+  čím se festival liší od ostatních, osvěžovny jsou servis.
+- Praktické info se stěhuje pod O festivalu, a to jako první položka.
+  Dokument 13-struktura-a-program.md to nedoporučoval (je to informace pro
+  návštěvníka, kdežto O festivalu je o organizaci); zadavatel na přesunu
+  trvá, hlavní úroveň má být krátká. První místo v seznamu je kompromis,
+  aby se nezahrabalo mezi osm položek o organizaci.
 - Program nemá podstránky: zkratka [bm_program] drží Lineup i Seznam na jedné
   stránce. Stránky /program/lineup/ a /program/prehled/ jsou v koši,
   znovu je sem nepřidávat.
 
-Zbylo jedno rozbalovátko místo šesti a pět položek místo devatenácti.
+Zbylo jedno rozbalovátko místo šesti a čtyři položky v hlavní úrovni
+místo devatenácti.
 """
 from pripojeni import rest
 
@@ -24,13 +35,15 @@ NAZEV = "Hlavní menu"
 
 STROM = [
     ("Program", 83, []),
-    ("Osvěžovny", 90, []),
     ("Králové", 85, []),
-    ("Praktické info", 86, []),
+    ("Osvěžovny", 90, []),
     ("O festivalu", 87, [
+        # Praktické info je pro návštěvníka, ne o organizaci — proto stojí
+        # nad vším ostatním, oddělené od zbytku seznamu.
+        ("Praktické info", 86),
         ("O nás", 97),
         ("Historie", 99),
-        # Aktuality jsou tu nejnavštěvovanější položka, proto hned nahoře.
+        # Aktuality jsou tu nejnavštěvovanější položka ze zbytku.
         ("Aktuality", 114),
         ("Dobrovolníci", 98),
         ("Fotogalerie", 100),

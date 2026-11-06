@@ -18,6 +18,17 @@ na první verzi webu, moje námitky k ní a to, co z toho zbylo jako návrh.
 > Partneři, Podpoř nás, Kontakt a GDPR jsou **v patičce**; GDPR na webu do dneška
 > nemělo jediný odkaz odnikud.
 
+> **6. 11. 2026 — zadavatel menu ještě přeskládal.**
+> Nově: **Program · Králové · Osvěžovny · O festivalu ▾**, přičemž *Praktické info*
+> je **první položkou rozbalovátka**.
+>
+> Tím padá námitka níž v této kapitole („Praktické info nepatří pod O festivalu“).
+> Argument platí dál — je to informace pro návštěvníka, kdežto O festivalu je
+> o organizaci — ale zadavatel chce krátkou hlavní úroveň a na přesunu trvá.
+> První místo v seznamu je kompromis: nezahrabe se mezi osm položek o organizaci.
+> **Pozor na důsledek:** rozbalovátko má teď devět položek a je to nejdelší seznam
+> na webu. Starý text níž se nepřepisuje, platí tenhle odstavec.
+
 ### Původní zápis ze 4. 11.
 
 Dnešní menu zdědilo hierarchii starého webu: šest rozbalovátek, devatenáct položek.
