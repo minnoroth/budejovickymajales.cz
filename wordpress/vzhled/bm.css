@@ -396,7 +396,10 @@ body:not(.transparent-header) .site-branding .custom-logo { filter: brightness(0
   padding: 8px 15px;
   line-height: 1.15;
 }
-.site-header .primary-menu-container .menu > li > a:hover {
+/* Zvýraznění visí na položce, ne na odkazu: jakmile myš sjede do rozbalené
+   kartičky, odkaz sám pod myší není, ale položka ano — štítek tedy zůstane
+   vybarvený po celou dobu, co je seznam otevřený. */
+.site-header .primary-menu-container .menu > li:hover > a {
   background: var(--bm-polozka, var(--global-palette15));
 }
 /* Stránka, na které návštěvník je. Plakátový stín stejný jako u kartiček. */
@@ -425,10 +428,12 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
   border-radius: var(--bm-radius);
   box-shadow: 6px 6px 0 var(--global-palette3);
   padding: 8px;
-  /* Kadence kreslí rozbalovátko od spodní hrany položky, ne hlavičky,
-     a položka je o 26 px kratší. Tohle číslo je těch 26 px plus mezera,
-     aby kartička pod černou linkou hlavičky volně visela. */
-  margin-top: 36px;
+  /* Kartička visí rovnou pod štítkem, ne pod hlavičkou. Dřív tu bylo 36 px,
+     aby se vešla až pod černou linku hlavičky, jenže takhle daleko od štítku
+     vypadala jako samostatný plovoucí blok a nebylo poznat, ke komu patří.
+     Teď linku překryje — kartička je papírová a ohraničená stejně jako
+     hlavička, takže to drží pohromadě. */
+  margin-top: 8px;
 }
 
 /* Mezera nad kartičkou je prázdné místo, kudy myš cestuje dolů. Kdyby tam
@@ -440,8 +445,8 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
   position: absolute;
   left: 0;
   right: 0;
-  top: -36px;
-  height: 36px;
+  top: -8px;
+  height: 8px;
 }
 .site-header .header-navigation .header-menu-container ul ul li.menu-item > a {
   width: auto;
@@ -492,6 +497,28 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
 #mobile-drawer .mobile-navigation .menu > li > .drawer-nav-drop-wrap > a {
   padding: 13px 16px;
   font-weight: 800;
+}
+
+/* Položka, která nikam nevede (vlastní odkaz „#", viz
+   mu-plugins/bm-menu-rozbalovatko.php), má rozbalovat klepnutím kamkoli
+   do řádku. Kadence kreslí vedle popisku tlačítko se šipkou — to se tu
+   roztáhne přes celý řádek a šipka se v něm odsune doprava. Bez toho se
+   trefit do šipky je loterie a popisek nedělá nic.
+
+   :has() čte „obal, v němž je odkaz bez adresy". Rozbalovátko, jehož
+   popisek je skutečný odkaz, se tím pádem nerozbije. */
+#mobile-drawer .mobile-navigation .menu > li > .drawer-nav-drop-wrap:has(> a:not([href])) {
+  position: relative;
+}
+#mobile-drawer .mobile-navigation .menu > li > .drawer-nav-drop-wrap:has(> a:not([href])) > .drawer-sub-toggle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
 }
 #mobile-drawer .mobile-navigation .menu > li.current-menu-ancestor > .drawer-nav-drop-wrap {
   background: var(--bm-polozka, var(--global-palette15));

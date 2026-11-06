@@ -31,6 +31,9 @@
  *
  * Omezení: počítá se s jednou úrovní zanoření, což je přesně to, co menu
  * má (jediné rozbalovátko je O festivalu). Hlubší vnoření by barvu nezdědilo.
+ * Položka hlavní úrovně nemusí vést na stránku — „O festivalu" je vlastní
+ * odkaz, který jen rozbaluje seznam. Barvu dostane stejně jako ostatní,
+ * jen do mapy stránek nic nezapíše.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -98,7 +101,10 @@ function bm_barva_mapa() {
 
 		$mapa['polozky'][ (int) $polozka->ID ] = $slot;
 
-		if ( $polozka->object_id ) {
+		// Jen položka vedoucí na stránku má co zapsat do mapy stránek.
+		// U vlastního odkazu (například „O festivalu", které jen rozbaluje
+		// seznam) je object_id ID té položky menu, ne ID stránky.
+		if ( 'page' === $polozka->object && $polozka->object_id ) {
 			$mapa['stranky'][ (int) $polozka->object_id ] = $slot;
 		}
 	}
@@ -107,7 +113,7 @@ function bm_barva_mapa() {
 	foreach ( $polozky as $polozka ) {
 		$rodic = (int) $polozka->menu_item_parent;
 
-		if ( ! $rodic || ! isset( $mapa['polozky'][ $rodic ] ) || ! $polozka->object_id ) {
+		if ( ! $rodic || ! isset( $mapa['polozky'][ $rodic ] ) || 'page' !== $polozka->object || ! $polozka->object_id ) {
 			continue;
 		}
 
@@ -124,7 +130,7 @@ function bm_barva_mapa() {
  * vykresluje totéž menu dvakrát (počítač a mobilní panel), takže by stejné
  * id bylo v dokumentu dvakrát.
  *
- * Stránka, která v menu není (Partneři, Zpracování osobních údajů, úvod),
+ * Stránka, která v menu není (Zpracování osobních údajů, úvod),
  * barvu nedostane. Nadpis takové stránky zůstane černý bez podtržení — to je
  * schválně: barva znamená „tady v menu jsi“, a tam návštěvník není.
  *
@@ -147,7 +153,16 @@ function bm_barva_do_hlavicky() {
 		);
 	}
 
-	$id_stranky = is_singular() ? (int) get_queried_object_id() : 0;
+	// Aktuality nejsou stránka, ale výpis příspěvků — a jednotlivý článek
+	// není v menu vůbec. Obojí v menu zastupuje stránka nastavená jako
+	// „stránka s příspěvky", takže barvu dostanou po ní.
+	if ( is_home() || is_singular( 'post' ) ) {
+		$id_stranky = (int) get_option( 'page_for_posts' );
+	} elseif ( is_singular() ) {
+		$id_stranky = (int) get_queried_object_id();
+	} else {
+		$id_stranky = 0;
+	}
 
 	if ( ! empty( $mapa['stranky'][ $id_stranky ] ) ) {
 		$pravidla[] = sprintf(

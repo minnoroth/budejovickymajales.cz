@@ -127,6 +127,11 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
 - **Zálohu proměnné piš do `var()`, ne jako vlastní deklaraci.** Když má prvek sám
   `--x: záloha`, je to pro něj silnější než hodnota zděděná od rodiče, takže
   zděděná barva nikdy nedorazí. Správně je `var(--x, záloha)` na místě použití.
+- **Položka menu, která nemá být odkaz, se dělá sundáním `href`**, ne přes
+  `pointer-events` ani JavaScript. `<a>` bez adresy není odkaz: nemá ruku, klepnutí
+  nic neudělá, tabulátor ho přeskočí — a `li:hover` pořád funguje, takže
+  rozbalovátko Kadence se otevírá dál. V menu se taková položka zadá jako vlastní
+  odkaz `#` (prázdnou adresu REST odmítne) a `href` sundá `bm-menu-rozbalovatko.php`.
 
 ### Doplňky a vývoj
 

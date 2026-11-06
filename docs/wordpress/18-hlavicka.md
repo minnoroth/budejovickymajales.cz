@@ -12,7 +12,7 @@
 |---|---|---|
 | Pozadí hlavičky | zelenomodrá (palette1) | papír (palette7) s černou spodní hranou |
 | Položky menu | bílý text, aktivní žlutě podtržený | černé štítky s obrysem, aktivní vyplněný svou barvou |
-| Rozbalovátko | černý obdélník s vlasovými linkami | bílá kartička s rámečkem a plakátovým stínem |
+| Rozbalovátko | černý obdélník s vlasovými linkami | bílá kartička zavěšená pod štítkem |
 | Mobilní panel | černý list s linkami | papír se štítky, jako na počítači |
 | Logo | bílá kapka | invertovaná na černou (kromě úvodu) |
 | Nadpis podstránky | černý | podtržený barvou své sekce |
@@ -90,6 +90,7 @@ pravidlo v `bm.css` a nahrát druhý obrázek.
 | Soubor | K čemu |
 |---|---|
 | `wordpress/mu-plugins/bm-barva-sekce.php` | rozdává barvy podle pořadí v menu |
+| `wordpress/mu-plugins/bm-menu-rozbalovatko.php` | sundá href z položky s adresou „#“ |
 | `wordpress/vzhled/bm.css`, sekce *Hlavička* | štítky, rozbalovátko, mobilní panel, podtržení |
 | `wordpress/vzhled/nastaveni.py` | pozadí hlavičky, barvy písma, mobilní panel |
 | `wordpress/vzhled/menu.py` | pořadí položek, a tím i pořadí barev |
@@ -114,10 +115,10 @@ jednobarevné. Správně je `var(--bm-polozka, var(--global-palette15))`.
 a 0 zdola; hlavička se pak sice zarovná na střed, ale kolem loga je nesymetrická
 mezera. Odsazení se v `bm.css` nuluje.
 
-**Rozbalovátko se zavíralo cestou dolů.** Kartička visí 36 px pod položkou a v té
+**Rozbalovátko se zavíralo cestou dolů.** Kartička visela 36 px pod položkou a v té
 mezeře nebylo nic, takže kurzor opustil položku dřív, než došel do nabídky.
-Mezeru teď překlenuje neviditelný `::before` samotné kartičky — patří jí, takže
-položka zůstane „pod myší“.
+Mezeru překlenuje neviditelný `::before` samotné kartičky — patří jí, takže
+položka zůstane „pod myší“. (Mezera se vzápětí zkrátila na 8 px, viz níž.)
 
 **Obsah nestál na stejné svislici jako nadpis.** Skupiny mají `contentSize` 1160 px,
 jenže obal stránky je širší (1242 px při 1440), takže WordPress bloky uvnitř
@@ -132,17 +133,53 @@ obsahu (O festivalu, Historie, Kontakt, Aktuality), dostávají nadpis od Kadenc
 v samostatném pásu. Ten teď má bílé pozadí, černý nadpis a stejné podtržení jako
 nadpisy v obsahu, takže obě skupiny stránek vypadají stejně.
 
-## Rozcestník O festivalu zrušen
+## Druhé kolo: O festivalu jen rozbaluje (6. 11. 2026)
 
-Stránka `/o-festivalu/` byla prázdný rozcestník — jedna věta a „Úvodní text dodá
-zadavatel“. Kliknutí na položku menu tedy skončilo na stránce, která nic neříká,
-kdežto skutečný text byl vedle, na podstránce *O nás*.
+Nejdřív se zrušil prázdný rozcestník `/o-festivalu/` tím, že se na něj přenesl
+text z podstránky *O nás*. Jenže tím položka menu pořád někam vedla a zadavatel
+ze záznamu obrazovky pojmenoval, co mu na tom vadí: *„To ‚O festivalu‘ by mělo být
+jen rozbalit/zabalit a ‚O nás‘ tedy bude zpátky samostatná položka."* Na mobilu
+navíc nešlo poznat, jestli klepnutím rozbaluje, nebo odchází na stránku.
 
-Text se přenesl na `/o-festivalu/` a stránka *O nás* je v konceptech (nemazala se,
-vrátí se jedním klikem). Z rozbalovátka položka *O nás* zmizela. Adresa zůstává
-`/o-festivalu/`, takže podstránky mají dál `/o-festivalu/<nazev>/`.
+**Položka je teď vlastní odkaz s adresou `#` a doplněk z ní sundá `href`.**
+`<a>` bez adresy není odkaz: myš nad ním nemá ruku, klepnutí nic neudělá
+a tabulátor ho přeskočí — klávesnice jde rovnou na tlačítko se šipkou, které
+Kadence kreslí vedle a které umí seznam rozbalit. Rozbalování tedy nepotřebovalo
+ani řádek JavaScriptu; stačilo odkaz zrušit.
 
-Dělá to `wordpress/vzhled/o-festivalu.py`, jednorázově a opakovaně spustitelně.
+Proč `#` a ne prázdná adresa: prázdnou REST u vlastního odkazu odmítne a `#` je
+zároveň to, co by do pole napsal člověk v administraci. V menu je tak vidět, že
+položka nikam nevede.
+
+**Na mobilu rozbaluje celý řádek.** Kadence kreslí popisek a tlačítko se šipkou
+vedle sebe; tlačítko se v `bm.css` roztáhne přes celý řádek a šipka se v něm
+odsune doprava. Vybírá se podle `:has(> a:not([href]))`, takže rozbalovátko,
+jehož popisek je skutečný odkaz, se tím nerozbije.
+
+**Kartička visí 8 px pod štítkem, ne 36.** Původní mezera ji posadila až pod
+černou linku hlavičky, jenže takhle daleko vypadala jako samostatný plovoucí blok
+a nebylo poznat, ke komu patří. Teď linku překrývá. Zvýraznění štítku se zároveň
+přesunulo z `a:hover` na `li:hover`, takže štítek zůstane vybarvený i ve chvíli,
+kdy je myš uvnitř rozbaleného seznamu.
+
+**„O nás“ je zpátky** jako samostatná položka s původní adresou
+`/o-festivalu/o-nas/`. Rozbalovátko má devět položek.
+
+**Stránka `/o-festivalu/` je v konceptech.** Je nadřazená podstránkám a drží jim
+adresy `/o-festivalu/…`, takže se nesmí smazat — adresy by se změnily. Vydaná být
+nemusí: v menu na ni nic nevede a zůstal na ní jen zástupný text („Úvodní text
+dodá zadavatel“); kopie textu *O nás*, která na ní krátce byla, je pryč, aby
+na webu nebyly dvě stejné stránky. Ověřeno, že podstránky
+při konceptovém rodiči odpovídají dál 200; `/o-festivalu/` samo vrací 404.
+
+Jednorázový skript `o-festivalu.py`, který předtím obsah přenášel, je smazaný —
+reprodukoval by stav, který padl.
+
+## Aktuality dostaly barvu dodatečně
+
+Výpis příspěvků není stránka a jednotlivý článek v menu vůbec není, takže
+`is_singular()` u obou vracelo cizí ID a nadpis zůstával bez podtržení.
+Obojí teď v menu zastupuje stránka nastavená jako „stránka s příspěvky“.
 
 ## Co zůstává otevřené
 

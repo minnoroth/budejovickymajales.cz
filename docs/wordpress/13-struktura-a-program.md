@@ -26,12 +26,19 @@ na první verzi webu, moje námitky k ní a to, co z toho zbylo jako návrh.
 > Argument platí dál — je to informace pro návštěvníka, kdežto O festivalu je
 > o organizaci — ale zadavatel chce krátkou hlavní úroveň a na přesunu trvá.
 > První místo v seznamu je kompromis: nezahrabe se mezi osm položek o organizaci.
-> **Pozor na důsledek:** rozbalovátko má teď osm položek a je to nejdelší seznam
-> na webu. Starý text níž se nepřepisuje, platí tenhle odstavec.
+> **Pozor na důsledek:** rozbalovátko je nejdelší seznam na webu. Starý text níž se nepřepisuje, platí tenhle odstavec.
 >
-> Zároveň padl **rozcestník `/o-festivalu/`**: byl prázdný, takže se na něj přenesl
-> text z podstránky *O nás* a ta šla do konceptů. Položka *O nás* z rozbalovátka
-> zmizela, protože by vedla na totéž. Viz [18-hlavicka.md](18-hlavicka.md).
+> Zároveň padl **rozcestník `/o-festivalu/`**. Nejdřív se na něj přenesl text
+> z podstránky *O nás*, jenže položka menu tím pořád někam vedla. Zadavatel
+> ještě téhož dne: *„To ‚O festivalu‘ by mělo být jen rozbalit/zabalit a ‚O nás‘
+> tedy bude zpátky samostatná položka."* Takže:
+>
+> - položka **O festivalu** je vlastní odkaz s adresou `#` a nikam nevede,
+> - **O nás** je zpátky v rozbalovátku, s původní adresou `/o-festivalu/o-nas/`,
+> - stránka `/o-festivalu/` je v konceptech. Drží adresy podstránek, v menu
+>   na ni nic nevede.
+>
+> Rozbalovátko má devět položek. Viz [18-hlavicka.md](18-hlavicka.md).
 
 ### Původní zápis ze 4. 11.
 
