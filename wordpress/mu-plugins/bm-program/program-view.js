@@ -229,6 +229,41 @@
     return String(text == null ? '' : text)
       .replace(/([\\,;])/g, '\\$1').replace(/\r?\n/g, '\\n');
   }
+
+  /* Řádek v .ics smí mít 75 oktetů; delší se láme a pokračovací řádek
+     začíná mezerou. Počítají se bajty, ne znaky — s diakritikou je každé
+     české písmeno za dva, takže „Veřejně prospěšné práce" limit přeteče
+     dřív, než by se čekalo. Většina kalendářů dlouhý řádek skousne,
+     Outlook na něm historicky padá. */
+  function icsZabal(radek) {
+    var kodovac = new TextEncoder();
+    var vysledek = '';
+    var oktetu = 0;
+    var strop = 75;
+
+    Array.from(radek).forEach(function (znak) {
+      var velikost = kodovac.encode(znak).length;
+      if (oktetu + velikost > strop) {
+        vysledek += '\r\n ';
+        oktetu = 1;        // mezera na začátku pokračování se počítá
+        strop = 75;
+      }
+      vysledek += znak;
+      oktetu += velikost;
+    });
+
+    return vysledek;
+  }
+
+  /* Jméno souboru ze jména akce, ať je ve složce Stažené poznat, co to je.
+     „majales-451.ics" nikomu nic neřekne. */
+  function icsJmeno(a) {
+    var zaklad = bezDiakritiky(a.nazev)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60);
+    return 'majales-' + (zaklad || a.id) + '.ics';
+  }
   /* Kalendáře chtějí čas v UTC se Z na konci. */
   function icsCas(d) {
     return d.getUTCFullYear() +
@@ -249,17 +284,28 @@
       'DTEND:' + icsCas(a.kon),
       'SUMMARY:' + icsEsc(a.nazev),
       a.misto ? 'LOCATION:' + icsEsc(a.misto + (a.mesto ? ', ' + a.mesto : '')) : '',
+      /* Bez popisu je záznam v kalendáři holé jméno a čas. Bere se text
+         z popisu akce; HTML se zahodí, kalendáře ho neumí. */
+      icsPopis(a) ? 'DESCRIPTION:' + icsEsc(icsPopis(a)) : '',
       a.url ? 'URL:' + icsEsc(a.url) : '',
       'END:VEVENT',
       'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n');
+    ].filter(Boolean).map(icsZabal).join('\r\n');
+  }
+
+  function icsPopis(a) {
+    var text = naText(a.popisHtml);
+    if (text.length > 400) {
+      text = text.slice(0, 400).replace(/\s+\S*$/, '') + '…';
+    }
+    return [text, a.url].filter(Boolean).join('\n\n');
   }
   function stahniKalendar(a) {
     var soubor = new Blob([icsSoubor(a)], { type: 'text/calendar;charset=utf-8' });
     var adresa = URL.createObjectURL(soubor);
     var odkaz = document.createElement('a');
     odkaz.href = adresa;
-    odkaz.download = 'majales-' + a.id + '.ics';
+    odkaz.download = icsJmeno(a);
     document.body.appendChild(odkaz);
     odkaz.click();
     odkaz.remove();

@@ -98,6 +98,30 @@ mizí u pěti akcí ze šesti hned a u zbytku s částí B.**
 | odkaz do map, soubor `.ics` | skládá se v prohlížeči | — |
 | kapacita, obsazenost, konec rezervací | `tribe/tickets/v1/tickets?post_id=` | při otevření detailu |
 
+## Tlačítko „Do kalendáře"
+
+Vyrobí soubor `.ics` a nabídne ho ke stažení. Je to jediný způsob, jak dostat
+akci do kalendáře bez toho, aby si návštěvník vybíral mezi Googlem, Applem
+a Outlookem — soubor umí všichni tři. Na telefonu se po klepnutí rovnou otevře
+kalendář s předvyplněnou akcí; na počítači spadne do Stažených a otevře se
+poklepáním. To druhé je na první pohled překvapivé, ale jinak to nejde.
+
+Soubor se skládá v prohlížeči z dat, která program už má — žádný dotaz na server.
+Obsahuje název, čas v UTC, místo, popis (useknutý na 400 znaků) a adresu akce.
+Tři věci, na kterých se dá uklouznout a které jsou ošetřené:
+
+- **Jméno souboru je ze jména akce**, ne z ID. `majales-451.ics` ve Stažených
+  nikomu nic neřekne.
+- **Řádek smí mít 75 oktetů**, delší se láme a pokračování začíná mezerou.
+  Počítají se bajty, ne znaky — s diakritikou je každé české písmeno za dva,
+  takže limit přeteče dřív, než by se čekalo. Většina kalendářů dlouhý řádek
+  skousne, Outlook na něm historicky padá.
+- **Čárka, středník a zpětné lomítko se escapují**, jinak se popis rozpadne na
+  víc polí.
+
+Ověřeno na skutečném souboru: čas 18:30 pražského času vyšel jako
+`DTSTART:20270511T163000Z`, žádný řádek nepřesahuje 75 oktetů.
+
 ## Pět stavů rezervace
 
 Volno · poslední místa (do tří zbývajících, štítek zčervená) · plno ·
