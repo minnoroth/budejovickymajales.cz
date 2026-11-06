@@ -11,6 +11,10 @@
    funkce nactiData()" a zbytek skriptu zůstane. Tenhle soubor je ta funkce.
    Vykreslování je v program-view.js a tenhle soubor o něm neví.
 
+   Vedle toho vystavuje nactiRezervaci(idAkce) — stav rezervace jedné akce.
+   Načítá se zvlášť a až na vyžádání, protože je to další dotaz na Wedos
+   a týká se menšiny akcí.
+
    Proč je to vlastní soubor a ne součást pohledu:
    Je to jediné místo, kde se potkáváme s The Events Calendar. Až TEC jednou
    přejmenuje endpoint nebo Secure Custom Fields přestane vracet klíč „acf",
@@ -333,6 +337,78 @@
 	}
 
 	/* ─────────────────────────────────────────────────────────────────────
+	   Rezervace jedné akce
+
+	   Kapacita a obsazenost se nenačítají s programem, ale až když se
+	   otevře detail — a jen u akce, která rezervaci má. Je to další dotaz
+	   na Wedos (přes vteřinu) a loni se týkal sedmnácti akcí ze sta dvou;
+	   na načtení stránky se kvůli němu nečeká.
+	   ───────────────────────────────────────────────────────────────────── */
+
+	function cisloNeboNull(hodnota) {
+		if (hodnota === null || hodnota === undefined || hodnota === '') {
+			return null;
+		}
+		var cislo = Number(hodnota);
+		/* Kalendář posílá u neomezené kapacity zápornou hodnotu. */
+		return isFinite(cislo) && cislo >= 0 ? cislo : null;
+	}
+
+	/**
+	 * Čas konce rezervací na zobrazení.
+	 *
+	 * Chodí bez časové zóny („2027-05-11 19:00:00") — je to pražský čas,
+	 * ve kterém ho pořadatel zadal. Projít ho přes Date() by znamenalo
+	 * přepočet podle zóny prohlížeče, takže se jen poskládá.
+	 */
+	function casKonce(det) {
+		if (!det || !det.year) {
+			return '';
+		}
+		return Number(det.day) + '. ' + Number(det.month) + '. ' +
+			dve(det.hour) + ':' + dve(det.minutes);
+	}
+
+	/**
+	 * Stav rezervace jedné akce.
+	 *
+	 * @param {number} idAkce ID akce v kalendáři.
+	 * @param {string} [zaklad] Základ REST API.
+	 * @returns {Promise<object|null>} null znamená „nemá rezervaci zdarma";
+	 *          chybu dotazu si volající chytá sám a ukáže detail bez ní.
+	 */
+	async function nactiRezervaci(idAkce, zaklad) {
+		var koren = String(zaklad || bmProgram.zaklad || '/wp-json/');
+		if (koren.slice(-1) !== '/') {
+			koren += '/';
+		}
+
+		var odpoved = await ziskej(adresa(koren, 'tribe/tickets/v1/tickets', {
+			post_id: idAkce, per_page: 10
+		}));
+
+		/* Festival rozdává jen rezervace zdarma (RSVP). Kdyby na akci někdy
+		   visel placený lístek, do programu nepatří — ten o ceně nic neříká
+		   a tvářil by se, že je zdarma. */
+		var listek = ((odpoved && odpoved.tickets) || []).filter(function (polozka) {
+			return String(polozka.type || '').indexOf('rsvp') >= 0;
+		})[0];
+		if (!listek) {
+			return null;
+		}
+
+		var podrobnosti = listek.capacity_details || {};
+		return {
+			nazev: odstranEntity(listek.title || 'Rezervace'),
+			kapacita: cisloNeboNull(listek.capacity),
+			zbyva: cisloNeboNull(podrobnosti.available),
+			volnychProcent: cisloNeboNull(podrobnosti.available_percentage),
+			lzeRezervovat: listek.is_available !== false,
+			doKdy: casKonce(listek.available_until_details)
+		};
+	}
+
+	/* ─────────────────────────────────────────────────────────────────────
 	   Veřejné rozhraní
 	   ───────────────────────────────────────────────────────────────────── */
 
@@ -407,4 +483,5 @@
 	bmProgram.klicDneAkce = klicDneAkce;
 	bmProgram.odstranEntity = odstranEntity;
 	bmProgram.nactiData = nactiData;
+	bmProgram.nactiRezervaci = nactiRezervaci;
 })(typeof window !== 'undefined' ? window : globalThis);

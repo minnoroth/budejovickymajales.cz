@@ -57,6 +57,19 @@ kategorie  // [{ id, name, slug, parent, acf: { barva } }]
 mista      // [{ id, venue, slug, url, acf: { bezbarierovost } }]
 ```
 
+Od 6. 11. 2026 je vedle toho `nactiRezervaci(idAkce)` — stav rezervace jedné akce.
+Načítá se zvlášť a až na vyžádání, protože je to další dotaz na Wedos a týká se
+menšiny akcí:
+
+```js
+const r = await window.bmProgram.nactiRezervaci(437);
+
+r // { nazev, kapacita, zbyva, volnychProcent, lzeRezervovat, doKdy } nebo null
+```
+
+`null` znamená „akce nemá rezervaci zdarma". Chybu dotazu si chytá pohled sám
+a ukáže detail i bez stavu — kapacita není důvod schovat rezervaci.
+
 Navíc je na `window.bmProgram`:
 
 ```js
@@ -106,6 +119,24 @@ Všechno níž je vykrvácené proti živému API, ne převzaté z dokumentace.
 - **`image` může být `false`**, ne objekt. A pole `_bm_rezervace`, které si vymyslel
   prototyp, ve skutečných datech není — free verze Event Tickets rozdíl mezi dobrovolnou
   a povinnou rezervací neposílá.
+## Detail akce je v modálu celý
+
+Od 6. 11. 2026 nemá návštěvník důvod chodit na `/event/…`: modál ukazuje celý
+popis, místo s odkazem do Google Maps, stav rezervace a odkaz do kalendáře.
+Proč zrovna takhle a co z toho ještě chybí, je v
+[docs/wordpress/19-detail-akce.md](../../../docs/wordpress/19-detail-akce.md).
+
+Dvě věci, které z toho plynou pro tenhle soubor:
+
+- **Popis je jediné místo, kde se do stránky pouští cizí HTML.** Prochází přes
+  výčet povolených značek v `program-view.js` (funkce `bezpecneHtml`). Co v něm
+  není, neprojde — a `script`, `style`, `iframe` a spol. se mažou i s obsahem.
+  Když se bude výčet rozšiřovat, ví se kde.
+- **Stránky `/event/…` se nesmí vypnout ani teď.** Platí to, co stojí výš
+  o nativních pohledech: jsou kanonické pro vyhledávače, jsou v záchranném
+  bloku a dokud nebude formulář rezervace v modálu, vede na ně tlačítko
+  „Rezervovat místo".
+
 ## Rozhodnutí: který ročník stránka ukazuje
 
 Pravidlo z návrhu zní „nejnovější termín, který má aspoň jednu akci". Dá se číst dvěma

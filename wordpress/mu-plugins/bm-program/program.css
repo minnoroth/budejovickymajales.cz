@@ -578,8 +578,100 @@
   font-size: clamp(24px, 5vw, 32px); letter-spacing: -.02em;
   margin-bottom: 10px; padding-right: 42px;
 }
+/* Popis je jediné místo v programu, kam se pouští HTML od týmu —
+   prochází přes výčet povolených značek v program-view.js. Styluje se
+   proto i to, co v něm může přijít. */
 :is(#primary, body) .bmp .bmp-detail__popis {
   font-size: 14.5px; margin: 14px 0; color: var(--bmp-text);
+  display: flex; flex-direction: column; gap: 9px;
+}
+:is(#primary, body) .bmp .bmp-detail__popis p { margin: 0; }
+:is(#primary, body) .bmp .bmp-detail__popis ul,
+:is(#primary, body) .bmp .bmp-detail__popis ol { margin: 0; padding-left: 20px; }
+:is(#primary, body) .bmp .bmp-detail__popis li { margin: 2px 0; }
+:is(#primary, body) .bmp .bmp-detail__popis h3,
+:is(#primary, body) .bmp .bmp-detail__popis h4 {
+  font-size: 15px; font-weight: 800; color: var(--bmp-cerna); margin: 4px 0 0;
+}
+:is(#primary, body) .bmp .bmp-detail__popis strong { color: var(--bmp-cerna); }
+:is(#primary, body) .bmp .bmp-detail__popis a {
+  color: var(--bmp-cerna);
+  text-decoration: underline;
+  text-decoration-color: var(--bmp-hlavni);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+:is(#primary, body) .bmp .bmp-detail__popis blockquote {
+  margin: 0; padding-left: 12px; border-left: 3px solid var(--bmp-hlavni);
+}
+
+/* ── Místo s odkazem do map ─────────────────────────────────────── */
+/* Vlastní blok, ne řádek v hlavičce: je to jediná věc v detailu, která
+   vede ven z webu, a na mobilu musí jít trefit palcem. */
+:is(#primary, body) .bmp .bmp-detail__misto {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  border: 2px solid var(--bmp-cerna); border-radius: 14px;
+  padding: 11px 13px; background: var(--bmp-svetla);
+}
+:is(#primary, body) .bmp .bmp-detail__misto-nazev {
+  display: block; font-weight: 800; font-size: 15px;
+}
+:is(#primary, body) .bmp .bmp-detail__misto-pod {
+  display: block; font-size: 13px; color: var(--bmp-seda);
+}
+:is(#primary, body) .bmp .bmp-detail__mapy {
+  margin-left: auto; white-space: nowrap;
+  font-weight: 800; font-size: 13.5px; color: var(--bmp-cerna);
+  text-decoration: none; border-bottom: 2px solid var(--bmp-hlavni);
+}
+:is(#primary, body) .bmp .bmp-detail__mapy:hover,
+:is(#primary, body) .bmp .bmp-detail__mapy:focus-visible {
+  background: var(--bmp-hlavni); color: var(--bmp-bila);
+}
+
+/* ── Rezervace ──────────────────────────────────────────────────── */
+/* Žlutá jako výzva k akci — stejně jako blok Event Tickets na stránce
+   akce, aby to návštěvník poznal na obou místech. */
+:is(#primary, body) .bmp .bmp-detail__rez {
+  border: var(--bmp-ramecek); border-radius: 16px; background: var(--bmp-zluta);
+  padding: 13px 15px; margin-top: 14px;
+  box-shadow: var(--bmp-stin-s);
+  display: flex; flex-direction: column; gap: 10px;
+}
+:is(#primary, body) .bmp .bmp-detail__rez-hlava {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+}
+:is(#primary, body) .bmp .bmp-detail__rez-nazev {
+  margin: 0; font-size: 16px; font-weight: 900; color: var(--bmp-cerna);
+}
+:is(#primary, body) .bmp .bmp-detail__rez-zbyva {
+  font-size: 13px; font-weight: 700; color: var(--bmp-text);
+  font-variant-numeric: tabular-nums;
+}
+:is(#primary, body) .bmp .bmp-detail__rez-zbyva--malo {
+  background: var(--bmp-koral); color: var(--bmp-cerna);
+  border: 2px solid var(--bmp-cerna); border-radius: 999px; padding: 1px 9px;
+}
+:is(#primary, body) .bmp .bmp-detail__rez-pruh {
+  height: 9px; border: 2px solid var(--bmp-cerna); border-radius: 999px;
+  background: var(--bmp-bila); overflow: hidden;
+}
+:is(#primary, body) .bmp .bmp-detail__rez-pruh i {
+  display: block; height: 100%; background: var(--bmp-cerna);
+}
+:is(#primary, body) .bmp .bmp-detail__rez-popis {
+  margin: 0; font-size: 13px; color: var(--bmp-text);
+}
+:is(#primary, body) .bmp .bmp-detail__rez .bmp-btn--hlavni {
+  align-self: flex-start; background: var(--bmp-bila);
+}
+
+/* Odkaz na samostatnou stránku je dovětek, ne tlačítko — po doplnění
+   celého detailu na ni skoro nikdo nemusí. */
+:is(#primary, body) .bmp .bmp-detail__samostatne {
+  margin-left: auto; align-self: center;
+  font-size: 12.5px; color: var(--bmp-seda);
+  text-decoration: underline; text-underline-offset: 3px;
 }
 :is(#primary, body) .bmp .bmp-detail__zaroven {
   margin-top: 16px; border-top: 1px dashed var(--bmp-vlasova); padding-top: 12px;
@@ -712,6 +804,25 @@
     border-radius: var(--bmp-radius) var(--bmp-radius) 0 0;
     border-bottom: 0;
   }
+  /* Úchyt jako u každého šuplíku na telefonu: říká, že se s tím dá
+     hýbat, a odděluje obsah od okraje obrazovky. */
+  :is(#primary, body) .bmp .bmp-detail__telo::before {
+    content: ""; display: block;
+    width: 44px; height: 5px; border-radius: 999px;
+    background: var(--bmp-vlasova); margin: -6px auto 12px;
+  }
+  /* Na telefonu je rezervace to jediné, kvůli čemu se detail otevírá,
+     takže jde nad popis. Pořadí v HTML zůstává kvůli čtečkám logické. */
+  :is(#primary, body) .bmp .bmp-detail__telo { display: flex; flex-direction: column; }
+  :is(#primary, body) .bmp .bmp-detail__misto { order: 1; }
+  :is(#primary, body) .bmp .bmp-detail__rez   { order: 2; margin-top: 12px; }
+  :is(#primary, body) .bmp .bmp-detail__popis { order: 3; }
+  :is(#primary, body) .bmp .bmp-detail__zaroven { order: 4; }
+  :is(#primary, body) .bmp .bmp-detail__akce  { order: 5; }
+  :is(#primary, body) .bmp .bmp-detail__rez .bmp-btn--hlavni {
+    align-self: stretch; text-align: center;
+  }
+  :is(#primary, body) .bmp .bmp-detail__samostatne { margin: 4px auto 0; }
 }
 
 
