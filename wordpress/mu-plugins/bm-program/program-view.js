@@ -67,7 +67,9 @@
   var BARVA_KAT = {}, BEZBARIEROVE = {};
   var stav = null, el = null, prisloOdkazem = 0, denPredMoje = null;
 
-  most.nactiData(koren.getAttribute('data-bm-zaklad') || most.zaklad || '/wp-json/')
+  var ZAKLAD = koren.getAttribute('data-bm-zaklad') || most.zaklad || '/wp-json/';
+
+  most.nactiData(ZAKLAD)
     .then(function (data) { spust(data); })
     .catch(chyba);
 
@@ -145,6 +147,172 @@
     return odstranEntity(String(s == null ? '' : s).replace(/<[^>]*>/g, ' '))
       .replace(/\s+/g, ' ').trim();
   }
+  /* Popis akce píše tým v editoru, takže z něj chodí HTML. Do modálu ho
+     pouštíme, ale jen ve značkách, které se v editoru opravdu používají,
+     a bez jediného atributu kromě adresy odkazu. Nepovolená značka se
+     nemaže i s obsahem — text uvnitř je právě to, kvůli čemu tu popis je;
+     zmizí jen ta značka.
+
+     Je to jediné místo v programu, kde se cizí HTML nevypisuje přes esc().
+     Proto ten výčet: co v něm není, neprojde. */
+  var POVOLENE_ZNACKY = {
+    P: 1, BR: 1, STRONG: 1, B: 1, EM: 1, I: 1, UL: 1, OL: 1, LI: 1,
+    H3: 1, H4: 1, BLOCKQUOTE: 1, A: 1
+  };
+
+  /* U těchhle značek je obsah kód, ne text — vypsat ho jako odstavec by
+     znamenalo ukázat návštěvníkovi zdroják. Mažou se i s obsahem. */
+  var ZNACKY_I_S_OBSAHEM = {
+    SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEMPLATE: 1, IFRAME: 1,
+    OBJECT: 1, EMBED: 1, SVG: 1, MATH: 1
+  };
+
+  function ocisti(uzel) {
+    Array.prototype.slice.call(uzel.childNodes).forEach(function (dite) {
+      if (dite.nodeType === 3) return;                 // text
+      if (dite.nodeType !== 1) { dite.remove(); return; }  // komentáře a zbytek
+
+      if (ZNACKY_I_S_OBSAHEM[dite.tagName]) { dite.remove(); return; }
+
+      if (!POVOLENE_ZNACKY[dite.tagName]) {
+        ocisti(dite);
+        while (dite.firstChild) uzel.insertBefore(dite.firstChild, dite);
+        dite.remove();
+        return;
+      }
+      Array.prototype.slice.call(dite.attributes).forEach(function (atribut) {
+        var jeOdkaz = dite.tagName === 'A' && atribut.name === 'href' &&
+          /^(https?:|mailto:|\/)/i.test(atribut.value);
+        if (!jeOdkaz) dite.removeAttribute(atribut.name);
+      });
+      if (dite.tagName === 'A' && dite.hasAttribute('href')) {
+        dite.setAttribute('target', '_blank');
+        dite.setAttribute('rel', 'noopener');
+      }
+      ocisti(dite);
+    });
+  }
+
+  /* Po vyházení nepovolených značek zbydou prázdné odstavce — tam, kde
+     byl v textu obrázek nebo skript. V modálu by z nich byly nevysvětlené
+     mezery, takže jdou pryč. <br> se nepočítá jako prázdno, to je zalomení,
+     které tým napsal schválně. */
+  function zahodPrazdne(uzel) {
+    Array.prototype.slice.call(uzel.querySelectorAll('p,li,ul,ol,h3,h4,blockquote'))
+      .reverse()
+      .forEach(function (prvek) {
+        if (!prvek.textContent.trim() && !prvek.querySelector('br,img')) prvek.remove();
+      });
+  }
+
+  function bezpecneHtml(html) {
+    /* <template> se neparsuje do stránky, takže se z něj nic nenačte ani
+       nespustí — obrázek v popisu si nestáhne nic dřív, než projde výčtem. */
+    var sablona = document.createElement('template');
+    sablona.innerHTML = String(html == null ? '' : html);
+    ocisti(sablona.content);
+    zahodPrazdne(sablona.content);
+    return sablona.innerHTML.trim();
+  }
+
+  /* Místa v kalendáři nemají vyplněnou ulici ani souřadnice — ověřeno
+     u všech osmadvaceti. Odkaz se proto skládá z názvu a města; Google si
+     s pojmenovaným místem v Budějovicích poradí. Až tým adresy doplní,
+     přidá se sem jedno pole a odkaz se zpřesní sám. */
+  function odkazDoMap(nazev, mesto) {
+    if (!nazev) return '';
+    return 'https://www.google.com/maps/search/?api=1&query=' +
+      encodeURIComponent(nazev + (mesto ? ', ' + mesto : ''));
+  }
+
+  function icsEsc(text) {
+    return String(text == null ? '' : text)
+      .replace(/([\\,;])/g, '\\$1').replace(/\r?\n/g, '\\n');
+  }
+
+  /* Řádek v .ics smí mít 75 oktetů; delší se láme a pokračovací řádek
+     začíná mezerou. Počítají se bajty, ne znaky — s diakritikou je každé
+     české písmeno za dva, takže „Veřejně prospěšné práce" limit přeteče
+     dřív, než by se čekalo. Většina kalendářů dlouhý řádek skousne,
+     Outlook na něm historicky padá. */
+  function icsZabal(radek) {
+    var kodovac = new TextEncoder();
+    var vysledek = '';
+    var oktetu = 0;
+    var strop = 75;
+
+    Array.from(radek).forEach(function (znak) {
+      var velikost = kodovac.encode(znak).length;
+      if (oktetu + velikost > strop) {
+        vysledek += '\r\n ';
+        oktetu = 1;        // mezera na začátku pokračování se počítá
+        strop = 75;
+      }
+      vysledek += znak;
+      oktetu += velikost;
+    });
+
+    return vysledek;
+  }
+
+  /* Jméno souboru ze jména akce, ať je ve složce Stažené poznat, co to je.
+     „majales-451.ics" nikomu nic neřekne. */
+  function icsJmeno(a) {
+    var zaklad = bezDiakritiky(a.nazev)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60);
+    return 'majales-' + (zaklad || a.id) + '.ics';
+  }
+  /* Kalendáře chtějí čas v UTC se Z na konci. */
+  function icsCas(d) {
+    return d.getUTCFullYear() +
+      String(d.getUTCMonth() + 1).padStart(2, '0') +
+      String(d.getUTCDate()).padStart(2, '0') + 'T' +
+      String(d.getUTCHours()).padStart(2, '0') +
+      String(d.getUTCMinutes()).padStart(2, '0') + '00Z';
+  }
+  function icsSoubor(a) {
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Budejovicky Majales//program//CS',
+      'BEGIN:VEVENT',
+      'UID:bm-' + a.id + '@budejovickymajales.cz',
+      'DTSTAMP:' + icsCas(new Date()),
+      'DTSTART:' + icsCas(a.zac),
+      'DTEND:' + icsCas(a.kon),
+      'SUMMARY:' + icsEsc(a.nazev),
+      a.misto ? 'LOCATION:' + icsEsc(a.misto + (a.mesto ? ', ' + a.mesto : '')) : '',
+      /* Bez popisu je záznam v kalendáři holé jméno a čas. Bere se text
+         z popisu akce; HTML se zahodí, kalendáře ho neumí. */
+      icsPopis(a) ? 'DESCRIPTION:' + icsEsc(icsPopis(a)) : '',
+      a.url ? 'URL:' + icsEsc(a.url) : '',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).map(icsZabal).join('\r\n');
+  }
+
+  function icsPopis(a) {
+    var text = naText(a.popisHtml);
+    if (text.length > 400) {
+      text = text.slice(0, 400).replace(/\s+\S*$/, '') + '…';
+    }
+    return [text, a.url].filter(Boolean).join('\n\n');
+  }
+  function stahniKalendar(a) {
+    var soubor = new Blob([icsSoubor(a)], { type: 'text/calendar;charset=utf-8' });
+    var adresa = URL.createObjectURL(soubor);
+    var odkaz = document.createElement('a');
+    odkaz.href = adresa;
+    odkaz.download = icsJmeno(a);
+    document.body.appendChild(odkaz);
+    odkaz.click();
+    odkaz.remove();
+    /* Adresa se musí uvolnit, jinak si ji prohlížeč drží do konce stránky. */
+    setTimeout(function () { URL.revokeObjectURL(adresa); }, 1000);
+  }
+
   function bezDiakritiky(s) {
     return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   }
@@ -173,13 +341,17 @@
         var kat = (e.categories || []).filter(function (c) { return c.parent === 0; })[0] || null;
         var zan = (e.categories || []).filter(function (c) { return c.parent !== 0; })[0] || null;
         var slug = (e.venue && e.venue.slug) || '';
+        var mistoNazev = e.venue && e.venue.venue ? odstranEntity(e.venue.venue) : '';
+        var mesto = e.venue && e.venue.city ? odstranEntity(e.venue.city) : '';
         return {
           id: e.id,
           nazev: odstranEntity(e.title),
           zac: zac, kon: kon,
           den: klicDneAkce(e, zac),
           celyDen: !!e.all_day,
-          misto: e.venue && e.venue.venue ? odstranEntity(e.venue.venue) : '',
+          misto: mistoNazev,
+          mesto: mesto,
+          mapy: odkazDoMap(mistoNazev, mesto),
           mistoSlug: slug,
           bezbarierove: !!BEZBARIEROVE[slug],
           kat: kat ? odstranEntity(kat.name) : '',
@@ -190,7 +362,11 @@
           rezervace: (e.ticketed || []).length > 0,
           top: !!e.featured,
           obraz: e.image && e.image.url ? e.image.url : '',
-          popis: naText(e.excerpt),
+          /* Do modálu jde celý popis, ne výřez. Obojí chodí ve stejné
+             odpovědi; výřez je useknutý v půlce věty a právě kvůli němu
+             musel návštěvník na samostatnou stránku akce. Když popis
+             chybí, zbyde aspoň výřez. */
+          popisHtml: bezpecneHtml(e.description || e.excerpt),
           url: e.url || ''
         };
       })
@@ -339,7 +515,11 @@
       kategorie: new Set(),
       hledani: '',
       jenMoje: false,
-      moje: new Set()
+      moje: new Set(),
+      /* ID otevřeného detailu, nebo null. Drží ho stav, ne jen adresa —
+         vykresli() přepisuje adresu při každé změně a bez tohohle by
+         otevřený detail z adresy po první změně dne zmizel. */
+      akce: null
     };
 
     try {
@@ -386,15 +566,18 @@
   }
 
   function zapisAdresu() {
-    /* Adresa nese den a zobrazení, aby se dal poslat odkaz na konkrétní
-       pohled. Jednorázové parametry z příchozího odkazu se zahazují —
-       po přepnutí dne už neplatí. Cizí parametry (utm a podobně)
-       zůstávají, nejsou naše. */
+    /* Adresa nese den, zobrazení a otevřený detail, aby se dal poslat
+       odkaz na konkrétní pohled i na jednu kapelu. „moje" se zahazuje —
+       je to jednorázový parametr z příchozího odkazu, výběr už je uložený
+       v prohlížeči. Cizí parametry (utm a podobně) zůstávají, nejsou naše.
+
+       Schválně replaceState, ne pushState: tlačítko zpět má vést
+       z programu pryč, ne postupně zavírat otevřené detaily a dny. */
     var p = new URLSearchParams(location.search);
     p.delete('moje');
-    p.delete('akce');
     if (stav.den) p.set('den', stav.den); else p.delete('den');
     p.set('zobrazeni', stav.zobrazeni);
+    if (stav.akce) p.set('akce', String(stav.akce)); else p.delete('akce');
     var dotaz = p.toString();
     try {
       history.replaceState(null, '', location.pathname + (dotaz ? '?' + dotaz : '') + location.hash);
@@ -822,6 +1005,89 @@
      7. Detail akce
      ───────────────────────────────────────────────────────────────────── */
 
+  function mistoHtml(a) {
+    if (!a.misto) return '';
+    var pod = [a.mesto ? esc(a.mesto) : '',
+      a.bezbarierove ? '<span class="bmp-bez-barier">bez bariér</span>' : '']
+      .filter(Boolean).join(' · ');
+    return '<div class="bmp-detail__misto">' +
+      '<div><span class="bmp-detail__misto-nazev">' + esc(a.misto) + '</span>' +
+      (pod ? '<span class="bmp-detail__misto-pod">' + pod + '</span>' : '') + '</div>' +
+      (a.mapy ? '<a class="bmp-detail__mapy" href="' + esc(a.mapy) +
+        '" target="_blank" rel="noopener">Otevřít v mapách ↗</a>' : '') +
+      '</div>';
+  }
+
+  /* Stav rezervace se drží po dobu návštěvy. Zavřít a znovu otevřít
+     detail je běžné a druhý dotaz na Wedos by zase stál přes vteřinu.
+     undefined = ještě se neptalo, null = ptalo se a nic z toho nebylo. */
+  var REZERVACE = {};
+
+  function dopisRezervaci(id) {
+    var vykresli = function (r) {
+      /* Mezitím se mohl otevřít detail jiné akce — pak už tenhle obal
+         v dialogu není a není co doplňovat. */
+      var cil = el.detailObsah.querySelector('[data-rez="' + id + '"]');
+      if (cil) cil.innerHTML = rezervaceHtml(r, najdi(id));
+    };
+
+    if (REZERVACE[id] !== undefined) { vykresli(REZERVACE[id]); return; }
+    if (typeof most.nactiRezervaci !== 'function') { vykresli(null); return; }
+
+    most.nactiRezervaci(id, ZAKLAD).then(function (r) {
+      REZERVACE[id] = r;
+      vykresli(r);
+    }, function (e) {
+      /* Nepovedený dotaz na kapacitu není důvod schovat rezervaci —
+         návštěvník se o ni pořád může ucházet na stránce akce. */
+      REZERVACE[id] = null;
+      chyba(e);
+      vykresli(null);
+    });
+  }
+
+  function pruhHtml(obsazenoProcent) {
+    var sirka = Math.max(0, Math.min(100, Math.round(obsazenoProcent)));
+    return '<div class="bmp-detail__rez-pruh" role="img" aria-label="Obsazeno ' +
+      sirka + ' procent"><i style="width:' + sirka + '%"></i></div>';
+  }
+
+  function rezervaceHtml(r, a) {
+    var nazev = '<p class="bmp-detail__rez-nazev">' +
+      esc(r && r.nazev ? r.nazev : 'Rezervace') + '</p>';
+    /* Formulář je část B a čeká na SMTP (viz docs/wordpress/19-detail-akce.md).
+       Do té doby vede tlačítko na stránku akce, kde rezervace funguje. */
+    var tlacitko = a && a.url
+      ? '<a class="bmp-btn bmp-btn--hlavni" href="' + esc(a.url) + '">Rezervovat místo</a>'
+      : '';
+
+    if (!r) return nazev + tlacitko;
+
+    if (r.zbyva === 0) {
+      return nazev + pruhHtml(100) +
+        '<p class="bmp-detail__rez-popis">Obsazeno. Místo se uvolní, ' +
+        'když někdo svou rezervaci zruší.</p>';
+    }
+    if (!r.lzeRezervovat) {
+      return nazev +
+        '<p class="bmp-detail__rez-popis">Rezervace skončily' +
+        (r.doKdy ? ' ' + esc(r.doKdy) : '') +
+        '. Přijít se dá i bez nich, místo ale není jisté.</p>';
+    }
+
+    var malo = r.zbyva !== null && r.zbyva <= 3;
+    var zbyva = r.kapacita === null || r.zbyva === null
+      ? ''
+      : '<span class="bmp-detail__rez-zbyva' + (malo ? ' bmp-detail__rez-zbyva--malo' : '') +
+        '">zbývá ' + r.zbyva + ' z ' + r.kapacita + '</span>';
+
+    return '<div class="bmp-detail__rez-hlava">' + nazev + zbyva + '</div>' +
+      (r.volnychProcent === null ? '' : pruhHtml(100 - r.volnychProcent)) +
+      (r.doKdy ? '<p class="bmp-detail__rez-popis">Rezervovat jde do ' +
+        esc(r.doKdy) + '.</p>' : '') +
+      tlacitko;
+  }
+
   function otevriDetail(id) {
     var a = najdi(id);
     if (!a) return;
@@ -836,22 +1102,31 @@
     el.detailObsah.innerHTML =
       (a.obraz ? '<img class="bmp-detail__obraz" src="' + esc(a.obraz) + '" alt="">' : '') +
       '<div class="bmp-detail__telo">' +
+      /* Čas, nadpis a štítky jsou jedna hlavička, proto mají vlastní obal:
+         drží se u sebe těsněji než zbytek, o kterém rozhoduje jedna mezera
+         v CSS. Bez toho se odstupy skládaly z pěti různých okrajů a štítky
+         skončily nalepené na bloku s místem. */
+      '<header class="bmp-detail__hlava">' +
       '<p class="bmp-detail__meta">' + d.nazev + ' ' + d.datum + ' · ' +
-      hhmm(a.zac) + '–' + hhmm(a.kon) + (a.misto ? ' · ' + esc(a.misto) : '') +
-      (a.bezbarierove ? ' · bezbariérové' : '') + '</p>' +
+      hhmm(a.zac) + '–' + hhmm(a.kon) + '</p>' +
       '<h2>' + esc(a.nazev) + '</h2>' +
       '<div class="bmp-karta__stitky">' +
       (a.kat ? '<span class="bmp-stitek bmp-stitek--kat" data-kat="' + esc(a.katSlug) + '"' +
         (a.barva ? ' style="background:' + esc(a.barva) + '"' : '') + '>' + esc(a.kat) + '</span>' : '') +
       (a.zanr ? '<span class="bmp-stitek">' + esc(a.zanr) + '</span>' : '') +
       (a.zeme ? '<span class="bmp-stitek">' + esc(a.zeme) + '</span>' : '') +
-      (a.rezervace ? '<span class="bmp-stitek bmp-stitek--rez">Rezervace</span>' : '') +
       (a.top ? '<span class="bmp-stitek bmp-stitek--top">Top představení</span>' : '') +
-      '</div>' +
-      /* Výřez je useknutý v polovině věty, proto výpustka — ale jen
-         když si ji plugin nepřidal sám. */
-      (a.popis ? '<div class="bmp-detail__popis">' + esc(a.popis) +
-        (/[.!?…]$/.test(a.popis) ? '' : '…') + '</div>' : '') +
+      '</div></header>' +
+      /* Místo má vlastní blok, ne řádek v hlavičce: je to jediná věc
+         v detailu, která vede ven z webu, a musí jít trefit palcem. */
+      mistoHtml(a) +
+      (a.popisHtml ? '<div class="bmp-detail__popis">' + a.popisHtml + '</div>' : '') +
+      /* Štítek „Rezervace" tu schválně není — tenhle blok říká totéž
+         a ještě kolik je volno. V kartičce ve výpisu štítek zůstává. */
+      (a.rezervace
+        ? '<div class="bmp-detail__rez" data-rez="' + a.id + '">' +
+          '<p class="bmp-detail__rez-nazev">Zjišťuji volná místa…</p></div>'
+        : '') +
       (zaroven.length ? '<div class="bmp-detail__zaroven"><h3>Ve stejnou dobu jinde</h3><ul>' +
         zaroven.map(function (z) {
           return '<li><b>' + hhmm(z.zac) + '</b>' + esc(z.nazev) +
@@ -861,7 +1136,13 @@
       '<button type="button" class="bmp-btn' + (moje ? ' bmp-btn--zvyrazneny' : '') +
       '" data-hvezda="' + a.id + '" aria-pressed="' + moje + '">' +
       '★ ' + (moje ? 'V mém programu' : 'Přidat do mého programu') + '</button>' +
-      (a.url ? '<a class="bmp-btn bmp-btn--hlavni" href="' + esc(a.url) + '">Detail akce</a>' : '') +
+      '<button type="button" class="bmp-btn" data-ics="' + a.id + '">Do kalendáře</button>' +
+      /* Odkaz na samostatnou stránku akce tu býval a 7. 11. 2026 zmizel.
+         Detail je tady úplnější a stránka akce je horší verze téhož;
+         nabízet ji znamenalo posílat návštěvníka pryč z lepšího místa.
+         Stránky akcí žijí dál kvůli vyhledávačům a odkazům, které už
+         kolují, ale z webu na ně nic nevede. Jediná výjimka je tlačítko
+         „Rezervovat místo" — formulář zatím žije jen tam. */
       '</div></div>';
 
     /* Když se obrázek nenačte, ať po něm nezbyde prázdná díra. Obsluha
@@ -869,6 +1150,10 @@
        Content-Security-Policy. */
     var obraz = el.detailObsah.querySelector('.bmp-detail__obraz');
     if (obraz) obraz.addEventListener('error', function () { this.remove(); });
+
+    if (a.rezervace) dopisRezervaci(a.id);
+    stav.akce = a.id;
+    zapisAdresu();
 
     /* showModal() na už otevřeném dialogu vyhodí výjimku, a to se stane
        pokaždé, když se hvězdička zmáčkne přímo v detailu. */
@@ -884,7 +1169,8 @@
        data-akce může mít i cizí plugin. */
     koren.addEventListener('click', function (ev) {
       var t = ev.target.closest(
-        '[data-den],[data-hvezda],[data-akce],[data-filtr-misto],[data-filtr-kat],[data-zobrazeni]');
+        '[data-den],[data-hvezda],[data-akce],[data-filtr-misto],[data-filtr-kat],' +
+        '[data-zobrazeni],[data-ics]');
       if (!t || !koren.contains(t)) return;
 
       if (t.hasAttribute('data-hvezda')) {
@@ -898,6 +1184,11 @@
         if (el.detail.open) otevriDetail(hid);
         vykresli();
         vratFokus(stopa);
+        return;
+      }
+      if (t.hasAttribute('data-ics')) {
+        var akceDoKalendare = najdi(+t.getAttribute('data-ics'));
+        if (akceDoKalendare) stahniKalendar(akceDoKalendare);
         return;
       }
       if (t.hasAttribute('data-filtr-misto')) {
@@ -992,6 +1283,9 @@
       /* Kliknutí mimo obsah dialogu (do ztmaveného okolí) ho zavře. */
       if (e.target === el.detail) el.detail.close();
     });
+    /* Na „close" schválně, ne na tlačítku: dialog se zavírá i Escapem
+       a klepnutím vedle, a ?akce= musí z adresy zmizet pokaždé. */
+    el.detail.addEventListener('close', function () { stav.akce = null; zapisAdresu(); });
 
     window.addEventListener('resize', dopocitejRozmery);
   }

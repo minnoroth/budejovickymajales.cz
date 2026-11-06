@@ -136,6 +136,11 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   u `.sub-menu` se pak navenek chová jako jedenáctka a cokoli na stránce s vyšším
   číslem (lepkavá lišta Programu má 60) rozbalovátko překryje. Řeší se zvednutím
   hlavičky, ne rozbalovátka — a selektorem na `#masthead`, aby přebil ten od Kadence.
+- **Stejně pojmenovaná funkce v jednom souboru mlčky přebije tu dřívější.** Soubory
+  doplňků mají přes tisíc řádků a `function zapisAdresu()` se tam dá napsat podruhé,
+  aniž by cokoli zahlásilo — vyhraje ta poslední a první přestane existovat. Narazilo
+  se na to 7. 11. 2026 v `program-view.js`. Před přidáním funkce do velkého souboru
+  na její jméno grepni.
 - **Položka menu, která nemá být odkaz, se dělá sundáním `href`**, ne přes
   `pointer-events` ani JavaScript. `<a>` bez adresy není odkaz: nemá ruku, klepnutí
   nic neudělá, tabulátor ho přeskočí — a `li:hover` pořád funguje, takže
@@ -161,6 +166,11 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   Dělej to vždycky před nahráním. Syntaktická chyba v mu-pluginu shodí i administraci.
 - **Každý dotaz na Wedos stojí přes vteřinu.** Ne kvůli objemu dat — je to režie
   sdíleného hostingu. Při návrhu počítej s počtem koleček, ne s velikostí odpovědi.
+  Změřeno 7. 11. 2026: statický soubor 0,13 s, 2,6 kB z REST 1,34 s, **544 kB z REST
+  1,20 s**. Je to start PHP a pluginů, platí se při každém požadavku. Když něco trvá,
+  neřeš velikost odpovědi — ubírej požadavky. Nejlevnější je nula: data se dají
+  poskládat na serveru přes `rest_do_request()` a vložit do stránky, která si svou
+  vteřinu platí tak jako tak (viz `bm-program.php`).
 
 ### The Events Calendar a Event Tickets
 

@@ -11,6 +11,10 @@
    funkce nactiData()" a zbytek skriptu zůstane. Tenhle soubor je ta funkce.
    Vykreslování je v program-view.js a tenhle soubor o něm neví.
 
+   Vedle toho vystavuje nactiRezervaci(idAkce) — stav rezervace jedné akce.
+   Načítá se zvlášť a až na vyžádání, protože je to další dotaz na Wedos
+   a týká se menšiny akcí.
+
    Proč je to vlastní soubor a ne součást pohledu:
    Je to jediné místo, kde se potkáváme s The Events Calendar. Až TEC jednou
    přejmenuje endpoint nebo Secure Custom Fields přestane vracet klíč „acf",
@@ -333,6 +337,158 @@
 	}
 
 	/* ─────────────────────────────────────────────────────────────────────
+	   Program vložený do stránky
+
+	   Každý požadavek na WordPress stojí na sdíleném hostingu kolem 1,2 s
+	   bez ohledu na objem dat, a program jich potřebuje tři za sebou.
+	   Doplněk proto tytéž veřejné endpointy zavolá na serveru a výsledek
+	   vloží do stránky — viz bm-program.php. Tahle část ho vyzvedne.
+
+	   Je to zkratka, ne závislost: když blok chybí, je poškozený nebo mu
+	   chybí pole, program se zeptá přes REST jako dřív. Vynutit tu delší
+	   cestu jde adresou ?program=rest, což je jediný způsob, jak ji po
+	   zapnutí zkratky ještě někdy projít.
+	   ───────────────────────────────────────────────────────────────────── */
+
+	var ID_VLOZENYCH_DAT = 'bm-program-vlozena-data';
+
+	/**
+	 * Akce z vložených dat je ořezaná na pole, která pohled čte. Když
+	 * v PHP někdo ten výčet zkrátí moc, pozná se to tady a program se
+	 * radši zeptá přes REST, než aby vykreslil půlku programu.
+	 */
+	function akceJeCela(akce) {
+		return !!akce && akce.id !== undefined && akce.title !== undefined &&
+			!!akce.start_date_details && !!akce.end_date_details;
+	}
+
+	function vlozenaData() {
+		if (typeof document === 'undefined') {
+			return null;
+		}
+		if (typeof location !== 'undefined' && /[?&]program=rest\b/.test(location.search)) {
+			return null;
+		}
+
+		var blok = document.getElementById(ID_VLOZENYCH_DAT);
+		if (!blok) {
+			return null;
+		}
+
+		var data;
+		try {
+			data = JSON.parse(blok.textContent);
+		} catch (chyba) {
+			return null;
+		}
+
+		if (!data || !Array.isArray(data.akce)) {
+			return null;
+		}
+		if (data.akce.length && !akceJeCela(data.akce[0])) {
+			return null;
+		}
+
+		return data;
+	}
+
+	/**
+	 * Z nepoužitých odpovědí udělá program. Je to jediné místo, kde se
+	 * data upravují — obě cesty (vložená i přes REST) jím procházejí, aby
+	 * se nemohly rozejít.
+	 */
+	function sestav(rocnik, syroveAkce, syroveKategorie, syroveMista) {
+		/* Hranici 6:00 musí dodržet klient — TEC si konec rozsahu přepsal na
+		   23:59:59, takže v odpovědi je i to, co se děje den po festivalu.
+		   Ořezává se jen konec: začátek rozsahu hlídá už dotaz, takže akce
+		   z brzkého rána prvního dne se nesmí ztratit. */
+		var akce = (syroveAkce || [])
+			.filter(function (polozka) {
+				return !rocnik || !rocnik.datum_do || klicDneAkce(polozka) <= rocnik.datum_do;
+			})
+			.map(upravAkci);
+
+		return {
+			rocnik: rocnik,
+			akce: akce,
+			kategorie: (syroveKategorie || []).map(upravKategorii),
+			mista: (syroveMista || []).map(upravMisto)
+		};
+	}
+
+	/* ─────────────────────────────────────────────────────────────────────
+	   Rezervace jedné akce
+
+	   Kapacita a obsazenost se nenačítají s programem, ale až když se
+	   otevře detail — a jen u akce, která rezervaci má. Je to další dotaz
+	   na Wedos (přes vteřinu) a loni se týkal sedmnácti akcí ze sta dvou;
+	   na načtení stránky se kvůli němu nečeká.
+	   ───────────────────────────────────────────────────────────────────── */
+
+	function cisloNeboNull(hodnota) {
+		if (hodnota === null || hodnota === undefined || hodnota === '') {
+			return null;
+		}
+		var cislo = Number(hodnota);
+		/* Kalendář posílá u neomezené kapacity zápornou hodnotu. */
+		return isFinite(cislo) && cislo >= 0 ? cislo : null;
+	}
+
+	/**
+	 * Čas konce rezervací na zobrazení.
+	 *
+	 * Chodí bez časové zóny („2027-05-11 19:00:00") — je to pražský čas,
+	 * ve kterém ho pořadatel zadal. Projít ho přes Date() by znamenalo
+	 * přepočet podle zóny prohlížeče, takže se jen poskládá.
+	 */
+	function casKonce(det) {
+		if (!det || !det.year) {
+			return '';
+		}
+		return Number(det.day) + '. ' + Number(det.month) + '. ' +
+			dve(det.hour) + ':' + dve(det.minutes);
+	}
+
+	/**
+	 * Stav rezervace jedné akce.
+	 *
+	 * @param {number} idAkce ID akce v kalendáři.
+	 * @param {string} [zaklad] Základ REST API.
+	 * @returns {Promise<object|null>} null znamená „nemá rezervaci zdarma";
+	 *          chybu dotazu si volající chytá sám a ukáže detail bez ní.
+	 */
+	async function nactiRezervaci(idAkce, zaklad) {
+		var koren = String(zaklad || bmProgram.zaklad || '/wp-json/');
+		if (koren.slice(-1) !== '/') {
+			koren += '/';
+		}
+
+		var odpoved = await ziskej(adresa(koren, 'tribe/tickets/v1/tickets', {
+			post_id: idAkce, per_page: 10
+		}));
+
+		/* Festival rozdává jen rezervace zdarma (RSVP). Kdyby na akci někdy
+		   visel placený lístek, do programu nepatří — ten o ceně nic neříká
+		   a tvářil by se, že je zdarma. */
+		var listek = ((odpoved && odpoved.tickets) || []).filter(function (polozka) {
+			return String(polozka.type || '').indexOf('rsvp') >= 0;
+		})[0];
+		if (!listek) {
+			return null;
+		}
+
+		var podrobnosti = listek.capacity_details || {};
+		return {
+			nazev: odstranEntity(listek.title || 'Rezervace'),
+			kapacita: cisloNeboNull(listek.capacity),
+			zbyva: cisloNeboNull(podrobnosti.available),
+			volnychProcent: cisloNeboNull(podrobnosti.available_percentage),
+			lzeRezervovat: listek.is_available !== false,
+			doKdy: casKonce(listek.available_until_details)
+		};
+	}
+
+	/* ─────────────────────────────────────────────────────────────────────
 	   Veřejné rozhraní
 	   ───────────────────────────────────────────────────────────────────── */
 
@@ -350,6 +506,16 @@
 		var koren = String(zaklad || bmProgram.zaklad || '/wp-json/');
 		if (koren.slice(-1) !== '/') {
 			koren += '/';
+		}
+
+		var vlozena = vlozenaData();
+		if (vlozena) {
+			return sestav(
+				vlozena.rocnik ? terminRocniku(vlozena.rocnik) : null,
+				vlozena.akce,
+				vlozena.kategorie,
+				vlozena.mista
+			);
 		}
 
 		var vybrany = await vyberRocnik(koren);
@@ -384,22 +550,7 @@
 			syrove = syrove.concat((odpoved && odpoved.events) || []);
 		});
 
-		/* Hranici 6:00 musí dodržet klient — TEC si konec rozsahu přepsal na
-		   23:59:59, takže v odpovědi je i to, co se děje den po festivalu.
-		   Ořezává se jen konec: začátek rozsahu hlídá už dotaz, takže akce
-		   z brzkého rána prvního dne se nesmí ztratit. */
-		var akce = syrove
-			.filter(function (polozka) {
-				return !rocnik || !rocnik.datum_do || klicDneAkce(polozka) <= rocnik.datum_do;
-			})
-			.map(upravAkci);
-
-		return {
-			rocnik: rocnik,
-			akce: akce,
-			kategorie: vse[0].map(upravKategorii),
-			mista: vse[1].map(upravMisto)
-		};
+		return sestav(rocnik, syrove, vse[0], vse[1]);
 	}
 
 	bmProgram.HRANICE_DNE = HRANICE_DNE;
@@ -407,4 +558,5 @@
 	bmProgram.klicDneAkce = klicDneAkce;
 	bmProgram.odstranEntity = odstranEntity;
 	bmProgram.nactiData = nactiData;
+	bmProgram.nactiRezervaci = nactiRezervaci;
 })(typeof window !== 'undefined' ? window : globalThis);

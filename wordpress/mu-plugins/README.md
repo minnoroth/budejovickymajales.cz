@@ -143,6 +143,13 @@ představení**, seřazených podle data, nejvýš osm.
 > čtyři dlaždice vedly stejně na `/program/`. Zkratku jsem tím pádem odstranil;
 > kdyby se počty někdy hodily jinde, jsou v historii gitu.
 
+**Kam kartička vede.** Od 7. 11. 2026 na `/program/?akce=<id>`, tedy do detailu
+v programu, ne na samostatnou stránku akce. Do té doby to byl `get_permalink()`,
+protože program se načítal kolem čtyř vteřin a posílat tam někoho kvůli jedné akci
+bylo zpomalení; teď je program ve stránce hned a detail je úplnější. Adresu skládá
+`bm_program_odkaz_na_akci()` v `bm-program/`. Volá se přes `function_exists` — když
+se složka programu smaže, kartičky povedou na akci jako dřív a úvod nespadne.
+
 **Jak se přepíná.** Na širokém okně jsou vidět tři kartičky vedle sebe, zbytek se
 přepíná **tečkami** pod pruhem. Na telefonu jedna a švihá se prstem. Najetí myší dělá
 stejný plakátový stín jako kartičky v Lineupu a Seznamu.

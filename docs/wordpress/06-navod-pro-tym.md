@@ -810,6 +810,13 @@ neskládá samo; mění se skriptem `wordpress/vzhled/menu.py`.
 > i podstránky. Když se pořadí položek v menu změní, barvy se posunou s nimi.
 > Stránka, která v menu není, zůstane černobílá.
 
+> **Popis akce se od 6. 11. 2026 ukazuje celý rovnou v programu.** Dřív se
+> z něj v programu objevil jen začátek a návštěvník musel kliknout na
+> samostatnou stránku akce. Píše se pořád stejně, jen má smysl ho psát
+> pořádně. Z formátování projde tučné, kurzíva, odkazy, odrážky a mezinadpisy;
+> obrázky vložené do textu se v programu neukážou (plakát akce ano — ten se
+> nastavuje jako náhledový obrázek).
+
 > **Položka „O festivalu“ není odkaz**, jen rozbaluje seznam pod sebou. V menu
 > je zadaná jako **Vlastní odkaz** s adresou `#`. Kdybys ji někdy zakládal znovu,
 > musí to být zase `#` — stránka by z ní udělala odkaz a nebylo by poznat, jestli
