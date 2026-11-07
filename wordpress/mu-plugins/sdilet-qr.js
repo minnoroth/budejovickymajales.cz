@@ -19,22 +19,13 @@
 (function () {
   'use strict';
 
-  var ucet = document.querySelector('.bm-qr__ucet');
-  var cislo = ucet && ucet.querySelector('.bm-qr__cislo');
-  if (!ucet || !cislo) return;
-
-  /* Starý prohlížeč bez `download` by odkaz jen otevřel v nové kartě.
-     To je pořád použitelné (jde podržet prstem a uložit), takže se
-     nevzdáváme — vzdáváme se jen tam, kde není ani kód. */
-  if (!document.querySelector('.bm-qr__kod')) return;
+  /* Odkaz patří na konec druhého kroku, rovnou pod kód. */
+  var krok = document.querySelector('.bm-krok--kod');
+  if (!krok || !krok.querySelector('.bm-qr__kod')) return;
 
   var odkaz = document.createElement('a');
   odkaz.className = 'bm-sdilet';
   odkaz.textContent = 'Uložit kód do telefonu';
-
-  var rada = document.createElement('p');
-  rada.className = 'bm-sdilet__rada';
-  rada.textContent = 'Pak ho v bankovní aplikaci načti z galerie — částku i zprávu máš předvyplněnou.';
 
   /** Obrázek odpovídající zaškrtnuté částce. */
   function vybranyKod() {
@@ -88,6 +79,5 @@
     });
   });
 
-  cislo.insertAdjacentElement('afterend', rada);
-  cislo.insertAdjacentElement('afterend', odkaz);
+  krok.appendChild(odkaz);
 })();

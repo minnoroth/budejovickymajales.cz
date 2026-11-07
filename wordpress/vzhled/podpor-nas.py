@@ -50,9 +50,20 @@ def adresa_kodu(castka):
     return ""
 
 
-def prepinac():
-    """Přepínač částek a k němu čtyři QR kódy. Bez jediného řádku JS:
-    zaškrtnuté radio přes ~ obarví svůj štítek a odkryje svůj kód."""
+def stitek(cislo, text):
+    """Štítek kroku: číslo v kolečku a co se v tom kroku dělá."""
+    return ('<p class="bm-krok__stitek"><span class="bm-krok__cislo">%s</span>%s</p>'
+            % (cislo, text))
+
+
+def kroky():
+    """Tři kroky kartičky: vyber částku, načti kód, nebo pošli převodem.
+
+    Přepínač částek je pořád bez jediného řádku JS — zaškrtnuté radio přes ~
+    obarví svůj štítek a odkryje svůj kód. Proto **radia musí zůstat přímými
+    sourozenci kroků**: `~` přes úrovně nefunguje a zabalení do kroku by
+    přepínač vypnulo.
+    """
     radia, stitky, kody = "", "", ""
 
     for castka, popisek in CASTKY:
@@ -68,9 +79,26 @@ def prepinac():
                  'width="420" height="420" loading="lazy">' % (klic, url, popis))
 
     return (radia
+            + '<div class="bm-krok">'
+            + stitek(1, "Vyber částku")
             + '<div class="bm-qr__castky" role="group" aria-label="Částka">'
-            + stitky + '</div>'
-            + '<div class="bm-qr__obraz">' + kody + '</div>')
+            + stitky + '</div></div>'
+
+            # Druhý krok se jmenuje podle toho, co s kódem na daném přístroji
+            # jde udělat: na monitoru se skenuje, na telefonu ukládá. Odkaz
+            # na uložení sem dopisuje mu-plugins/sdilet-qr.js.
+            + '<div class="bm-krok bm-krok--kod">'
+            + '<p class="bm-krok__stitek"><span class="bm-krok__cislo">2</span>'
+            + '<span class="bm-qr__fotak">Namiř na kód foťák</span>'
+            + '<span class="bm-qr__mobil">Ulož kód a načti v bance</span>'
+            + '</p>'
+            + '<div class="bm-qr__obraz">' + kody + '</div></div>'
+
+            + '<div class="bm-krok">'
+            + stitek(3, "Nebo pošli převodem")
+            + '<p class="bm-qr__cislo bm-kopirovatelne">' + UCET + '</p>'
+            + '<p class="bm-qr__drobne">Zpráva pro příjemce '
+              '<strong>DAR</strong>.</p></div>')
 
 
 KARTY = (
@@ -80,15 +108,7 @@ KARTY = (
     '<header class="bm-podpor__hlava">'
     '<p class="bm-podpor__poradi">Nejrychlejší</p>'
     '<h2>Pošli pár stovek z mobilu</h2></header>'
-    '<div class="bm-qr">' + prepinac() +
-    '<div class="bm-qr__ucet">'
-    '<p class="bm-qr__cislo bm-kopirovatelne">' + UCET + '</p>'
-    '<p class="bm-qr__drobne">'
-    # Věta o foťáku se na telefonu schovává — tam se kód ukládá, neskenuje.
-    '<span class="bm-qr__fotak">Namiř na kód foťák — aplikace předvyplní '
-    'částku i zprávu. </span>'
-    'Nebo pošli převodem, zpráva pro příjemce <strong>DAR</strong>.</p>'
-    '</div></div>'
+    '<div class="bm-qr">' + kroky() + '</div>'
     '</section>'
 
     '<section class="bm-podpor__karta bm-podpor__karta--donio">'

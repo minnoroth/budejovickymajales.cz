@@ -347,8 +347,15 @@ body.single-post .entry-content > ol { max-width: 62ch; }
    druh podpory, ne dar. Rozhodnutí: docs/wordpress/21-podpor-nas.md */
 .bm-podpor { display: grid; grid-template-columns: 1fr; gap: 18px; }
 @media (min-width: 760px) {
-  .bm-podpor { grid-template-columns: 1.15fr 1fr; align-items: start; }
-  .bm-podpor__karta--eshop { grid-column: 1 / -1; }
+  /* Dřív měla QR kartička širší sloupec kvůli kódu vedle textu. Od kroků je
+     její obsah jeden úzký sloupec — kód 180 px a rámeček s účtem — takže
+     dostává strop a zbytek šířky bere Donio. Jinak by vedle obsahu zůstal
+     pruh prázdné žluté. */
+  .bm-podpor { grid-template-columns: minmax(0, 360px) 1fr; align-items: start; }
+  /* Kartička s kódem je úzká a vysoká, Donio a e-shop nízké. Postavit je
+     vedle sebe do jedné řady nechávalo pod Doniem prázdno, tak jdou obě
+     pod sebe vedle kódu. */
+  .bm-podpor__karta--qr { grid-row: span 2; }
 }
 
 .bm-podpor__karta {
@@ -393,48 +400,66 @@ body.single-post .entry-content > ol { max-width: 62ch; }
 /* Přepínání částek je na čistém CSS: zaškrtnuté radio přes ~ obarví svůj
    štítek a odkryje svůj kód. Bez JavaScriptu, takže to funguje i když se
    skripty nenačtou — a nepřibyla žádná závislost. */
-.bm-qr { display: flex; flex-direction: column; gap: 14px; }
+/* Tři kroky pod sebou: vyber částku, načti kód, nebo pošli převodem.
+   Na telefonu jde každý blok přes celou šířku kartičky — jedna svislice
+   místo pěti různě širokých věcí. Radia musí zůstat přímými sourozenci
+   kroků: celý přepínač stojí na `~`, a ten mezi úrovněmi nefunguje. */
+.bm-qr { display: flex; flex-direction: column; gap: 18px; }
 .bm-qr__volba { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.bm-qr__castky { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.bm-krok { display: flex; flex-direction: column; gap: 8px; }
+/* Kadence dává odstavcům spodní okraj 32 px (.single-content p). Mezery tady
+   drží gap kroku, takže se okraje dětí nulují — jinak se sečtou. */
+.bm-podpor .bm-krok > * { margin: 0; }
+/* Kolečko sedí na prvním řádku, ne na středu zalomeného štítku: řádek je
+   vysoký přesně jako ono, takže se oba začínají na stejné výšce. */
+.bm-krok__stitek {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; line-height: 20px;
+  text-transform: uppercase; color: var(--global-palette5);
+}
+.bm-krok__cislo {
+  flex: none; width: 20px; height: 20px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--global-palette3); color: var(--global-palette15);
+  font-size: 12px; font-weight: 900; letter-spacing: 0;
+}
+
+/* Štítky v jedné řadě přes celou šířku, ať je částek kolik chce. */
+.bm-qr__castky { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
 .bm-qr__castky label {
   border: 2px solid var(--global-palette3); border-radius: 999px;
-  padding: 7px 16px; font-size: 15px; font-weight: 800;
+  padding: 7px 8px; font-size: 15px; font-weight: 800; text-align: center;
   background: var(--global-palette9); cursor: pointer;
 }
 /* POZOR: tyhle tři částky musí sedět na CASTKY v podpor-nas.py. Když se
    rozejdou, nevykreslí se žádný kód — selektor prostě nikoho nenajde. */
-#bm-qr-100:checked ~ .bm-qr__castky [for="bm-qr-100"],
-#bm-qr-300:checked ~ .bm-qr__castky [for="bm-qr-300"],
-#bm-qr-500:checked ~ .bm-qr__castky [for="bm-qr-500"] {
+#bm-qr-100:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-500"] {
   background: var(--global-palette3); color: var(--global-palette15);
 }
 /* Radio je schované, takže fokus z klávesnice musí být vidět na štítku. */
-#bm-qr-100:focus-visible ~ .bm-qr__castky [for="bm-qr-100"],
-#bm-qr-300:focus-visible ~ .bm-qr__castky [for="bm-qr-300"],
-#bm-qr-500:focus-visible ~ .bm-qr__castky [for="bm-qr-500"] {
+#bm-qr-100:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-500"] {
   outline: 3px solid var(--global-palette3); outline-offset: 3px;
 }
 
 .bm-qr__obraz { display: contents; }
 .bm-qr__kod {
-  display: none; order: 2;
-  width: 180px; height: auto; max-width: 100%;
+  display: none;
+  width: 100%; height: auto; max-width: 100%;
   border: 2px solid var(--global-palette3); border-radius: 12px;
   background: var(--global-palette9);
 }
-#bm-qr-100:checked ~ .bm-qr__obraz .bm-qr__kod--100,
-#bm-qr-300:checked ~ .bm-qr__obraz .bm-qr__kod--300,
-#bm-qr-500:checked ~ .bm-qr__obraz .bm-qr__kod--500 { display: block; }
+#bm-qr-100:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--100,
+#bm-qr-300:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--300,
+#bm-qr-500:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--500 { display: block; }
 
-.bm-qr__ucet {
-  order: 1; display: flex; flex-direction: column; gap: 6px;
-  align-items: flex-start;
-}
-/* Kadence dává odstavcům spodní okraj 32 px (.single-content p). Mezery tady
-   drží gap kontejneru, takže se okraje dětí nulují — jinak se sečtou. */
-.bm-podpor .bm-qr__ucet > * { margin: 0; }
+/* Ikonka ke kopírování drží u pravého okraje, ať je rámeček jakkoli široký. */
 .bm-qr__cislo {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
   font-size: 20px; font-weight: 800; letter-spacing: .01em;
   font-variant-numeric: tabular-nums;
   background: var(--global-palette9);
@@ -480,19 +505,22 @@ body.single-post .entry-content > ol { max-width: 62ch; }
 .bm-podpor .bm-sdilet:hover, .bm-podpor .bm-sdilet:focus-visible {
   background: var(--global-palette9); color: var(--global-palette3);
 }
-.bm-podpor .bm-sdilet__rada { font-size: 13.5px; color: var(--global-palette4); }
-/* Rada „namiř foťák" platí jen tam, kde fotí někdo jiný než majitel kódu. */
+/* Druhý krok se jmenuje jinak podle toho, čím se kód dá použít. */
 .bm-qr__fotak { display: none; }
 
-/* Na monitoru je kód první a vedle něj číslo účtu; na telefonu obráceně
-   a pod sebe — telefon se nevyfotí sám, takže tam je k něčemu číslo. */
+/* Na monitoru je kartička kompaktní: kód menší, štítky i rámeček s účtem
+   jen tak široké, jak potřebují. Telefon má všechno přes celou šířku. */
 @media (min-width: 560px) {
-  .bm-qr { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
-  .bm-qr__castky { grid-column: 1 / -1; }
-  .bm-qr__kod { order: 0; }
-  .bm-qr__ucet { order: 0; }
+  /* Strop platí od chvíle, kdy je kartička kompaktní — ne až od mřížky
+     v 760 px. Mezi tím by jinak měla 550 px a obsah 200. */
+  .bm-podpor__karta--qr { max-width: 360px; }
+  .bm-qr__castky { display: flex; flex-wrap: wrap; }
+  .bm-qr__castky label { padding: 7px 16px; }
+  .bm-qr__kod { width: 180px; }
+  .bm-qr__cislo { align-self: flex-start; justify-content: flex-start; }
   .bm-qr__fotak { display: inline; }
-  .bm-podpor .bm-sdilet, .bm-podpor .bm-sdilet__rada { display: none; }
+  .bm-qr__mobil { display: none; }
+  .bm-podpor .bm-sdilet { display: none; }
 }
 
 /* ── Rozcestník kotev ─────────────────────────────────────────── */

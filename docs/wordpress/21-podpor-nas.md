@@ -90,7 +90,7 @@ a slib byl v návrhu dřív, než se ověřil:
 - **Na iOS neexistuje ani to.** Řešení té knihovny na iOS je uložit QR
   do Fotek a načíst ho v bance z galerie.
 
-**Takže se to dělá takhle:** na telefonu je pod číslem účtu černé tlačítko
+**Takže se to dělá takhle:** na telefonu je pod kódem černé tlačítko
 *Uložit kód do telefonu*. Kde prohlížeč umí sdílet soubory, otevře systémový
 panel (tam je „Uložit obrázek" i aplikace, které obrázky přijímají); kde ne,
 obrázek se prostě stáhne. V bankovní aplikaci se pak načte QR z galerie —
@@ -106,11 +106,42 @@ Tři detaily, na kterých to stojí:
   náhradní stažení.
 
 **Kód na telefonu zůstává vidět** — je to to, co se ukládá, a dá se naskenovat
-z obrazovky druhým telefonem. Věta „namiř na kód foťák" se naopak pod 560 px
-schovává; tam by radila nemožné.
+z obrazovky druhým telefonem. Štítek druhého kroku se ale mění: na monitoru
+*Namiř na kód foťák*, pod 560 px *Ulož kód a načti v bance*. Jsou to dva
+`<span>`y a přepíná je jediné pravidlo; na telefonu by rada s foťákem radila
+nemožné.
 
-**Na monitoru je kód první, na telefonu až za číslem účtu.** Telefon se
-nevyfotí sám, takže tam je k něčemu to číslo, ne kód.
+## Rozvržení: tři kroky
+
+Kartička byla do 7. 11. 2026 hromada prvků: pět různě širokých bloků pod
+sebou, kód až pod záložním textem a na monitoru čtvrtina plochy prázdná.
+Zadavatel: *„je to úplně spřeházený přes sebe… má to být super přímočarý
+a hezký — tohle je místo, kde lidi žádáme o jejich příspěvek."* Vybíralo se
+ze tří variant (artefakt *Kartička QR platby*), vyhrály **očíslované kroky**:
+
+1. **Vyber částku** — přepínač
+2. **Namiř na kód foťák** / **Ulož kód a načti v bance** — kód a na telefonu
+   tlačítko k uložení
+3. **Nebo pošli převodem** — číslo účtu a zpráva
+
+Co z toho plyne pro kód:
+
+- **Radia musí zůstat přímými sourozenci kroků.** Celý přepínač stojí na `~`,
+  který přes úrovně nefunguje — zabalit je dovnitř kroku by ho vypnulo.
+  Selektory proto míří `#bm-qr-300:checked ~ .bm-krok .bm-qr__castky …`.
+- **Na telefonu má každý blok jednu šířku**, tedy celou šířku kartičky:
+  štítky, kód, tlačítko i rámeček s účtem. Ověřeno na 375 px: všechny čtyři
+  měří 277 px. Přesně tohle na starém stavu vadilo.
+- **Štítky částek jsou mřížka s `grid-auto-flow: column`**, ne pevné tři
+  sloupce — přidáním čtvrté částky se nic nerozbije.
+- **Kolečko s číslem sedí na prvním řádku štítku**, ne na středu zalomeného:
+  štítek má `line-height: 20px`, stejně vysoko jako kolečko.
+
+**Na monitoru je kartička kompaktní** — kód 180 px, rámeček s účtem podle
+obsahu, žádný text vedle kódu (zadavatel ho škrtl). Kartička má proto strop
+360 px; bez něj by měla 550 px a obsah 200, tedy pruh prázdné žluté.
+**Donio a e-shop jdou vedle ní pod sebe**, protože obě jsou nízké a kód je
+vysoký: tři kartičky v jedné řadě nechávaly pod Doniem díru.
 
 > **QR kód posílá peníze a tenhle web ho neumí ověřit.** Po každé změně účtu
 > ho někdo musí načíst bankovní aplikací a zkontrolovat, že sedí číslo účtu
