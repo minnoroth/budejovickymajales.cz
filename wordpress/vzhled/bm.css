@@ -257,6 +257,272 @@ body.home .bm-pas-hlavni {
   .wp-block-latest-posts.is-grid li { transition: none; }
 }
 
+/* ── Aktuality: kartičky výpisu ───────────────────────────────── */
+/* Kartička je ta samá jako v „Nepřehlédni", u Králů a v Osvěžovnách:
+   černý obrys a plakátový stín při najetí. Kadence umí jen měkký stín,
+   nebo nic — proto se kreslí tady. Pozadí kartičky si drží sama, i když
+   je archiv přepnutý na „unboxed"; to vypnulo jen rám od Kadence.
+
+   Selektor je obecný schválně: stejně vypadá i výsledek hledání nebo
+   výpis rubriky, což je totéž podání téže věci. */
+.loop-entry {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background: var(--global-palette9);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  transition: box-shadow .12s ease;
+}
+.loop-entry:hover,
+.loop-entry:focus-within { box-shadow: 3px 3px 0 var(--global-palette3); }
+@media (prefers-reduced-motion: reduce) { .loop-entry { transition: none; } }
+
+/* Odsazení uvnitř kartičky musí přebít Kadence: v režimu „unboxed" dává
+   `.archive.content-style-unboxed .entry-content-wrap { padding: 0 }`,
+   tedy o třídu víc, než má samotné `.loop-entry .entry-content-wrap`.
+   Bez `body` navíc text seděl rovnou na obrysu. */
+body.content-style-unboxed .loop-entry .entry-content-wrap {
+  padding: 18px 20px 20px;
+}
+.loop-entry .entry-content-wrap {
+  display: flex; flex-direction: column; gap: 14px; flex: 1;
+}
+
+/* Odstupy drží jedna mezera, ne okraje jednotlivých prvků. Kadence dává
+   každému svoje (0,5em, 0,35em, 14px, 17px) a s flexovým `gap` se sčítaly
+   — mezi štítkem a nadpisem z toho bylo 15 px, mezi nadpisem a datem 22
+   a mezi datem a perexem 40. Je to podruhé stejná chyba; poprvé v modálu
+   detailu akce. */
+.loop-entry .entry-content-wrap > *,
+.loop-entry .entry-header > *,
+/* Datum si Kadence drží `margin: 1em 0` selektorem o třídu delším,
+   takže řádek výš na něj nestačí. */
+.loop-entry .entry-header .entry-meta,
+.loop-entry .entry-summary p { margin: 0; }
+
+.loop-entry .entry-header { display: flex; flex-direction: column; gap: 8px; }
+.loop-entry .entry-title { font-size: 21px; font-weight: 800; line-height: 1.18; }
+.loop-entry .entry-title a { color: var(--global-palette3); text-decoration: none; }
+.loop-entry .entry-meta { font-size: 13px; color: var(--global-palette5); }
+.loop-entry .entry-summary { font-size: 14px; color: var(--global-palette4); }
+.loop-entry .entry-summary p { margin: 0; }
+.loop-entry .entry-footer { margin-top: auto; }
+.loop-entry .more-link-wrap { margin: 0; font-size: 13px; font-weight: 800; }
+
+/* Rubrika jako štítek — stejný tvar jako u akcí v programu. */
+.loop-entry .entry-taxonomies .category-links a {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 2px 10px;
+  background: var(--global-palette1); color: var(--global-palette3);
+  text-decoration: none;
+}
+
+/* Náhledový obrázek sedí na obrysu, ne uvnitř odsazení. */
+.loop-entry .post-thumbnail { margin: 0; }
+.loop-entry .post-thumbnail img {
+  display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover;
+  border-bottom: var(--bm-ramecek);
+}
+
+/* Kadence dělí šířku na tři stejné sloupce, takže jediný článek vypadal
+   jako díra po dvou dalších. Kartičky mají strop šířky a pakují se zleva:
+   jeden článek je pak první v řadě, ne zbytek po rozpadlé mřížce. */
+.site-main .kadence-posts-list.grid-cols {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 360px));
+  justify-content: start;
+}
+
+/* Text článku drží šířku — přes celý obsah se dlouhý řádek špatně čte. */
+body.single-post .entry-content > p,
+body.single-post .entry-content > ul,
+body.single-post .entry-content > ol { max-width: 62ch; }
+
+/* ── Podpoř nás ───────────────────────────────────────────────── */
+/* Tři cesty vedle sebe, nejrychlejší první a žlutá — žlutá na tomhle webu
+   znamená „sem klikni". E-shop je pod nimi přes celou šířku: je to jiný
+   druh podpory, ne dar. Rozhodnutí: docs/wordpress/21-podpor-nas.md */
+.bm-podpor { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) {
+  /* Dřív měla QR kartička širší sloupec kvůli kódu vedle textu. Od kroků je
+     její obsah jeden úzký sloupec — kód 180 px a rámeček s účtem — takže
+     dostává strop a zbytek šířky bere Donio. Jinak by vedle obsahu zůstal
+     pruh prázdné žluté. */
+  .bm-podpor { grid-template-columns: minmax(0, 360px) 1fr; align-items: start; }
+  /* Kartička s kódem je úzká a vysoká, Donio a e-shop nízké. Postavit je
+     vedle sebe do jedné řady nechávalo pod Doniem prázdno, tak jdou obě
+     pod sebe vedle kódu. */
+  .bm-podpor__karta--qr { grid-row: span 2; }
+}
+
+.bm-podpor__karta {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background: var(--global-palette9);
+  padding: 20px 22px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bm-podpor__karta > * { margin: 0; }
+/* Popisek nad nadpisem k němu patří, takže má vlastní, menší mezeru —
+   mezera kartičky (12 px) mezi nimi dělala díru. */
+.bm-podpor__hlava { display: flex; flex-direction: column; gap: 2px; }
+/* Dvě třídy schválně: samotná `.bm-podpor__hlava > *` prohrává s pravidlem
+   `.entry-content h2` od Kadence, které má o prvek navíc. */
+.bm-podpor .bm-podpor__hlava > * { margin: 0; }
+.bm-podpor__karta--qr { background: var(--global-palette15); box-shadow: var(--bm-stin); }
+.bm-podpor__karta--eshop { background: var(--global-palette14); }
+.bm-podpor__poradi {
+  font-size: 12px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--global-palette5);
+}
+.bm-podpor__karta h2 { font-size: 26px; letter-spacing: -.015em; }
+.bm-podpor__karta p { font-size: 15px; }
+
+.bm-tlacitko--donio,
+.bm-tlacitko--eshop {
+  display: inline-block;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 11px 22px; font-weight: 800; text-decoration: none;
+  color: var(--global-palette3);
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+.bm-tlacitko--donio { background: var(--global-palette1); }
+.bm-tlacitko--eshop { background: var(--global-palette9); }
+.bm-tlacitko--donio:hover, .bm-tlacitko--donio:focus-visible,
+.bm-tlacitko--eshop:hover, .bm-tlacitko--eshop:focus-visible {
+  background: var(--global-palette9); box-shadow: none; transform: translate(3px, 3px);
+}
+
+/* ── QR platba ────────────────────────────────────────────────── */
+/* Přepínání částek je na čistém CSS: zaškrtnuté radio přes ~ obarví svůj
+   štítek a odkryje svůj kód. Bez JavaScriptu, takže to funguje i když se
+   skripty nenačtou — a nepřibyla žádná závislost. */
+/* Tři kroky pod sebou: vyber částku, načti kód, nebo pošli převodem.
+   Na telefonu jde každý blok přes celou šířku kartičky — jedna svislice
+   místo pěti různě širokých věcí. Radia musí zůstat přímými sourozenci
+   kroků: celý přepínač stojí na `~`, a ten mezi úrovněmi nefunguje. */
+.bm-qr { display: flex; flex-direction: column; gap: 18px; }
+.bm-qr__volba { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+.bm-krok { display: flex; flex-direction: column; gap: 8px; }
+/* Kadence dává odstavcům spodní okraj 32 px (.single-content p). Mezery tady
+   drží gap kroku, takže se okraje dětí nulují — jinak se sečtou. */
+.bm-podpor .bm-krok > * { margin: 0; }
+/* Kolečko sedí na prvním řádku, ne na středu zalomeného štítku: řádek je
+   vysoký přesně jako ono, takže se oba začínají na stejné výšce. */
+.bm-krok__stitek {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; line-height: 20px;
+  text-transform: uppercase; color: var(--global-palette5);
+}
+.bm-krok__cislo {
+  flex: none; width: 20px; height: 20px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--global-palette3); color: var(--global-palette15);
+  font-size: 12px; font-weight: 900; letter-spacing: 0;
+}
+
+/* Štítky v jedné řadě přes celou šířku, ať je částek kolik chce. */
+.bm-qr__castky { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.bm-qr__castky label {
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 7px 8px; font-size: 15px; font-weight: 800; text-align: center;
+  background: var(--global-palette9); cursor: pointer;
+}
+/* POZOR: tyhle tři částky musí sedět na CASTKY v podpor-nas.py. Když se
+   rozejdou, nevykreslí se žádný kód — selektor prostě nikoho nenajde. */
+#bm-qr-100:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:checked ~ .bm-krok .bm-qr__castky [for="bm-qr-500"] {
+  background: var(--global-palette3); color: var(--global-palette15);
+}
+/* Radio je schované, takže fokus z klávesnice musí být vidět na štítku. */
+#bm-qr-100:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:focus-visible ~ .bm-krok .bm-qr__castky [for="bm-qr-500"] {
+  outline: 3px solid var(--global-palette3); outline-offset: 3px;
+}
+
+.bm-qr__obraz { display: contents; }
+.bm-qr__kod {
+  display: none;
+  width: 100%; height: auto; max-width: 100%;
+  border: 2px solid var(--global-palette3); border-radius: 12px;
+  background: var(--global-palette9);
+}
+#bm-qr-100:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--100,
+#bm-qr-300:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--300,
+#bm-qr-500:checked ~ .bm-krok .bm-qr__obraz .bm-qr__kod--500 { display: block; }
+
+/* Ikonka ke kopírování drží u pravého okraje, ať je rámeček jakkoli široký. */
+.bm-qr__cislo {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 20px; font-weight: 800; letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  background: var(--global-palette9);
+  border: 2px solid var(--global-palette3); border-radius: 10px;
+  padding: 7px 9px 7px 13px;
+  user-select: all;
+}
+.bm-qr__drobne { font-size: 13.5px; color: var(--global-palette4); }
+
+/* Ikonku ke kopírování dopisuje dovnitř rámečku s číslem až skript
+   (mu-plugins/kopirovat.js), takže tady se jen obarvuje. Bez skriptu žádná
+   není a číslo se pořád označí jedním kliknutím (user-select: all výše). */
+.bm-podpor .bm-kopirovat {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; width: 28px; height: 28px;
+  padding: 0; margin: 0; border: 0; border-radius: 8px;
+  background: transparent; color: var(--global-palette5);
+  cursor: pointer; user-select: none;
+}
+.bm-podpor .bm-kopirovat svg { display: block; width: 17px; height: 17px; }
+.bm-podpor .bm-kopirovat:hover,
+.bm-podpor .bm-kopirovat:focus-visible {
+  background: var(--global-palette7); color: var(--global-palette3);
+}
+/* Zelená = zkopírováno. palette11 je „Úspěch" z palety ročníku. */
+.bm-podpor .bm-kopirovat--hotovo,
+.bm-podpor .bm-kopirovat--hotovo:hover {
+  background: transparent; color: var(--global-palette11);
+}
+
+/* Na telefonu se kód naskenovat nedá — přístroj se nevyfotí sám. Místo
+   skenování se dá uložit a v bankovní aplikaci načíst z galerie; odkaz na to
+   vyrábí skript (mu-plugins/sdilet-qr.js). Na monitoru se schovává, tam je
+   kód na dosah mobilu. Návrh tu měl tlačítko „Otevřít v bance" — to nejde,
+   platbu z odkazu ve webu žádná česká banka nepřijme. */
+.bm-podpor .bm-sdilet {
+  display: block; align-self: stretch; text-align: center;
+  margin: 0; padding: 12px 18px; text-decoration: none;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  background: var(--global-palette3); color: var(--global-palette15);
+  font-size: 15px; font-weight: 800;
+}
+.bm-podpor .bm-sdilet:hover, .bm-podpor .bm-sdilet:focus-visible {
+  background: var(--global-palette9); color: var(--global-palette3);
+}
+/* Druhý krok se jmenuje jinak podle toho, čím se kód dá použít. */
+.bm-qr__fotak { display: none; }
+
+/* Na monitoru je kartička kompaktní: kód menší, štítky i rámeček s účtem
+   jen tak široké, jak potřebují. Telefon má všechno přes celou šířku. */
+@media (min-width: 560px) {
+  /* Strop platí od chvíle, kdy je kartička kompaktní — ne až od mřížky
+     v 760 px. Mezi tím by jinak měla 550 px a obsah 200. */
+  .bm-podpor__karta--qr { max-width: 360px; }
+  .bm-qr__castky { display: flex; flex-wrap: wrap; }
+  .bm-qr__castky label { padding: 7px 16px; }
+  .bm-qr__kod { width: 180px; }
+  .bm-qr__cislo { align-self: flex-start; justify-content: flex-start; }
+  .bm-qr__fotak { display: inline; }
+  .bm-qr__mobil { display: none; }
+  .bm-podpor .bm-sdilet { display: none; }
+}
+
 /* ── Rozcestník kotev ─────────────────────────────────────────── */
 /* Nahrazuje rozbalovátko, které měla stránka v menu. Sekce jsou na jedné
    stránce pod sebou a tyhle odkazy na ně skáčou. */
@@ -626,7 +892,9 @@ body.transparent-header .site-header .primary-menu-container .menu > li > a {
 /* Stránky, které si nadpis nedávají do obsahu (O festivalu, Historie,
    Kontakt), ho dostávají od Kadence v titulkovém pásu. Dřív byl bílý na
    zelené, od 6. 11. 2026 je černý na bílé a podtržení platí i pro něj. */
-.entry-hero .entry-title {
+.entry-hero .entry-title,
+/* Výpis Aktualit má nadpis v jiné třídě než stránky a příspěvky. */
+.entry-hero .archive-title {
   display: inline;
   padding: 0 2px;
   background-image: linear-gradient(
