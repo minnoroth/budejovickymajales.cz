@@ -83,8 +83,11 @@ KARTY = (
     '<div class="bm-qr">' + prepinac() +
     '<div class="bm-qr__ucet">'
     '<p class="bm-qr__cislo bm-kopirovatelne">' + UCET + '</p>'
-    '<p class="bm-qr__drobne">Namiř na kód foťák — aplikace předvyplní částku '
-    'i zprávu. Nebo pošli převodem, zpráva pro příjemce <strong>DAR</strong>.</p>'
+    '<p class="bm-qr__drobne">'
+    # Věta o foťáku se na telefonu schovává — tam se kód ukládá, neskenuje.
+    '<span class="bm-qr__fotak">Namiř na kód foťák — aplikace předvyplní '
+    'částku i zprávu. </span>'
+    'Nebo pošli převodem, zpráva pro příjemce <strong>DAR</strong>.</p>'
     '</div></div>'
     '</section>'
 

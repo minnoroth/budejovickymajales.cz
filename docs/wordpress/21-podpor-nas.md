@@ -74,6 +74,41 @@ Dvě rozhodnutí, která stojí za přečtení:
 Do schránky jde číslo bez mezer kolem lomítka, ať se dá rovnou vložit do
 bankovnictví.
 
+### Na telefonu: „Otevřít v bance" neexistuje
+
+Návrh sliboval na mobilu tlačítko, které **otevře bankovní aplikaci
+s předvyplněnou platbou**. Takové tlačítko z webové stránky postavit nejde
+a slib byl v návrhu dřív, než se ověřil:
+
+- **SPAYD je norma jen pro obsah QR kódu, ne pro odkaz.** Banky ho čtou
+  z kamery, ne z URL.
+- **Jediná funkční cesta je Android Intent** s řetězcem v extra `spayd`
+  a MIME `application/x-shortpaymentdescriptor`. Umí ji jen **nativní**
+  aplikace — knihovna, která to dělá, si vyžaduje `Activity`.
+- **Schéma `spayd://` je návrh jednoho pilotního projektu**, ne nic, co by
+  české banky registrovaly.
+- **Na iOS neexistuje ani to.** Řešení té knihovny na iOS je uložit QR
+  do Fotek a načíst ho v bance z galerie.
+
+**Takže se to dělá takhle:** na telefonu je pod číslem účtu černé tlačítko
+*Uložit kód do telefonu*. Kde prohlížeč umí sdílet soubory, otevře systémový
+panel (tam je „Uložit obrázek" i aplikace, které obrázky přijímají); kde ne,
+obrázek se prostě stáhne. V bankovní aplikaci se pak načte QR z galerie —
+a **částka i zpráva jsou předvyplněné**, což samotné číslo účtu neumí.
+
+Tři detaily, na kterých to stojí:
+
+- **Je to `<a download>`, ne `<button>`.** I kdyby obsluha kliknutí selhala,
+  prohlížeč pořád umí obrázek stáhnout nebo otevřít. Tlačítko by neudělalo nic.
+- **Odkaz se přepíná s částkou.** Skript poslouchá na `change` přepínače
+  a mění `href` i jméno souboru, jinak by se ukládal pořád kód výchozích 300 Kč.
+- **Zavření systémového panelu není chyba** (`AbortError`) a nesmí spustit
+  náhradní stažení.
+
+**Kód na telefonu zůstává vidět** — je to to, co se ukládá, a dá se naskenovat
+z obrazovky druhým telefonem. Věta „namiř na kód foťák" se naopak pod 560 px
+schovává; tam by radila nemožné.
+
 **Na monitoru je kód první, na telefonu až za číslem účtu.** Telefon se
 nevyfotí sám, takže tam je k něčemu to číslo, ne kód.
 
@@ -115,6 +150,8 @@ Tím se uzavírá otevřená otázka z
 | `wordpress/vzhled/bm.css`, sekce *Podpoř nás* | kartičky a přepínač částek |
 | `wordpress/mu-plugins/bm-kopirovat.php` | zařadí skript na stránce s číslem účtu |
 | `wordpress/mu-plugins/kopirovat.js` | vyrobí ikonku a kopíruje do schránky |
+| `wordpress/mu-plugins/bm-sdilet-qr.php` | zařadí skript na stránce s QR kódem |
+| `wordpress/mu-plugins/sdilet-qr.js` | uloží nebo sdílí kód vybrané částky |
 
 ## Co zůstává otevřené
 
@@ -125,3 +162,6 @@ Tím se uzavírá otevřená otázka z
   nejde. Až budou, je to deset minut.
 - **Variabilní symbol.** Dnes dary pozná účetní jen podle zprávy `DAR`.
   Jestli chce VS, dá se do SPAYD doplnit.
+- **Načtení QR z galerie v bankovních aplikacích** je ověřené jen z popisu
+  knihovny `pay-via-bank-app`, ne klikáním. Až to někdo zkusí ve své bance,
+  stojí za to sem poznamenat, kde to je a kde ne.

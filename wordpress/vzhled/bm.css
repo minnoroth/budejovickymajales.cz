@@ -465,6 +465,25 @@ body.single-post .entry-content > ol { max-width: 62ch; }
   background: transparent; color: var(--global-palette11);
 }
 
+/* Na telefonu se kód naskenovat nedá — přístroj se nevyfotí sám. Místo
+   skenování se dá uložit a v bankovní aplikaci načíst z galerie; odkaz na to
+   vyrábí skript (mu-plugins/sdilet-qr.js). Na monitoru se schovává, tam je
+   kód na dosah mobilu. Návrh tu měl tlačítko „Otevřít v bance" — to nejde,
+   platbu z odkazu ve webu žádná česká banka nepřijme. */
+.bm-podpor .bm-sdilet {
+  display: block; align-self: stretch; text-align: center;
+  margin: 0; padding: 12px 18px; text-decoration: none;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  background: var(--global-palette3); color: var(--global-palette15);
+  font-size: 15px; font-weight: 800;
+}
+.bm-podpor .bm-sdilet:hover, .bm-podpor .bm-sdilet:focus-visible {
+  background: var(--global-palette9); color: var(--global-palette3);
+}
+.bm-podpor .bm-sdilet__rada { font-size: 13.5px; color: var(--global-palette4); }
+/* Rada „namiř foťák" platí jen tam, kde fotí někdo jiný než majitel kódu. */
+.bm-qr__fotak { display: none; }
+
 /* Na monitoru je kód první a vedle něj číslo účtu; na telefonu obráceně
    a pod sebe — telefon se nevyfotí sám, takže tam je k něčemu číslo. */
 @media (min-width: 560px) {
@@ -472,6 +491,8 @@ body.single-post .entry-content > ol { max-width: 62ch; }
   .bm-qr__castky { grid-column: 1 / -1; }
   .bm-qr__kod { order: 0; }
   .bm-qr__ucet { order: 0; }
+  .bm-qr__fotak { display: inline; }
+  .bm-podpor .bm-sdilet, .bm-podpor .bm-sdilet__rada { display: none; }
 }
 
 /* ── Rozcestník kotev ─────────────────────────────────────────── */
