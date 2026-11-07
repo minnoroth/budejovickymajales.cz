@@ -33,14 +33,16 @@ DONIO = "https://donio.cz/23-rocnik-budejovickeho-majalesu"
 ESHOP = "https://shop.budejovickymajales.cz/"
 UCET = "266541760 / 0300"
 
-# Jméno souboru v médiích → popisek částky. None = kód bez částky.
-CASTKY = [(200, "200 Kč"), (500, "500 Kč"), (1000, "1 000 Kč"), (None, "jiná částka")]
-VYCHOZI = 500
+# Částky rozhodl zadavatel 7. 11. 2026. „Jiná částka" vypadla — kdo chce
+# poslat jinak, přepíše si ji v bankovnictví, takže kód navíc nic nepřidal.
+# Výchozí je prostřední: nabídnout rovnou nejvyšší je tlak, nejnižší je škoda.
+CASTKY = [(100, "100 Kč"), (300, "300 Kč"), (500, "500 Kč")]
+VYCHOZI = 300
 
 
 def adresa_kodu(castka):
     """Najde v médiích QR kód, který nahrál qr-platba.py."""
-    jmeno = "qr-dar-%s" % (castka if castka else "bez-castky")
+    jmeno = "qr-dar-%s" % castka
     nalezene = rest("media?search=%s&per_page=5" % jmeno, "GET")
     for polozka in nalezene if isinstance(nalezene, list) else []:
         if polozka.get("slug", "").startswith(jmeno):
@@ -54,15 +56,14 @@ def prepinac():
     radia, stitky, kody = "", "", ""
 
     for castka, popisek in CASTKY:
-        klic = castka if castka else "jina"
+        klic = castka
         zaskrtnuto = " checked" if castka == VYCHOZI else ""
         radia += ('<input type="radio" name="bm-qr" id="bm-qr-%s" class="bm-qr__volba"%s>'
                   % (klic, zaskrtnuto))
         stitky += '<label for="bm-qr-%s">%s</label>' % (klic, popisek)
 
         url = adresa_kodu(castka)
-        popis = ("QR kód pro platbu %s na účet Budějovického Majálesu" % popisek
-                 if castka else "QR kód pro platbu na účet Budějovického Majálesu")
+        popis = "QR kód pro platbu %s na účet Budějovického Majálesu" % popisek
         kody += ('<img class="bm-qr__kod bm-qr__kod--%s" src="%s" alt="%s" '
                  'width="420" height="420" loading="lazy">' % (klic, url, popis))
 
@@ -76,19 +77,21 @@ KARTY = (
     '<div class="bm-podpor">'
 
     '<section class="bm-podpor__karta bm-podpor__karta--qr">'
+    '<header class="bm-podpor__hlava">'
     '<p class="bm-podpor__poradi">Nejrychlejší</p>'
-    '<h2>Pošli pár stovek z mobilu</h2>'
+    '<h2>Pošli pár stovek z mobilu</h2></header>'
     '<div class="bm-qr">' + prepinac() +
     '<div class="bm-qr__ucet">'
-    '<p class="bm-qr__cislo">' + UCET + '</p>'
+    '<p class="bm-qr__cislo bm-kopirovatelne">' + UCET + '</p>'
     '<p class="bm-qr__drobne">Namiř na kód foťák — aplikace předvyplní částku '
-    'i zprávu. Nebo číslo účtu opiš, zpráva pro příjemce <strong>DAR</strong>.</p>'
+    'i zprávu. Nebo pošli převodem, zpráva pro příjemce <strong>DAR</strong>.</p>'
     '</div></div>'
     '</section>'
 
     '<section class="bm-podpor__karta bm-podpor__karta--donio">'
+    '<header class="bm-podpor__hlava">'
     '<p class="bm-podpor__poradi">Veřejná sbírka</p>'
-    '<h2>Donio</h2>'
+    '<h2>Donio</h2></header>'
     '<p>Sbírka s příběhem a cílem. Zaplatíš kartou nebo převodem a dostaneš '
     'potvrzení o daru.</p>'
     '<p><a class="bm-tlacitko bm-tlacitko--donio" href="' + DONIO + '" '
@@ -96,8 +99,9 @@ KARTY = (
     '</section>'
 
     '<section class="bm-podpor__karta bm-podpor__karta--eshop">'
+    '<header class="bm-podpor__hlava">'
     '<p class="bm-podpor__poradi">Něco za to</p>'
-    '<h2>Kup si kus Majálesu</h2>'
+    '<h2>Kup si kus Majálesu</h2></header>'
     '<p>Trička, plakáty a placky. Peníze jdou na festival a ty máš doma důkaz, '
     'že jsi u toho byl.</p>'
     '<p><a class="bm-tlacitko bm-tlacitko--eshop" href="' + ESHOP + '" '

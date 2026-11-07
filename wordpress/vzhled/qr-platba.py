@@ -7,8 +7,10 @@ službu třetí strany — jen účet spolku.
 
 Proč obrázky, a ne generování v prohlížeči:
 Program i zbytek webu se obejdou bez cizích knihoven a tahle stránka taky má.
-Čtyři obrázky se vyrobí jednou a leží v médiích; výměna účtu znamená spustit
-tenhle skript znovu.
+Obrázky se vyrobí jednou a leží v médiích; výměna účtu znamená spustit tenhle
+skript znovu. Starý kód se před nahráním smaže — WordPress by stejné jméno
+nepřepsal, jen by přidal „-1" a v médiích by zůstaly dva kódy se stejným
+číslem a jiným účtem.
 
 Potřebuje knihovnu segno (čistý Python, bez závislostí), stejně jako
 oriznout-logo.py potřebuje Pillow:
@@ -33,8 +35,9 @@ IBAN = "CZ2003000000000266541760"
 PRIJEMCE = "BUDEJOVICKY MAJALES Z.S."   # SPAYD je ASCII, bez diakritiky
 ZPRAVA = "DAR MAJALES"
 
-# Částky, které stránka nabízí. None = kód bez částky, tu si člověk zadá sám.
-CASTKY = [200, 500, 1000, None]
+# Částky, které stránka nabízí. Rozhodnutí zadavatele ze 7. 11. 2026;
+# „jiná částka" vypadla — kdo chce poslat jinak, přepíše si ji v bankovnictví.
+CASTKY = [100, 300, 500]
 
 
 def spayd(castka):
@@ -46,8 +49,18 @@ def spayd(castka):
     return "*".join(pole)
 
 
+def smaz_stary(jmeno):
+    """Zahodí dřívější kód téhož jména, ať v médiích nezůstanou dva."""
+    zaklad = jmeno[:-4]
+    nalezene = rest("media?search=%s&per_page=10" % zaklad, "GET")
+    for polozka in nalezene if isinstance(nalezene, list) else []:
+        if polozka.get("slug", "").startswith(zaklad):
+            rest("media/%d?force=true" % polozka["id"], "DELETE")
+
+
 def nahraj(jmeno, data, popis):
-    """Nahraje PNG do médií. Stejné jméno přepíše starý soubor novým."""
+    """Nahraje PNG do médií."""
+    smaz_stary(jmeno)
     hlavicky = {
         "Content-Disposition": 'attachment; filename="%s"' % jmeno,
         "Content-Type": "image/png",

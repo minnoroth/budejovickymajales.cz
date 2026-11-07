@@ -359,6 +359,12 @@ body.single-post .entry-content > ol { max-width: 62ch; }
   display: flex; flex-direction: column; gap: 12px;
 }
 .bm-podpor__karta > * { margin: 0; }
+/* Popisek nad nadpisem k němu patří, takže má vlastní, menší mezeru —
+   mezera kartičky (12 px) mezi nimi dělala díru. */
+.bm-podpor__hlava { display: flex; flex-direction: column; gap: 2px; }
+/* Dvě třídy schválně: samotná `.bm-podpor__hlava > *` prohrává s pravidlem
+   `.entry-content h2` od Kadence, které má o prvek navíc. */
+.bm-podpor .bm-podpor__hlava > * { margin: 0; }
 .bm-podpor__karta--qr { background: var(--global-palette15); box-shadow: var(--bm-stin); }
 .bm-podpor__karta--eshop { background: var(--global-palette14); }
 .bm-podpor__poradi {
@@ -395,17 +401,17 @@ body.single-post .entry-content > ol { max-width: 62ch; }
   padding: 7px 16px; font-size: 15px; font-weight: 800;
   background: var(--global-palette9); cursor: pointer;
 }
-#bm-qr-200:checked   ~ .bm-qr__castky [for="bm-qr-200"],
-#bm-qr-500:checked   ~ .bm-qr__castky [for="bm-qr-500"],
-#bm-qr-1000:checked  ~ .bm-qr__castky [for="bm-qr-1000"],
-#bm-qr-jina:checked  ~ .bm-qr__castky [for="bm-qr-jina"] {
+/* POZOR: tyhle tři částky musí sedět na CASTKY v podpor-nas.py. Když se
+   rozejdou, nevykreslí se žádný kód — selektor prostě nikoho nenajde. */
+#bm-qr-100:checked ~ .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:checked ~ .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:checked ~ .bm-qr__castky [for="bm-qr-500"] {
   background: var(--global-palette3); color: var(--global-palette15);
 }
 /* Radio je schované, takže fokus z klávesnice musí být vidět na štítku. */
-#bm-qr-200:focus-visible  ~ .bm-qr__castky [for="bm-qr-200"],
-#bm-qr-500:focus-visible  ~ .bm-qr__castky [for="bm-qr-500"],
-#bm-qr-1000:focus-visible ~ .bm-qr__castky [for="bm-qr-1000"],
-#bm-qr-jina:focus-visible ~ .bm-qr__castky [for="bm-qr-jina"] {
+#bm-qr-100:focus-visible ~ .bm-qr__castky [for="bm-qr-100"],
+#bm-qr-300:focus-visible ~ .bm-qr__castky [for="bm-qr-300"],
+#bm-qr-500:focus-visible ~ .bm-qr__castky [for="bm-qr-500"] {
   outline: 3px solid var(--global-palette3); outline-offset: 3px;
 }
 
@@ -416,21 +422,48 @@ body.single-post .entry-content > ol { max-width: 62ch; }
   border: 2px solid var(--global-palette3); border-radius: 12px;
   background: var(--global-palette9);
 }
-#bm-qr-200:checked   ~ .bm-qr__obraz .bm-qr__kod--200,
-#bm-qr-500:checked   ~ .bm-qr__obraz .bm-qr__kod--500,
-#bm-qr-1000:checked  ~ .bm-qr__obraz .bm-qr__kod--1000,
-#bm-qr-jina:checked  ~ .bm-qr__obraz .bm-qr__kod--jina { display: block; }
+#bm-qr-100:checked ~ .bm-qr__obraz .bm-qr__kod--100,
+#bm-qr-300:checked ~ .bm-qr__obraz .bm-qr__kod--300,
+#bm-qr-500:checked ~ .bm-qr__obraz .bm-qr__kod--500 { display: block; }
 
-.bm-qr__ucet { order: 1; display: flex; flex-direction: column; gap: 6px; }
+.bm-qr__ucet {
+  order: 1; display: flex; flex-direction: column; gap: 6px;
+  align-items: flex-start;
+}
+/* Kadence dává odstavcům spodní okraj 32 px (.single-content p). Mezery tady
+   drží gap kontejneru, takže se okraje dětí nulují — jinak se sečtou. */
+.bm-podpor .bm-qr__ucet > * { margin: 0; }
 .bm-qr__cislo {
+  display: inline-flex; align-items: center; gap: 10px;
   font-size: 20px; font-weight: 800; letter-spacing: .01em;
   font-variant-numeric: tabular-nums;
   background: var(--global-palette9);
   border: 2px solid var(--global-palette3); border-radius: 10px;
-  padding: 9px 13px; align-self: flex-start;
+  padding: 7px 9px 7px 13px;
   user-select: all;
 }
 .bm-qr__drobne { font-size: 13.5px; color: var(--global-palette4); }
+
+/* Ikonku ke kopírování dopisuje dovnitř rámečku s číslem až skript
+   (mu-plugins/kopirovat.js), takže tady se jen obarvuje. Bez skriptu žádná
+   není a číslo se pořád označí jedním kliknutím (user-select: all výše). */
+.bm-podpor .bm-kopirovat {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; width: 28px; height: 28px;
+  padding: 0; margin: 0; border: 0; border-radius: 8px;
+  background: transparent; color: var(--global-palette5);
+  cursor: pointer; user-select: none;
+}
+.bm-podpor .bm-kopirovat svg { display: block; width: 17px; height: 17px; }
+.bm-podpor .bm-kopirovat:hover,
+.bm-podpor .bm-kopirovat:focus-visible {
+  background: var(--global-palette7); color: var(--global-palette3);
+}
+/* Zelená = zkopírováno. palette11 je „Úspěch" z palety ročníku. */
+.bm-podpor .bm-kopirovat--hotovo,
+.bm-podpor .bm-kopirovat--hotovo:hover {
+  background: transparent; color: var(--global-palette11);
+}
 
 /* Na monitoru je kód první a vedle něj číslo účtu; na telefonu obráceně
    a pod sebe — telefon se nevyfotí sám, takže tam je k něčemu číslo. */

@@ -34,15 +34,45 @@ o daru. **Proto Donio nenahrazuje, doplňuje ho.**
 IBAN pro SPAYD je `CZ2003000000000266541760`; kontrolní číslice ověřené
 výpočtem. Zpráva pro příjemce je `DAR MAJALES`.
 
-**Kódy jsou čtyři obrázky v médiích**, ne generování v prohlížeči — web se
+**Kódy jsou tři obrázky v médiích**, ne generování v prohlížeči — web se
 obejde bez cizích knihoven a tahle stránka taky. Vyrábí je `qr-platba.py`
 (potřebuje `segno`, stejně jako `oriznout-logo.py` potřebuje Pillow).
-**Po změně účtu se musí spustit znovu.**
+**Po změně účtu se musí spustit znovu.** Opakovaný běh je bezpečný: skript
+staré obrázky nejdřív smaže, jinak by je WordPress nepřepsal a založil
+by vedle nich kopie s příponou `-1`.
+
+**Částky jsou 100, 300 a 500 Kč** (zadavatel 7. 11. 2026). Volba „jiná
+částka" vypadla — kdo chce poslat jinou sumu, přepíše si ji v bankovnictví,
+takže by to byl přepínač navíc za nic.
 
 **Přepínání částek je na čistém CSS** (`radio` + `:checked` + `~`), ne na
 JavaScriptu. Stránka tím pádem funguje i bez něj a nepřibyla žádná závislost.
 Radio je schované, takže fokus z klávesnice musí být vidět na štítku — má
 proto vlastní pravidlo.
+
+> **Částky jsou na dvou místech.** `CASTKY` v `qr-platba.py` a ids
+> `#bm-qr-100`, `#bm-qr-300`, `#bm-qr-500` v `bm.css`. Když se rozejdou,
+> nevykreslí se **žádný** kód — selektor prostě nikoho nenajde.
+
+### Ikonka ke zkopírování
+
+Číslo účtu je záložní cesta pro toho, kdo se na stránku dívá z téhož
+telefonu, kterým by skenoval. Opisovat šestnáct číslic z obrazovky je přesně
+ten okamžik, kdy to člověk vzdá — proto je za číslem **malá ikonka, která po
+kliknutí zezelená** (`palette11`, „Úspěch" z palety ročníku).
+
+Dvě rozhodnutí, která stojí za přečtení:
+
+- **Ikonku vyrábí až JavaScript** (`mu-plugins/kopirovat.js`), ne PHP. Kdyby
+  byla v HTML a skript se nenačetl, zůstalo by na stránce tlačítko, které nic
+  nedělá. Takhle se objeví jen tam, kde funguje — a kde ne, číslo se pořád
+  označí jedním kliknutím (`user-select: all` v `bm.css`).
+- **Zelená se zobrazí jen po skutečném zápisu do schránky.** Když ho
+  prohlížeč odmítne (starší Safari, soukromé okno), skript místo toho číslo
+  označí a změní titulek. Zelená fajfka by tam lhala.
+
+Do schránky jde číslo bez mezer kolem lomítka, ať se dá rovnou vložit do
+bankovnictví.
 
 **Na monitoru je kód první, na telefonu až za číslem účtu.** Telefon se
 nevyfotí sám, takže tam je k něčemu to číslo, ne kód.
@@ -83,13 +113,15 @@ Tím se uzavírá otevřená otázka z
 | `wordpress/vzhled/qr-platba.py` | vyrobí QR kódy a nahraje je do médií |
 | `wordpress/vzhled/podpor-nas.py` | složí obsah stránky |
 | `wordpress/vzhled/bm.css`, sekce *Podpoř nás* | kartičky a přepínač částek |
+| `wordpress/mu-plugins/bm-kopirovat.php` | zařadí skript na stránce s číslem účtu |
+| `wordpress/mu-plugins/kopirovat.js` | vyrobí ikonku a kopíruje do schránky |
 
 ## Co zůstává otevřené
 
 - **Odkaz na Donio míří na sbírku 23. ročníku.** Až bude sbírka na 2027,
   přepsat v `podpor-nas.py`.
-- **Pruh „na co to jde"** (200 Kč plakáty, 500 Kč ozvučení, 1 000 Kč honorář)
-  byl v návrhu a na stránce není — ta čísla musí dodat tým a vymyslet si je
+- **Pruh „na co to jde"** (kolik stojí plakáty, ozvučení, honorář) byl
+  v návrhu a na stránce není — ta čísla musí dodat tým a vymyslet si je
   nejde. Až budou, je to deset minut.
 - **Variabilní symbol.** Dnes dary pozná účetní jen podle zprávy `DAR`.
   Jestli chce VS, dá se do SPAYD doplnit.

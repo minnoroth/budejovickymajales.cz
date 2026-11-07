@@ -141,6 +141,15 @@ Všechno níž je vykrvácené v praxi, ne převzaté z dokumentace.
   aniž by cokoli zahlásilo — vyhraje ta poslední a první přestane existovat. Narazilo
   se na to 7. 11. 2026 v `program-view.js`. Před přidáním funkce do velkého souboru
   na její jméno grepni.
+- **Kadence dává tlačítkům `transition: .2s`, takže `getComputedStyle` hned po
+  změně třídy vrací rozpitou mezihodnotu.** Měření v prohlížeči pak tvrdí, že
+  pravidlo neplatí — i `style.color = 'red'` přečtené v témže tiku vyjde jako
+  `rgb(76, 73, 73)`. Vypadá to na přebíjení vahou a hledá se neexistující
+  `!important`. Barvu měř až po doběhnutí přechodu (stačí 400 ms).
+- **Odstavec uvnitř flex kontejneru si nese od Kadence spodní okraj 32 px**
+  (`.single-content p`) a ten se **sečte** s `gap` rodiče. Nulovat se musí
+  i dětem, které nejsou přímými dětmi kartičky — `.bm-podpor .bm-qr__ucet > *`,
+  ne jen `.bm-podpor__karta > *`.
 - **Položka menu, která nemá být odkaz, se dělá sundáním `href`**, ne přes
   `pointer-events` ani JavaScript. `<a>` bez adresy není odkaz: nemá ruku, klepnutí
   nic neudělá, tabulátor ho přeskočí — a `li:hover` pořád funguje, takže
