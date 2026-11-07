@@ -67,9 +67,17 @@ Dvě rozhodnutí, která stojí za přečtení:
   byla v HTML a skript se nenačetl, zůstalo by na stránce tlačítko, které nic
   nedělá. Takhle se objeví jen tam, kde funguje — a kde ne, číslo se pořád
   označí jedním kliknutím (`user-select: all` v `bm.css`).
-- **Zelená se zobrazí jen po skutečném zápisu do schránky.** Když ho
-  prohlížeč odmítne (starší Safari, soukromé okno), skript místo toho číslo
-  označí a změní titulek. Zelená fajfka by tam lhala.
+- **Kopíruje se dvěma cestami.** Nejdřív moderní `navigator.clipboard`,
+  a když ho prohlížeč odmítne, zastaralý `execCommand('copy')` přes schované
+  pole. Samotné moderní API nestačí: 7. 11. se ukázalo, že ve vestavěném
+  prohlížeči Claude Code vrací `NotAllowedError`, takže tlačítko jen označilo
+  text a vypadalo rozbitě. Stejně je na tom starší Safari a soukromé okno.
+- **Kopíruje se ze schovaného pole, ne z rámečku na stránce.** V rámečku jsou
+  kolem lomítka mezery kvůli čitelnosti; do bankovnictví patří číslo bez nich.
+- **Zelená se zobrazí jen po skutečném zápisu do schránky.** Když selžou obě
+  cesty, skript číslo aspoň označí a změní titulek. Zelená fajfka by tam lhala.
+- **Ověřeno až do systémové schránky**, ne jen podle vzhledu tlačítka: po
+  kliknutí vrátil `pbpaste` řetězec `266541760/0300`.
 
 Do schránky jde číslo bez mezer kolem lomítka, ať se dá rovnou vložit do
 bankovnictví.
