@@ -341,6 +341,106 @@ body.single-post .entry-content > p,
 body.single-post .entry-content > ul,
 body.single-post .entry-content > ol { max-width: 62ch; }
 
+/* ── Podpoř nás ───────────────────────────────────────────────── */
+/* Tři cesty vedle sebe, nejrychlejší první a žlutá — žlutá na tomhle webu
+   znamená „sem klikni". E-shop je pod nimi přes celou šířku: je to jiný
+   druh podpory, ne dar. Rozhodnutí: docs/wordpress/21-podpor-nas.md */
+.bm-podpor { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) {
+  .bm-podpor { grid-template-columns: 1.15fr 1fr; align-items: start; }
+  .bm-podpor__karta--eshop { grid-column: 1 / -1; }
+}
+
+.bm-podpor__karta {
+  border: var(--bm-ramecek);
+  border-radius: var(--bm-radius);
+  background: var(--global-palette9);
+  padding: 20px 22px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bm-podpor__karta > * { margin: 0; }
+.bm-podpor__karta--qr { background: var(--global-palette15); box-shadow: var(--bm-stin); }
+.bm-podpor__karta--eshop { background: var(--global-palette14); }
+.bm-podpor__poradi {
+  font-size: 12px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--global-palette5);
+}
+.bm-podpor__karta h2 { font-size: 26px; letter-spacing: -.015em; }
+.bm-podpor__karta p { font-size: 15px; }
+
+.bm-tlacitko--donio,
+.bm-tlacitko--eshop {
+  display: inline-block;
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 11px 22px; font-weight: 800; text-decoration: none;
+  color: var(--global-palette3);
+  box-shadow: 3px 3px 0 var(--global-palette3);
+}
+.bm-tlacitko--donio { background: var(--global-palette1); }
+.bm-tlacitko--eshop { background: var(--global-palette9); }
+.bm-tlacitko--donio:hover, .bm-tlacitko--donio:focus-visible,
+.bm-tlacitko--eshop:hover, .bm-tlacitko--eshop:focus-visible {
+  background: var(--global-palette9); box-shadow: none; transform: translate(3px, 3px);
+}
+
+/* ── QR platba ────────────────────────────────────────────────── */
+/* Přepínání částek je na čistém CSS: zaškrtnuté radio přes ~ obarví svůj
+   štítek a odkryje svůj kód. Bez JavaScriptu, takže to funguje i když se
+   skripty nenačtou — a nepřibyla žádná závislost. */
+.bm-qr { display: flex; flex-direction: column; gap: 14px; }
+.bm-qr__volba { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.bm-qr__castky { display: flex; flex-wrap: wrap; gap: 8px; }
+.bm-qr__castky label {
+  border: 2px solid var(--global-palette3); border-radius: 999px;
+  padding: 7px 16px; font-size: 15px; font-weight: 800;
+  background: var(--global-palette9); cursor: pointer;
+}
+#bm-qr-200:checked   ~ .bm-qr__castky [for="bm-qr-200"],
+#bm-qr-500:checked   ~ .bm-qr__castky [for="bm-qr-500"],
+#bm-qr-1000:checked  ~ .bm-qr__castky [for="bm-qr-1000"],
+#bm-qr-jina:checked  ~ .bm-qr__castky [for="bm-qr-jina"] {
+  background: var(--global-palette3); color: var(--global-palette15);
+}
+/* Radio je schované, takže fokus z klávesnice musí být vidět na štítku. */
+#bm-qr-200:focus-visible  ~ .bm-qr__castky [for="bm-qr-200"],
+#bm-qr-500:focus-visible  ~ .bm-qr__castky [for="bm-qr-500"],
+#bm-qr-1000:focus-visible ~ .bm-qr__castky [for="bm-qr-1000"],
+#bm-qr-jina:focus-visible ~ .bm-qr__castky [for="bm-qr-jina"] {
+  outline: 3px solid var(--global-palette3); outline-offset: 3px;
+}
+
+.bm-qr__obraz { display: contents; }
+.bm-qr__kod {
+  display: none; order: 2;
+  width: 180px; height: auto; max-width: 100%;
+  border: 2px solid var(--global-palette3); border-radius: 12px;
+  background: var(--global-palette9);
+}
+#bm-qr-200:checked   ~ .bm-qr__obraz .bm-qr__kod--200,
+#bm-qr-500:checked   ~ .bm-qr__obraz .bm-qr__kod--500,
+#bm-qr-1000:checked  ~ .bm-qr__obraz .bm-qr__kod--1000,
+#bm-qr-jina:checked  ~ .bm-qr__obraz .bm-qr__kod--jina { display: block; }
+
+.bm-qr__ucet { order: 1; display: flex; flex-direction: column; gap: 6px; }
+.bm-qr__cislo {
+  font-size: 20px; font-weight: 800; letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  background: var(--global-palette9);
+  border: 2px solid var(--global-palette3); border-radius: 10px;
+  padding: 9px 13px; align-self: flex-start;
+  user-select: all;
+}
+.bm-qr__drobne { font-size: 13.5px; color: var(--global-palette4); }
+
+/* Na monitoru je kód první a vedle něj číslo účtu; na telefonu obráceně
+   a pod sebe — telefon se nevyfotí sám, takže tam je k něčemu číslo. */
+@media (min-width: 560px) {
+  .bm-qr { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
+  .bm-qr__castky { grid-column: 1 / -1; }
+  .bm-qr__kod { order: 0; }
+  .bm-qr__ucet { order: 0; }
+}
+
 /* ── Rozcestník kotev ─────────────────────────────────────────── */
 /* Nahrazuje rozbalovátko, které měla stránka v menu. Sekce jsou na jedné
    stránce pod sebou a tyhle odkazy na ně skáčou. */

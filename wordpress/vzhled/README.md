@@ -17,6 +17,8 @@ Proč je co takhle a kde se to mění klikáním popisuje
 | `program.py` | obsah stránky Program |
 | `kralove.py` | obsah stránky Králové |
 | `osvezovny.py` | obsah stránky Osvěžovny |
+| `podpor-nas.py` | obsah stránky Podpoř nás (QR platba, Donio, e-shop) |
+| `qr-platba.py` | **jednorázové** — vyrobí QR kódy pro platbu a nahraje je do médií (potřebuje segno) |
 | `osvezovny-data.py` | **jednorázové** naplnění osvěžoven daty z dnešního webu |
 | `oriznout-logo.py` | ořízne průhledný rám loga pro hlavičku (potřebuje Pillow) |
 | `pripojeni.py` | společné přihlášení, REST a zápis do Customizeru |
