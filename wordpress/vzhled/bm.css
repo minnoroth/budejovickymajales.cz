@@ -341,6 +341,20 @@ body.single-post .entry-content > p,
 body.single-post .entry-content > ul,
 body.single-post .entry-content > ol { max-width: 62ch; }
 
+/* Mezi odkazy „předchozí" a „další" kreslí Kadence svislou čárku jako
+   `.post-navigation .nav-previous::after`. U prvního a posledního
+   příspěvku je ale v mřížce jen jeden odkaz a čárka visí vedle prázdna —
+   vypadá jako kurzor zapomenutý na stránce. Když je odkaz v mřížce sám,
+   čárka se schová; `:only-child` dělá selektor o třídu silnější než ten
+   od Kadence, takže se nemusí nic opakovat. */
+.post-navigation .nav-links > :only-child::after { display: none; }
+
+/* A když čárka je, má mít barvu z palety. Kadence jí dává vlastní
+   modrošedou (#A0AEC0), která na tomhle webu nikde jinde není. */
+.post-navigation .nav-links .nav-previous::after {
+  background: var(--global-palette6);
+}
+
 /* ── Podpoř nás ───────────────────────────────────────────────── */
 /* Tři cesty vedle sebe, nejrychlejší první a žlutá — žlutá na tomhle webu
    znamená „sem klikni". E-shop je pod nimi přes celou šířku: je to jiný

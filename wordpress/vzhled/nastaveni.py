@@ -191,16 +191,18 @@ NASTAVENI = {
     # obsahu (O festivalu, Historie, Kontakt). Od 6. 11. 2026 je bílý
     # a nadpis černý, aby vypadal stejně jako na stránkách stavěných
     # skriptem; podtržení barvou sekce mu dává bm.css.
-    # Pás v barvě stránky = žádný viditelný pás. Bílá (palette9) tu byla od
-    # 6. 11., kdy nahradila zelenou; proti papírové stránce ale dělala šev,
-    # který nikdo nečetl jako záměr.
-    "page_title_background": {"desktop": {"color": "palette8"}},
+    # Pás v barvě obsahu = žádný viditelný pás. A obsah je **bílý**: Kadence
+    # dává `.site.wp-site-blocks` #FFFFFF na všech šablonách (změřeno 8. 11.
+    # 2026 na stránce, příspěvku i archivu). Mezi 6. a 8. 11. tu byla
+    # palette8 podle dojmu, že stránka je papírová — dělala slabý šev pod
+    # záhlavím. Než to tu někdo zase přehodí, ať si to na webu změří.
+    "page_title_background": {"desktop": {"color": "palette9"}},
     "page_title_font": pismo(48, 40, 34, 1.08, barva="palette3"),
     # Bez "above" Kadence pás nevykreslí a bílý titulek skončí na bílém pozadí.
     "post_title_layout": "above",
     "post_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     "post_title_elements": ["categories", "title", "meta"],
-    "post_title_background": {"desktop": {"color": "palette8"}},
+    "post_title_background": {"desktop": {"color": "palette9"}},
     "post_title_font": pismo(44, 36, 32, 1.1, barva="palette3"),
     "post_title_meta_color": {"color": "palette5", "hover": "palette2"},
     "post_title_category_color": {"color": "palette2", "hover": "palette3"},
@@ -216,7 +218,7 @@ NASTAVENI = {
     "post_archive_title_align": {"mobile": "left", "tablet": "left", "desktop": "left"},
     # Pás v barvě stránky = žádný pás. Vypnout ho úplně nejde, aniž by zmizel
     # i nadpis; takhle zůstane nadpis tam, kde ho mají ostatní stránky.
-    "post_archive_title_background": {"desktop": {"color": "palette8"}},
+    "post_archive_title_background": {"desktop": {"color": "palette9"}},
     # Písmo nadpisu archivu se tu nenastavuje: „post_archive_title_font"
     # Kadence nezná a Customizer ho odmítne. Nadpis bere velikost z h1.
     # „unboxed" sundá z kartiček i z článku bílý rám od Kadence. Kartičkám

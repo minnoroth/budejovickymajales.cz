@@ -91,7 +91,10 @@ Nic dalšího se přepínat nemusí.
 - **Program** — zelenomodrý pás s titulkem a odkaz do kalendáře akcí.
 - **Menu** — Program / Králové / Partneři / Praktické info / O festivalu / Aktuality
   s podpoložkami, plus žluté tlačítko na e-shop.
-- **Titulkový pás** na všech ostatních stránkách a u příspěvků.
+- **Titulkový pás** na všech ostatních stránkách a u příspěvků. Je **bílý**,
+  tedy neviditelný: Kadence dává obsahu `.site.wp-site-blocks` #FFFFFF, takže
+  jakákoli jiná bílá (`palette8` je o chlup teplejší) vykreslí pod záhlavím
+  slabý šev. Než se barva pásu změní, změřit pozadí obsahu na webu.
 - **Patička** — tmavá, se znakem a jednou větou.
 - **Kalendář akcí** — barvy pluginu dotažené na paletu ročníku a od 4. 11. 2026
   i celý vzhled výpisů: seznam, měsíc, den a detail akce. Je v samostatném
